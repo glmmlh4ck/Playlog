@@ -4,7 +4,7 @@
 <meta name="theme-color" content="#0b0b10"><meta name="color-scheme" content="dark"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Playlog"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"><title>Playlog</title>
 <style>
 :root{--bg:#0b0b10;--s1:#15151d;--s2:#1e1e29;--bd:rgba(255,255,255,.07);--tx:#f4f4f8;--mu:#9494a8;--ac:#8b5cf6;--ac2:#b69dff;--ok:#34d399;--er:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{height:100%;margin:0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{position:fixed;inset:0;width:100%;height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--tx);font:15px/1.45 'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 #app{max-width:480px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;background:radial-gradient(120% 45% at 50% -8%,#2d1b5e 0%,transparent 62%)}
 #main{flex:1;overflow-y:auto;padding:18px 16px 28px}
@@ -19,7 +19,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 
 button{cursor:pointer;width:auto;font-weight:500;transition:transform .12s,background .2s}button:active{transform:scale(.97)}
 .pri{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;font-weight:600;box-shadow:0 4px 14px #7c3aed66}.dng{color:var(--er)}
 textarea{min-height:76px}label{display:block;margin:12px 0 5px;color:var(--mu);font-size:13px}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}.tabs button{width:100%;white-space:nowrap;min-height:40px;padding:6px 0;font-size:12px;text-align:center;border-radius:99px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center}.stats b{display:block;font-size:22px}.stats span{font-size:11px;color:var(--mu)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}.tabs button{width:100%;white-space:nowrap;min-height:40px;padding:6px 0;font-size:12px;text-align:center;border-radius:99px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center}.stats b{display:block;font-size:22px}.stats span{font-size:11px;color:var(--mu)}.pie{width:110px;height:110px;border-radius:50%;flex:none;position:relative}.pie:after{content:"";position:absolute;inset:26px;border-radius:50%;background:var(--s1)}
 .tabs .on{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;box-shadow:0 3px 12px #7c3aed66}
 nav{display:flex;align-items:center;justify-content:space-around;background:rgba(21,21,29,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
 nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mu);min-width:60px;padding:4px;position:relative}
@@ -65,9 +65,10 @@ const save=()=>{try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(e
 const $=s=>document.querySelector(s),e=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const ymd=d=>{d=new Date(d);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-const today=()=>ymd(new Date()),H=m=>(m/60).toFixed(1)+" h",fm=m=>m>=60?Math.floor(m/60)+"h "+(m%60)+"m":m+" min";
+const today=()=>ymd(new Date()),H=m=>S.unit==="m"?m+" min":(m/60).toFixed(1)+" h",fm=H;
 const gm=id=>S.sessions.filter(s=>s.gameId===id).reduce((a,s)=>a+s.min,0);
 const G=id=>S.games.find(g=>g.id===id);
+const PLAT=["PC","PlayStation 5","PlayStation 4","PlayStation 3","PlayStation 2","PlayStation","PS Vita","PSP","Xbox Series X|S","Xbox One","Xbox 360","Xbox","Nintendo Switch","Nintendo Switch 2","Wii U","Wii","GameCube","Nintendo 64","SNES","NES","Nintendo 3DS","Nintendo DS","Game Boy Advance","Game Boy","Steam Deck","Mac","Linux","iOS","Android","Sega Mega Drive","Otra"];
 let tab="home",lib={st:"playing",q:""},cal={y:new Date().getFullYear(),m:new Date().getMonth(),sel:today()};
 function stats(){
  const dm={};S.sessions.forEach(s=>dm[s.date]=(dm[s.date]||0)+s.min);
@@ -105,37 +106,56 @@ function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><button class="pri
  <input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()" style="margin-top:8px">
  <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.st='${k}';R()">${v}</button>`).join("")}
  </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Juego aleatorio del Backlog</button>`:""}<div id="list"></div>`}
-function gg(g){return`<div class="poster" onclick="openGame('${g.id}')"><div class="cv">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.title)}</b><span>${H(gm(g.id))}</span></div>`}
+function gg(g){const rt=g.rating?.score;return`<div class="poster" onclick="openGame('${g.id}')"><div class="cv">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.title)}</b><span>${H(gm(g.id))}${rt?" · ⭐ "+rt:""}</span></div>`}
 function list(){const q=lib.q.toLowerCase(),a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q));
- $("#list").innerHTML=a.length?`<div class="grid">${a.map(gg).join("")}</div>`:`<div class="empty">No hay juegos aquí todavía.</div>`}
+ if(!a.length)return $("#list").innerHTML=`<div class="empty">No hay juegos aquí todavía.</div>`;
+ if(lib.st!=="done")return $("#list").innerHTML=`<div class="grid">${a.map(gg).join("")}</div>`;
+ const dd=g=>g.doneDate||g.rating?.date||"",yr=g=>dd(g).slice(0,4)||"Sin fecha",by={};a.forEach(g=>(by[yr(g)]=by[yr(g)]||[]).push(g));
+ $("#list").innerHTML=Object.keys(by).sort((x,y)=>x==="Sin fecha"?1:y==="Sin fecha"?-1:y.localeCompare(x)).map(k=>`<h2>${k}</h2><div class="grid">${by[k].sort((x,y)=>dd(x).localeCompare(dd(y))).map(gg).join("")}</div>`).join("")}
 function randomBacklog(){const b=S.games.filter(g=>g.status==="backlog");b.length?openGame(b[Math.floor(Math.random()*b.length)].id):alert("Tu backlog está vacío.")}
 function sheet(h){$("#sc").innerHTML=h;$("#sheet").style.display="flex"}
 function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)}
-function addGame(){sheet(`<h1>Nuevo juego</h1><button class="pri" style="width:100%;margin:10px 0" onclick="catSearch()">🔍 Buscar en catálogo (RAWG)</button><div class="mu">O crea una ficha manual (también para fangames):</div>
- <label>Título</label><input id="gt" autocapitalize="words" enterkeyhint="next"><label>Plataforma</label><input id="gp" placeholder="PC, Switch, PS5…"><label>Género</label><input id="gg">
+function addGame(){addSheet(-1)}
+function pl(g){return g?.platforms?.length?g.platforms:PLAT}
+function platOpts(list,sel){return[...new Set([sel,...list].filter(Boolean))].map(p=>`<option ${p===sel?"selected":""}>${e(p)}</option>`).join("")}
+function th(g,w,h){return g?.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:${w}px;height:${h}px;object-fit:cover;border-radius:10px;flex:none">`:`<div style="width:${w}px;height:${h}px;border-radius:10px;background:var(--s2);display:grid;place-items:center;flex:none">🎮</div>`}
+function addSheet(i){const b=i>=0?CR[i]:{title:""};
+ sheet(`<div class="row sp"><h1>Añadir juego</h1><button onclick="closeSheet()">✕</button></div>
+ ${i>=0?`<div class="row">${th({cover:b.cover},56,74)}<b>${e(b.title)}</b></div>`:`<label>Título</label><input id="gt" autocapitalize="words">`}
+ <label>¿Dónde lo añadimos?</label><select id="gs" onchange="$('#gd').style.display=this.value==='done'?'block':'none'">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
+ <label>Plataforma</label><select id="gp">${platOpts(pl(b),"")}</select>
  <label>Formato</label><select id="gf"><option>Digital</option><option>Físico</option></select>
- <label>Estado</label><select id="gs">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
- <div class="row" style="margin-top:14px"><button onclick="closeSheet()">Cancelar</button><button class="pri" onclick="saveGame()">Guardar</button></div>`)}
-function saveGame(){const t=$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
- S.games.push({id:uid(),title:t,platform:$("#gp").value.trim().slice(0,40),genre:$("#gg").value.trim().slice(0,40),format:$("#gf").value,status:$("#gs").value,notes:"",goals:[],rating:null});
- if(S.games.at(-1).platform)S.pref=S.games.at(-1).platform;save();closeSheet();R()}
-function openGame(id){const g=G(id);if(!g)return;const gl=g.goals,dn=gl.filter(x=>x.done).length;
- const ss=S.sessions.filter(s=>s.gameId===id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
- sheet(`${g.cover?`<img src="${e(g.cover)}" alt="Portada de ${e(g.title)}" referrerpolicy="no-referrer" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:10px">`:""}<div class="row sp"><h1>${e(g.title)}</h1><button onclick="closeSheet()">✕</button></div>
- <div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")} · ${g.format} · ${H(gm(id))}</div>
+ <div id="gd" style="display:${lib.st==="done"?"block":"none"}"><label>Fecha de finalización</label><input type="date" id="gdt" value="${today()}"><label>Tiempo de juego total (horas, opcional)</label><input type="number" id="gh" min="0" step="0.5" inputmode="decimal"></div>
+ <button class="pri" style="width:100%;margin-top:16px" onclick="saveGame(${i})">Guardar</button>`)}
+function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
+ const st=$("#gs").value,id=uid(),p=$("#gp").value;
+ const g={id,title:t,platform:p,platforms:b.platforms||[],genre:(b.genres||[]).join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,run:1};
+ if(st==="done"){g.doneDate=$("#gdt").value||today();const h=parseFloat($("#gh").value);if(h>0)S.sessions.push({id:uid(),gameId:id,date:g.doneDate,platform:p,min:Math.round(h*60),note:"Tiempo total al completar",run:1})}
+ S.games.push(g);if(p)S.pref=p;save();closeSheet();R()}
+function openGame(id){const g=G(id);if(!g)return;const gl=g.goals,dn=gl.filter(x=>x.done).length,t=g.ttb||{};
+ const ss=S.sessions.filter(s=>s.gameId===id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5),dm=d=>d.split("-").reverse().join("/");
+ sheet(`${g.cover?`<img src="${e(g.cover)}" alt="Portada" referrerpolicy="no-referrer" style="width:100%;height:230px;object-fit:contain;background:var(--s2);border-radius:12px;margin-bottom:10px">`:""}<div class="row sp"><h1>${e(g.title)}</h1><button onclick="closeSheet()">✕</button></div>
+ <div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")} · ${g.format} · ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>
  <label>Estado</label><select onchange="setStatus('${id}',this.value)">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${g.status===k?"selected":""}>${v}</option>`).join("")}</select>
+ <div class="row" style="margin-top:8px">${g.status==="done"?`<button onclick="replay('${id}')">🔁 Rejugar</button>`:""}<button onclick="setCover('${id}')">🖼 Cambiar portada</button></div>
  ${g.rating?`<div class="card" style="margin-top:10px">⭐ ${g.rating.score??"—"}/10 ${g.rating.date?"· "+g.rating.date:""}<div class="mu">${e(g.rating.review||"")}</div><button onclick="rate('${id}')">Editar valoración</button></div>`:""}
+ ${t.main||t.extra||t.full?`<h2>Duración estimada</h2><div class="stats" style="grid-template-columns:repeat(3,1fr)">${[["main","Historia"],["extra","Hist. + extras"],["full","100%"]].map(([k,l])=>`<div><b>${t[k]?t[k]+" h":"—"}</b><span>${l}</span></div>`).join("")}</div>`:""}
+ ${g.tags?.length?`<h2>Etiquetas</h2>${g.tags.map(x=>`<span class="tag">${e(x)}</span>`).join("")}`:""}
+ ${g.summary?`<h2>Resumen</h2><div class="mu">${e(g.summary)}</div>`:""}
+ ${g.similar?.length?`<h2>Juegos similares</h2>${g.similar.map(x=>`<span class="tag">${e(x)}</span>`).join("")}`:""}
  <h2>Objetivos</h2>${gl.length?`<div class="mu">${Math.round(dn/gl.length*100)}% (${dn}/${gl.length}) · Objetivos personalizados: no son logros verificados automáticamente.</div>`:`<div class="mu">Sin objetivos: no se muestra porcentaje.</div>`}
  ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${e(x.name)}</span><button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
  <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo objetivo"><button onclick="addGoal('${id}')">Añadir</button></div>
  <h2>Notas</h2><textarea onchange="G('${id}').notes=this.value;save()">${e(g.notes)}</textarea>
- <h2>Sesiones recientes</h2>${ss.map(s=>`<div class="mu">${s.date} · ${fm(s.min)} ${e(s.note)}</div>`).join("")||`<div class="mu">Ninguna</div>`}
+ <h2>Sesiones recientes</h2>${ss.map(s=>`<div class="mu">${dm(s.date)} - ${fm(s.min)}${s.note?" - "+e(s.note):""}${s.run>1?" (Partida "+s.run+")":""}</div>`).join("")||`<div class="mu">Ninguna</div>`}
  <button class="dng" style="margin-top:16px" onclick="delGame('${id}')">Eliminar juego</button>`)}
-function setStatus(id,v){const g=G(id),was=g.status;g.status=v;save();if(v==="done"&&was!=="done"){rate(id)}else{openGame(id);R()}}
+function replay(id){const g=G(id);g.run=(g.run||1)+1;g.status="playing";save();openGame(id);R()}
+function setCover(id){const u=prompt("Pega el enlace (URL) de la imagen de portada:");if(u&&/^https?:\/\//.test(u.trim())){G(id).cover=u.trim();save();openGame(id);R()}}
+function setStatus(id,v){const g=G(id),was=g.status;g.status=v;if(v==="done"&&was!=="done"){g.doneDate=today();save();rate(id)}else{save();openGame(id);R()}}
 function rate(id){const r=G(id).rating||{};sheet(`<h1>Valoración (opcional)</h1><label>Fecha de finalización</label><input type="date" id="rd" value="${r.date||today()}">
  <label>Nota (1-10)</label><input type="number" id="rs" min="1" max="10" value="${r.score??""}"><label>Reseña</label><textarea id="rr">${e(r.review||"")}</textarea>
  <div class="row" style="margin-top:14px"><button onclick="openGame('${id}');R()">Omitir</button><button class="pri" onclick="saveRate('${id}')">Guardar</button></div>`)}
-function saveRate(id){let n=parseInt($("#rs").value);n=n>=1&&n<=10?n:null;G(id).rating={date:$("#rd").value,score:n,review:$("#rr").value.slice(0,2000)};save();openGame(id);R()}
+function saveRate(id){let n=parseInt($("#rs").value);n=n>=1&&n<=10?n:null;const d=$("#rd").value;G(id).rating={date:d,score:n,review:$("#rr").value.slice(0,2000)};if(d)G(id).doneDate=d;save();openGame(id);R()}
 function goal(id,i){const x=G(id).goals[i];x.done=!x.done;save();openGame(id)}
 function delGoal(id,i){G(id).goals.splice(i,1);save();openGame(id)}
 function addGoal(id){const n=$("#ng").value.trim();if(n){G(id).goals.push({name:n.slice(0,100),done:false});save();openGame(id)}}
@@ -143,11 +163,11 @@ function delGame(id){if(!confirm("¿Eliminar el juego y sus sesiones?"))return;S
 // Cronómetro con marcas temporales persistidas
 const el=()=>{const t=S.timer;return t?t.acc+(t.run?Date.now()-t.start:0):0};
 function openPlus(){sheet(`<h1 style="text-align:center">¿Qué quieres hacer?</h1><div style="display:grid;gap:10px;margin-top:14px"><button class="pri" style="width:100%;padding:16px" onclick="closeSheet();go('lib');catSearch()">🎮 Añadir un juego a mi biblioteca</button><button style="width:100%;padding:16px" onclick="openLog()">📖 Registrar una sesión en el diario</button></div>`)}
-function openLog(){const opts=S.games.filter(g=>g.status==="playing");
+function openLog(d){const opts=S.games.filter(g=>g.status==="playing");
  if(!opts.length){return sheet(`<div class="empty">No tienes ningún juego en <b>Jugando</b>.<br>Añade uno o cambia el estado de un juego de tu biblioteca.<br><br><button class="pri" onclick="closeSheet();go('lib');catSearch()">Añadir juego</button> <button onclick="closeSheet();go('lib')">Ir a la biblioteca</button></div>`)}
  sheet(`<div class="row sp"><h1>Registrar sesión</h1><button onclick="closeSheet()">✕</button></div>
- <label>Juego</label><select id="lg" onchange="const g=G(this.value);$('#lp').value=g.platform||S.pref">${opts.map(g=>`<option value="${g.id}">${e(g.title)}</option>`).join("")}</select>
- <label>Fecha</label><input type="date" id="ld" value="${today()}"><label>Plataforma</label><input id="lp" value="${e(opts[0]?.platform||S.pref)}">
+ <label>Juego</label><select id="lg" onchange="const g=G(this.value);$('#lp').innerHTML=platOpts(pl(g),g.platform||S.pref)">${opts.map(g=>`<option value="${g.id}">${e(g.title)}</option>`).join("")}</select>
+ <label>Fecha</label><input type="date" id="ld" value="${typeof d==="string"?d:today()}"><label>Plataforma</label><select id="lp">${platOpts(pl(opts[0]),opts[0].platform||S.pref)}</select>
  <div class="card" style="margin-top:12px"><div class="big" id="tm">00:00:00</div><div class="row" id="tb"></div></div>
  <label>Duración (minutos)</label><input type="number" id="lm" min="1" max="1440" inputmode="numeric"><label>Nota (opcional)</label><textarea id="ln" maxlength="500"></textarea>
  <button class="pri" style="width:100%;margin-top:14px" onclick="saveSession()">Guardar sesión</button>`);
@@ -161,40 +181,53 @@ function tm(a){const t=S.timer,n=Date.now();
  if(a==="stop"){const m=Math.max(1,Math.round(el()/6e4));S.timer=null;$("#lm").value=m}
  save();tb();tick()}
 function saveSession(){const m=parseInt($("#lm").value);if(!(m>=1&&m<=1440))return alert("Indica una duración válida (o usa el cronómetro y pulsa Detener).");
- if(S.sessions.some(s=>s.id===window._sid))return;
- S.sessions.push({id:window._sid,gameId:$("#lg").value,date:$("#ld").value||today(),platform:$("#lp").value.slice(0,40),min:m,note:$("#ln").value.slice(0,500)});
- S.pref=$("#lp").value;if(S.timer&&!S.timer.run&&false)S.timer=null;save();closeSheet();R()}
+ if(S.sessions.some(s=>s.id===window._sid))return;const g=G($("#lg").value),p=$("#lp").value;
+ S.sessions.push({id:window._sid,gameId:g.id,date:$("#ld").value||today(),platform:p,min:m,note:$("#ln").value.slice(0,500),run:g.run||1});
+ g.platform=p;S.pref=p;save();closeSheet();R()}
 function vDiary(){const{y,m,sel}=cal,dm=stats().dm,f=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate();
  let c="";for(let i=0;i<f;i++)c+="<span></span>";
  for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));c+=`<button class="${dm[k]?"dot":""} ${k===sel?"sel":""}" onclick="cal.sel='${k}';R()">${d}</button>`}
  const ss=S.sessions.filter(s=>s.date===sel),tot=ss.reduce((a,s)=>a+s.min,0);
  return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1>${new Date(y,m,1).toLocaleDateString("es",{month:"long",year:"numeric"})}</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
  <div class="cal mu" style="margin:8px 0">${["L","M","X","J","V","S","D"].map(d=>`<span>${d}</span>`).join("")}</div><div class="cal">${c}</div>
- <h2>${sel} · ${fm(tot)}</h2>${ss.map(s=>`<div class="card" onclick="editS('${s.id}')"><b>${e(G(s.gameId)?.title||"?")}</b> <span class="tag">${e(s.platform||"—")}</span> <span class="tag">${fm(s.min)}</span><div class="mu">${e(s.note)}</div></div>`).join("")||`<div class="empty">Sin sesiones este día.</div>`}
- <button class="pri" style="width:100%" onclick="openLog()">+ Registrar sesión</button>`}
+ <div class="row sp"><h2 style="margin:20px 0 10px">${sel.split("-").reverse().join("/")} · ${fm(tot)}</h2><button style="min-height:36px" onclick="cal.y=new Date().getFullYear();cal.m=new Date().getMonth();cal.sel=today();R()">Hoy</button></div>
+ ${ss.map(s=>{const g=G(s.gameId);return`<div class="card row" style="cursor:pointer" onclick="editS('${s.id}')">${th(g,52,70)}<div style="min-width:0"><b>${e(g?.title||"?")}</b><div class="mu">${e(s.platform||"—")} · ${fm(s.min)}</div>${s.note?`<div class="mu">${e(s.note)}</div>`:""}</div></div>`}).join("")||`<div class="empty">Sin sesiones este día.</div>`}
+ <button class="pri" style="width:100%" onclick="openLog(cal.sel)">+ Registrar sesión el ${sel.split("-").reverse().join("/")}</button>`}
 function cm(d){cal.m+=d;if(cal.m<0){cal.m=11;cal.y--}if(cal.m>11){cal.m=0;cal.y++}R()}
-function editS(id){const s=S.sessions.find(x=>x.id===id);sheet(`<h1>Editar sesión</h1><label>Fecha</label><input type="date" id="ed" value="${s.date}"><label>Minutos</label><input type="number" id="em" min="1" max="1440" value="${s.min}">
+function editS(id){const s=S.sessions.find(x=>x.id===id),g=G(s.gameId)||{};sheet(`<div class="row sp"><h1>Editar sesión</h1><button onclick="closeSheet()">✕</button></div>
+ <div class="card row">${th(g,56,74)}<div><b>${e(g.title||"?")}</b><div class="mu">${fm(s.min)}${s.run>1?" · Partida "+s.run:""}</div></div></div>
+ <label>Plataforma</label><select id="ep">${platOpts(pl(g),s.platform)}</select><label>Fecha</label><input type="date" id="ed" value="${s.date}"><label>Minutos</label><input type="number" id="em" min="1" max="1440" value="${s.min}">
  <label>Nota</label><textarea id="en">${e(s.note)}</textarea><div class="row" style="margin-top:14px"><button class="dng" onclick="delS('${id}')">Eliminar</button><button class="pri" onclick="updS('${id}')">Guardar</button></div>`)}
-function updS(id){const s=S.sessions.find(x=>x.id===id),m=parseInt($("#em").value);if(!(m>=1&&m<=1440))return alert("Duración no válida");s.min=m;s.date=$("#ed").value||s.date;s.note=$("#en").value.slice(0,500);save();closeSheet();R()}
+function updS(id){const s=S.sessions.find(x=>x.id===id),m=parseInt($("#em").value);if(!(m>=1&&m<=1440))return alert("Duración no válida");s.min=m;s.platform=$("#ep").value;s.date=$("#ed").value||s.date;s.note=$("#en").value.slice(0,500);save();closeSheet();R()}
 function delS(id){if(confirm("¿Eliminar esta sesión? XP y horas se recalcularán.")){S.sessions=S.sessions.filter(x=>x.id!==id);save();closeSheet();R()}}
-function vProf(){const s=stats(),tot=S.sessions.reduce((a,x)=>a+x.min,0),top=S.games.map(g=>[g,gm(g.id)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,3);
+function vProf(){const s=stats(),tot=S.sessions.reduce((a,x)=>a+x.min,0),yr=String(new Date().getFullYear()),
+ top=S.games.map(g=>[g,gm(g.id)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,3),gen={},plt={};
+ S.sessions.forEach(x=>{const g=G(x.gameId);(g?.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(z=>gen[z]=(gen[z]||0)+x.min);if(x.platform)plt[x.platform]=(plt[x.platform]||0)+x.min});
+ const best=S.games.filter(g=>g.rating?.score&&(g.doneDate||g.rating.date||"").startsWith(yr)).sort((a,b)=>b.rating.score-a.rating.score).slice(0,5);
  const per=[["week","Esta semana"],["month","Este mes"],["year","Este año"]].map(([p,l])=>{const r=range(p),h=(r.reduce((a,x)=>a+x.min,0)/60).toFixed(1);return`<div class="card"><b>${l}</b><div class="stats"><div><b>${h}</b><span>horas</span></div><div><b>${r.length}</b><span>sesiones</span></div><div><b>${new Set(r.map(x=>x.gameId)).size}</b><span>juegos</span></div><div><b>${new Set(r.map(x=>x.date)).size}</b><span>días</span></div></div></div>`}).join("");
- return`<div class="card row"><div style="font-size:40px">🎮</div><div style="flex:1"><input value="${e(S.user.name)}" onchange="S.user.name=this.value.slice(0,30)||'Jugador';save()"><div class="mu">Nivel ${s.lv} · ${s.xp}/${s.hi} XP</div></div></div>${bar(s.xp-s.lo,s.hi-s.lo)}
- <h2>Estadísticas</h2><div class="card">🔥 Racha: ${s.cur} d · Récord: ${s.rec} d<br>⏱ ${H(tot)} · ${S.sessions.length} sesiones · ${S.games.filter(g=>g.status==="done").length} completados</div>
- ${per}
+ return`<div class="card row"><label style="margin:0;cursor:pointer;flex:none">${S.user.avatar?`<img src="${S.user.avatar}" alt="Avatar" style="width:64px;height:64px;border-radius:50%;object-fit:cover">`:`<div style="font-size:34px;width:64px;height:64px;display:grid;place-items:center;border-radius:50%;background:var(--s2)">🎮</div>`}<input type="file" accept="image/*" hidden onchange="setAvatar(this)"></label><div style="flex:1"><input value="${e(S.user.name)}" onchange="S.user.name=this.value.slice(0,30)||'Jugador';save()"><div class="mu">Toca la foto para cambiarla · Nivel ${s.lv} · ${s.xp}/${s.hi} XP</div></div></div>${bar(s.xp-s.lo,s.hi-s.lo)}
+ <h2>Estadísticas</h2><div class="card">🔥 Racha: ${s.cur} d · Récord: ${s.rec} d<br>⏱ ${H(tot)} · ${S.sessions.length} sesiones · ${S.games.filter(g=>g.status==="done").length} completados</div>${per}
+ ${pie(gen,"Géneros más jugados")}${pie(plt,"Plataformas más jugadas")}
+ <h2>Mejor valorados de ${yr}</h2>${best.map(g=>`<div class="card row">${th(g,40,54)}<b style="flex:1">${e(g.title)}</b><span>⭐ ${g.rating.score}</span></div>`).join("")||`<div class="empty">Completa y puntúa juegos este año para verlos aquí.</div>`}
  <h2>Más jugados</h2>${top.map(([g,m])=>`<div class="card row sp">${e(g.title)}<span class="mu">${H(m)}</span></div>`).join("")||`<div class="empty">Registra sesiones para ver tu top.</div>`}
- 
- <h2>Ajustes</h2><div class="card"><div class="mu">Datos guardados solo en este navegador (modo local).</div>
+ <h2>Ajustes</h2><div class="card"><label style="margin-top:0">Mostrar el tiempo de juego en</label><div class="row"><button class="${S.unit!=="m"?"pri":""}" style="flex:1" onclick="S.unit='h';save();R()">Horas</button><button class="${S.unit==="m"?"pri":""}" style="flex:1" onclick="S.unit='m';save();R()">Minutos</button></div>
+ <div class="mu" style="margin-top:12px">Datos guardados solo en este navegador (modo local).</div>
  <div class="row" style="margin-top:8px"><button onclick="exp()">Exportar JSON</button><button class="dng" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar datos</button></div></div>
  <div class="mu">${APP_NAME} MVP · Premium: estructura futura, sin cobros.</div>`}
+const PC=["#8b5cf6","#34d399","#f59e0b","#f87171","#38bdf8","#f472b6","#a3e635"];
+function pie(o,t){const a=Object.entries(o).sort((x,y)=>y[1]-x[1]).slice(0,7),sum=a.reduce((n,x)=>n+x[1],0);if(!sum)return`<h2>${t}</h2><div class="empty">Aún no hay datos.</div>`;let acc=0;
+ const g=a.map(([k,v],i)=>{const st=acc/sum*100;acc+=v;return`${PC[i]} ${st}% ${acc/sum*100}%`}).join(",");
+ return`<h2>${t}</h2><div class="card row"><div class="pie" style="background:conic-gradient(${g})"></div><div style="flex:1;min-width:0">${a.map(([k,v],i)=>`<div class="row" style="font-size:13px"><i style="width:10px;height:10px;border-radius:50%;background:${PC[i]};flex:none"></i><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(k)}</span><span class="mu">${Math.round(v/sum*100)}%</span></div>`).join("")}</div></div>`}
+function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];
 function catSearch(){
  sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
-async function catGo(){const q=$("#cq").value.trim();if(!q)return;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
- try{const r=await fetch(`/.netlify/functions/search?q=${encodeURIComponent(q)}`);if(!r.ok)throw new Error("error "+r.status);const d=await r.json();CR=d.results||[];
- $("#cr").innerHTML=CR.length?CR.map((g,i)=>`<div class="card row sp"><div class="row" style="flex:1">${g.background_image?`<img src="${e(g.background_image)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:""}<div><b>${e(g.name)}</b><div class="mu">${e(g.released||"s/f")} · ${e((g.platforms||[]).map(p=>p.platform.name).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="catAdd(${i})">Añadir</button></div>`).join(""):`<div class="empty">Sin resultados.</div>`}
- catch(x){$("#cr").innerHTML=`<div class="empty">No se pudo buscar (${e(x.message)}). Revisa la clave o la conexión.<br><button onclick="catGo()">Reintentar</button></div>`}}
-function catAdd(i){const g=CR[i];S.games.push({id:uid(),title:g.name,platform:(g.platforms||[])[0]?.platform.name||"",genre:(g.genres||[]).map(x=>x.name).join(", "),format:"Digital",status:lib.st,notes:"",goals:[],rating:null,cover:g.background_image||"",released:g.released||"",rawgId:g.id});save();alert(g.name+" añadido a "+ST[lib.st]);R()}
+async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
+ const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("error "+r.status);return r.json()};
+ try{let d;try{d=await get("/.netlify/functions/igdb?q="+encodeURIComponent(q))}catch(_){d=await get("/.netlify/functions/search?q="+encodeURIComponent(q))}
+ CR=(d.results||[]).map(g=>g.title?g:{title:g.name,released:g.released,cover:g.background_image,platforms:(g.platforms||[]).map(p=>p.platform.name),genres:(g.genres||[]).map(x=>x.name),tags:[],similar:[],summary:"",ttb:null});
+ $("#cr").innerHTML=CR.length?CR.map((g,i)=>`<div class="card row sp"><div class="row" style="flex:1;min-width:0">${th(g,48,64)}<div style="min-width:0"><b>${e(g.title)}</b><div class="mu">${e((g.released||"s/f").slice(0,4))} · ${e((g.platforms||[]).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="addSheet(${i})">Añadir</button></div>`).join(""):`<div class="empty">Sin resultados.</div>`}
+ catch(x){$("#cr").innerHTML=`<div class="empty">No se pudo buscar (${e(x.message)}).<br><button onclick="catGo()">Reintentar</button></div>`}}
 R();
 </script></body></html>

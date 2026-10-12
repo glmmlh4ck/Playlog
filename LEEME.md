@@ -12,3 +12,8 @@
 
 Notas: cada persona guarda sus datos solo en su propio navegador (no hay cuentas todavía).
 La caché y el límite por IP funcionan por instancia, así que son un ahorro, no una garantía.
+
+## IGDB (portadas verticales, duración, etiquetas, resumen y juegos similares)
+En dev.twitch.tv/console registra una aplicación (Client Type: Confidential, OAuth Redirect URL: http://localhost),
+crea un Client Secret y añade en Netlify las variables TWITCH_CLIENT_ID y TWITCH_CLIENT_SECRET. Después, Trigger deploy.
+Si IGDB no está configurado, la app usa RAWG automáticamente.
