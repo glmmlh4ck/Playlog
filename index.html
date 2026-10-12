@@ -1,33 +1,56 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Playlog</title>
+<meta name="theme-color" content="#0b0b10"><meta name="color-scheme" content="dark"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Playlog"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"><title>Playlog</title>
 <style>
-:root{--bg:#121214;--s1:#1c1c20;--s2:#26262c;--tx:#f2f2f5;--mu:#9a9aa8;--ac:#8b5cf6;--ac2:#a78bfa;--ok:#34d399;--er:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-#app{max-width:560px;margin:0 auto;height:100%;display:flex;flex-direction:column}
-#main{flex:1;overflow-y:auto;padding:16px 16px 24px}
-h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:20px 0 8px}
-.card{background:var(--s1);border-radius:14px;padding:12px;margin-bottom:10px}
-.mu{color:var(--mu);font-size:13px}.row{display:flex;gap:8px;align-items:center}.sp{justify-content:space-between}
-.bar{height:8px;background:var(--s2);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2))}
-button,input,select,textarea{font:inherit;color:var(--tx);background:var(--s2);border:1px solid #33333b;border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
-button{cursor:pointer;width:auto}.pri{background:var(--ac);border-color:var(--ac);font-weight:600}.dng{color:var(--er)}
-textarea{min-height:70px}label{display:block;margin:10px 0 4px;color:var(--mu);font-size:13px}
-.tabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.tabs button{white-space:nowrap;min-height:38px;padding:6px 12px}.tabs .on{background:var(--ac);border-color:var(--ac)}
-nav{display:flex;align-items:center;justify-content:space-around;background:var(--s1);border-top:1px solid #2c2c33;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
-nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mu);min-width:56px;padding:4px}
-nav button.on{color:var(--ac2)}nav b{font-size:20px;font-weight:400}
-nav .plus{background:var(--ac);color:#fff;border-radius:50%;width:56px;height:56px;margin-top:-22px;font-size:30px;box-shadow:0 4px 16px #8b5cf688;justify-content:center}
-#sheet{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;z-index:9}
-#sheet>div{background:var(--bg);width:100%;max-width:560px;max-height:92%;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
-.cal button{padding:0;min-height:40px;position:relative;background:var(--s1);border:0}.cal .sel{background:var(--ac)}.cal .dot:after{content:"";position:absolute;bottom:4px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--ok)}
-.tag{display:inline-block;background:var(--s2);border-radius:99px;padding:2px 8px;font-size:12px;margin-right:4px}
-.big{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;margin:8px 0}
-.empty{text-align:center;color:var(--mu);padding:24px 8px}
-@media (prefers-reduced-motion:no-preference){.bar i{transition:width .5s}}
+:root{--bg:#0b0b10;--s1:#15151d;--s2:#1e1e29;--bd:rgba(255,255,255,.07);--tx:#f4f4f8;--mu:#9494a8;--ac:#8b5cf6;--ac2:#b69dff;--ok:#34d399;--er:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+#app{max-width:480px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;background:radial-gradient(120% 45% at 50% -8%,#2d1b5e 0%,transparent 62%)}
+#main{flex:1;overflow-y:auto;padding:18px 16px 28px}
+h1{font-size:26px;font-weight:700;margin:0 0 2px;letter-spacing:-.02em}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--mu);font-weight:600;margin:24px 0 10px}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:0 6px 20px #0006}
+.mu{color:var(--mu);font-size:13px}.row{display:flex;gap:10px;align-items:center}.sp{justify-content:space-between}
+.bar{height:8px;background:var(--s2);border-radius:99px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7c3aed,#c4b5fd);box-shadow:0 0 12px #8b5cf699}
+button,input,select,textarea{font:inherit;color:var(--tx);background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;min-height:46px;width:100%;outline:0}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px #8b5cf63d}
+button{cursor:pointer;width:auto;font-weight:500;transition:transform .12s,background .2s}button:active{transform:scale(.97)}
+.pri{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;font-weight:600;box-shadow:0 4px 14px #7c3aed66}.dng{color:var(--er)}
+textarea{min-height:76px}label{display:block;margin:12px 0 5px;color:var(--mu);font-size:13px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}.tabs button{width:100%;white-space:nowrap;min-height:40px;padding:6px 0;font-size:12px;text-align:center;border-radius:99px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center}.stats b{display:block;font-size:22px}.stats span{font-size:11px;color:var(--mu)}
+.tabs .on{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;box-shadow:0 3px 12px #7c3aed66}
+nav{display:flex;align-items:center;justify-content:space-around;background:rgba(21,21,29,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mu);min-width:60px;padding:4px;position:relative}
+nav button.on{color:var(--ac2)}nav button.on:after{content:"";position:absolute;bottom:-3px;width:5px;height:5px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px var(--ac)}
+nav .plus{background:linear-gradient(135deg,#7c3aed,#a47bff);color:#fff;border-radius:50%;width:58px;height:58px;margin-top:-28px;font-size:32px;font-weight:300;justify-content:center;box-shadow:0 0 0 6px var(--bg),0 8px 22px #7c3aedaa}
+.hero{display:flex;gap:16px;align-items:center;padding:18px;border-radius:22px;margin:14px 0 4px;background:linear-gradient(135deg,#2e1a69,#171727);border:1px solid #8b5cf655;box-shadow:0 10px 30px #5b2fd144}
+.ring{width:88px;height:88px;border-radius:50%;background:conic-gradient(var(--ac2) calc(var(--p)*1%),#ffffff1c 0);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;flex:none}
+.ring:before{content:"";position:absolute;inset:7px;border-radius:50%;background:#1b1536}.ring>*{position:relative}.ring b{font-size:28px;line-height:1}.ring small{font-size:9px;letter-spacing:.14em;color:var(--mu)}
+.chip{display:inline-block;background:#ffffff14;border-radius:99px;padding:3px 11px;font-size:12px;margin:8px 6px 0 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px}html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%}body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-select:text;user-select:text}
+#main{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}button{touch-action:manipulation}
+input,select,textarea{font-size:16px}h1{font-size:24px}.tabs button{min-height:42px}nav button{min-height:48px;min-width:64px}
+@media(min-width:600px){body{background:#050508;display:grid;place-items:center}#app{height:min(100dvh - 32px,860px);width:430px;border-radius:34px;overflow:hidden;border:1px solid var(--bd);box-shadow:0 24px 80px #000}#sheet{align-items:center}#sheet>div{max-width:430px;max-height:80%;border-radius:24px}}
+.poster{cursor:pointer;min-width:0}
+.cv{position:relative;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:var(--s2);border:1px solid var(--bd);box-shadow:0 6px 18px #0007}
+.cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cv .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;background:linear-gradient(135deg,#2d1b5e,#1a1a26)}
+.poster b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.25;margin-top:8px;font-weight:500}
+.poster span{font-size:11px;color:var(--mu)}
+#sheet{position:fixed;inset:0;background:#000b;backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:9}
+#sheet>div{background:#121219;border:1px solid var(--bd);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+#sheet>div:before{content:"";display:block;width:42px;height:4px;background:#ffffff33;border-radius:9px;margin:0 auto 14px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}
+.cal button{padding:0;min-height:42px;position:relative;background:var(--s1);border:1px solid var(--bd);border-radius:12px}
+.cal .sel{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;box-shadow:0 3px 12px #7c3aed66}
+.cal .dot:after{content:"";position:absolute;bottom:5px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.tag{display:inline-block;background:#8b5cf626;color:var(--ac2);border-radius:99px;padding:2px 10px;font-size:12px;margin-right:4px}
+.big{font-size:46px;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;margin:6px 0 10px;letter-spacing:.02em}
+.empty{text-align:center;color:var(--mu);padding:28px 12px;border:1px dashed #ffffff22;border-radius:18px;margin-bottom:10px}
+@keyframes up{from{transform:translateY(34px);opacity:0}}
+@media (prefers-reduced-motion:no-preference){#sheet>div{animation:up .25s ease-out}.bar i{transition:width .6s}}
 </style></head><body>
 <div id="app"><div id="main"></div>
 <nav id="nav"></nav></div><div id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sc"></div></div>
@@ -66,29 +89,30 @@ function missions(){const w=range("week"),mo=range("month");
  {n:"Semanal: 3 días activos",v:new Set(w.map(s=>s.date)).size,t:3},
  {n:"Mensual: 10 horas jugadas",v:Math.round(mo.reduce((a,s)=>a+s.min,0)/6)/10,t:10}]}
 const bar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`;
-function nav(){const t=[["home","🏠","Inicio"],["lib","🎮","Biblioteca"],["+","+",""],["diary","📅","Diario"],["prof","👤","Perfil"]];
- $("#nav").innerHTML=t.map(([k,i,l])=>k==="+"?`<button class="plus" aria-label="Registrar sesión" onclick="openLog()">+</button>`:`<button class="${tab===k?"on":""}" onclick="go('${k}')"><b>${i}</b>${l}</button>`).join("")}
+const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',lib:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5M16 11.5h.01M18.5 13.5h.01"/>',diary:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/>',prof:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'};
+function nav(){const t=[["home","Inicio"],["lib","Biblioteca"],["+",""],["diary","Diario"],["prof","Perfil"]];
+ $("#nav").innerHTML=t.map(([k,l])=>k==="+"?`<button class="plus" aria-label="Añadir" onclick="openPlus()">+</button>`:`<button class="${tab===k?"on":""}" onclick="go('${k}')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${l}</button>`).join("")}
 function go(t){tab=t;R()}
 function R(){nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib")list()}
 function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing");
  return`<h1>¡Hola, ${e(S.user.name)}!</h1><div class="mu">${APP_NAME} · ${SLOGAN}</div>
- <div class="card" style="margin-top:12px"><div class="row sp"><b>Nivel ${s.lv}</b><span class="mu">🔥 Racha ${s.cur} d</span></div>
- ${bar(s.xp-s.lo,s.hi-s.lo)}<div class="mu">${s.xp} XP · faltan ${s.hi-s.xp} para el nivel ${s.lv+1}</div></div>
+ <div class="hero"><div class="ring" style="--p:${Math.round((s.xp-s.lo)/(s.hi-s.lo)*100)}"><b>${s.lv}</b><small>NIVEL</small></div><div style="flex:1"><div class="mu">${s.xp} XP</div><b style="font-size:17px">Faltan ${s.hi-s.xp} XP</b><div><span class="chip">🔥 ${s.cur} días de racha</span><span class="chip">🏆 récord ${s.rec}</span></div></div></div>
  <h2>Jugando ahora</h2>${pl.length?pl.map(gc).join(""):`<div class="empty">Aún no tienes juegos en curso.<br><button class="pri" onclick="go('lib')">Ir a la biblioteca</button></div>`}
  <h2>Misiones activas</h2>${missions().map(m=>`<div class="card"><div class="row sp"><span>${m.n}</span><span class="mu">${Math.min(m.v,m.t)}/${m.t}${m.v>=m.t?" ✅":""}</span></div>${bar(m.v,m.t)}</div>`).join("")}
  <h2>Noticias y lanzamientos</h2><div class="card mu">Sin conexión a una API real todavía: no se muestran noticias ni tendencias para no inventar datos. Conecta RAWG/IGDB y una fuente de noticias mediante una función serverless (pendiente).</div>`}
 function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" style="cursor:pointer"><div class="row">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:`<div style="width:56px;height:56px;border-radius:8px;background:var(--s2);display:grid;place-items:center">🎮</div>`}<div><b>${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${H(gm(g.id))}</div></div></div><span>›</span></div>`}
 function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><button class="pri" onclick="catSearch()">+ Juego</button></div>
- <input placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()" style="margin-top:8px">
+ <input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()" style="margin-top:8px">
  <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.st='${k}';R()">${v}</button>`).join("")}
- ${lib.st==="backlog"?`<button onclick="randomBacklog()">🎲 Aleatorio</button>`:""}</div><div id="list"></div>`}
+ </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Juego aleatorio del Backlog</button>`:""}<div id="list"></div>`}
+function gg(g){return`<div class="poster" onclick="openGame('${g.id}')"><div class="cv">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.title)}</b><span>${H(gm(g.id))}</span></div>`}
 function list(){const q=lib.q.toLowerCase(),a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q));
- $("#list").innerHTML=a.length?a.map(gc).join(""):`<div class="empty">No hay juegos aquí todavía.</div>`}
+ $("#list").innerHTML=a.length?`<div class="grid">${a.map(gg).join("")}</div>`:`<div class="empty">No hay juegos aquí todavía.</div>`}
 function randomBacklog(){const b=S.games.filter(g=>g.status==="backlog");b.length?openGame(b[Math.floor(Math.random()*b.length)].id):alert("Tu backlog está vacío.")}
 function sheet(h){$("#sc").innerHTML=h;$("#sheet").style.display="flex"}
 function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)}
 function addGame(){sheet(`<h1>Nuevo juego</h1><button class="pri" style="width:100%;margin:10px 0" onclick="catSearch()">🔍 Buscar en catálogo (RAWG)</button><div class="mu">O crea una ficha manual (también para fangames):</div>
- <label>Título</label><input id="gt"><label>Plataforma</label><input id="gp" placeholder="PC, Switch, PS5…"><label>Género</label><input id="gg">
+ <label>Título</label><input id="gt" autocapitalize="words" enterkeyhint="next"><label>Plataforma</label><input id="gp" placeholder="PC, Switch, PS5…"><label>Género</label><input id="gg">
  <label>Formato</label><select id="gf"><option>Digital</option><option>Físico</option></select>
  <label>Estado</label><select id="gs">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
  <div class="row" style="margin-top:14px"><button onclick="closeSheet()">Cancelar</button><button class="pri" onclick="saveGame()">Guardar</button></div>`)}
@@ -118,8 +142,9 @@ function addGoal(id){const n=$("#ng").value.trim();if(n){G(id).goals.push({name:
 function delGame(id){if(!confirm("¿Eliminar el juego y sus sesiones?"))return;S.games=S.games.filter(g=>g.id!==id);S.sessions=S.sessions.filter(s=>s.gameId!==id);save();closeSheet();R()}
 // Cronómetro con marcas temporales persistidas
 const el=()=>{const t=S.timer;return t?t.acc+(t.run?Date.now()-t.start:0):0};
-function openLog(){if(!S.games.length){return sheet(`<div class="empty">Primero añade un juego a tu biblioteca.<br><br><button class="pri" onclick="closeSheet();go('lib');catSearch()">Añadir juego</button></div>`)}
- const opts=S.games.filter(g=>g.status!=="wish");
+function openPlus(){sheet(`<h1 style="text-align:center">¿Qué quieres hacer?</h1><div style="display:grid;gap:10px;margin-top:14px"><button class="pri" style="width:100%;padding:16px" onclick="closeSheet();go('lib');catSearch()">🎮 Añadir un juego a mi biblioteca</button><button style="width:100%;padding:16px" onclick="openLog()">📖 Registrar una sesión en el diario</button></div>`)}
+function openLog(){const opts=S.games.filter(g=>g.status==="playing");
+ if(!opts.length){return sheet(`<div class="empty">No tienes ningún juego en <b>Jugando</b>.<br>Añade uno o cambia el estado de un juego de tu biblioteca.<br><br><button class="pri" onclick="closeSheet();go('lib');catSearch()">Añadir juego</button> <button onclick="closeSheet();go('lib')">Ir a la biblioteca</button></div>`)}
  sheet(`<div class="row sp"><h1>Registrar sesión</h1><button onclick="closeSheet()">✕</button></div>
  <label>Juego</label><select id="lg" onchange="const g=G(this.value);$('#lp').value=g.platform||S.pref">${opts.map(g=>`<option value="${g.id}">${e(g.title)}</option>`).join("")}</select>
  <label>Fecha</label><input type="date" id="ld" value="${today()}"><label>Plataforma</label><input id="lp" value="${e(opts[0]?.platform||S.pref)}">
@@ -153,19 +178,19 @@ function editS(id){const s=S.sessions.find(x=>x.id===id);sheet(`<h1>Editar sesi�
 function updS(id){const s=S.sessions.find(x=>x.id===id),m=parseInt($("#em").value);if(!(m>=1&&m<=1440))return alert("Duración no válida");s.min=m;s.date=$("#ed").value||s.date;s.note=$("#en").value.slice(0,500);save();closeSheet();R()}
 function delS(id){if(confirm("¿Eliminar esta sesión? XP y horas se recalcularán.")){S.sessions=S.sessions.filter(x=>x.id!==id);save();closeSheet();R()}}
 function vProf(){const s=stats(),tot=S.sessions.reduce((a,x)=>a+x.min,0),top=S.games.map(g=>[g,gm(g.id)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,3);
- const per=[["day","Hoy"],["week","Semana"],["month","Mes"],["year","Año"]].map(([p,l])=>{const r=range(p);return`<tr><td>${l}</td><td>${r.length}</td><td>${H(r.reduce((a,x)=>a+x.min,0))}</td><td>${new Set(r.map(x=>x.gameId)).size}</td><td>${new Set(r.map(x=>x.date)).size}</td></tr>`}).join("");
+ const per=[["week","Esta semana"],["month","Este mes"],["year","Este año"]].map(([p,l])=>{const r=range(p),h=(r.reduce((a,x)=>a+x.min,0)/60).toFixed(1);return`<div class="card"><b>${l}</b><div class="stats"><div><b>${h}</b><span>horas</span></div><div><b>${r.length}</b><span>sesiones</span></div><div><b>${new Set(r.map(x=>x.gameId)).size}</b><span>juegos</span></div><div><b>${new Set(r.map(x=>x.date)).size}</b><span>días</span></div></div></div>`}).join("");
  return`<div class="card row"><div style="font-size:40px">🎮</div><div style="flex:1"><input value="${e(S.user.name)}" onchange="S.user.name=this.value.slice(0,30)||'Jugador';save()"><div class="mu">Nivel ${s.lv} · ${s.xp}/${s.hi} XP</div></div></div>${bar(s.xp-s.lo,s.hi-s.lo)}
  <h2>Estadísticas</h2><div class="card">🔥 Racha: ${s.cur} d · Récord: ${s.rec} d<br>⏱ ${H(tot)} · ${S.sessions.length} sesiones · ${S.games.filter(g=>g.status==="done").length} completados</div>
- <table style="width:100%;font-size:13px;text-align:center"><tr class="mu"><td></td><td>Ses.</td><td>Horas</td><td>Juegos</td><td>Días</td></tr>${per}</table>
+ ${per}
  <h2>Más jugados</h2>${top.map(([g,m])=>`<div class="card row sp">${e(g.title)}<span class="mu">${H(m)}</span></div>`).join("")||`<div class="empty">Registra sesiones para ver tu top.</div>`}
- <h2>Misiones</h2>${missions().map(m=>`<div class="mu">${m.v>=m.t?"✅":"⬜"} ${m.n}</div>`).join("")}
- <h2>Ajustes</h2><div class="card"><div class="mu">Datos guardados solo en este navegador (modo local). Importación desde Steam/PSN/Xbox/Nintendo: no disponible aún.</div>
+ 
+ <h2>Ajustes</h2><div class="card"><div class="mu">Datos guardados solo en este navegador (modo local).</div>
  <div class="row" style="margin-top:8px"><button onclick="exp()">Exportar JSON</button><button class="dng" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar datos</button></div></div>
  <div class="mu">${APP_NAME} MVP · Premium: estructura futura, sin cobros.</div>`}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];
 function catSearch(){
- sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
+ sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
 async function catGo(){const q=$("#cq").value.trim();if(!q)return;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
  try{const r=await fetch(`/.netlify/functions/search?q=${encodeURIComponent(q)}`);if(!r.ok)throw new Error("error "+r.status);const d=await r.json();CR=d.results||[];
  $("#cr").innerHTML=CR.length?CR.map((g,i)=>`<div class="card row sp"><div class="row" style="flex:1">${g.background_image?`<img src="${e(g.background_image)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:""}<div><b>${e(g.name)}</b><div class="mu">${e(g.released||"s/f")} · ${e((g.platforms||[]).map(p=>p.platform.name).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="catAdd(${i})">Añadir</button></div>`).join(""):`<div class="empty">Sin resultados.</div>`}
