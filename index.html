@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Playlog</title>
+<style>
+:root{--bg:#121214;--s1:#1c1c20;--s2:#26262c;--tx:#f2f2f5;--mu:#9a9aa8;--ac:#8b5cf6;--ac2:#a78bfa;--ok:#34d399;--er:#f87171;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+#app{max-width:560px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+#main{flex:1;overflow-y:auto;padding:16px 16px 24px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:20px 0 8px}
+.card{background:var(--s1);border-radius:14px;padding:12px;margin-bottom:10px}
+.mu{color:var(--mu);font-size:13px}.row{display:flex;gap:8px;align-items:center}.sp{justify-content:space-between}
+.bar{height:8px;background:var(--s2);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+button,input,select,textarea{font:inherit;color:var(--tx);background:var(--s2);border:1px solid #33333b;border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
+button{cursor:pointer;width:auto}.pri{background:var(--ac);border-color:var(--ac);font-weight:600}.dng{color:var(--er)}
+textarea{min-height:70px}label{display:block;margin:10px 0 4px;color:var(--mu);font-size:13px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:10px 0}.tabs button{white-space:nowrap;min-height:38px;padding:6px 12px}.tabs .on{background:var(--ac);border-color:var(--ac)}
+nav{display:flex;align-items:center;justify-content:space-around;background:var(--s1);border-top:1px solid #2c2c33;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mu);min-width:56px;padding:4px}
+nav button.on{color:var(--ac2)}nav b{font-size:20px;font-weight:400}
+nav .plus{background:var(--ac);color:#fff;border-radius:50%;width:56px;height:56px;margin-top:-22px;font-size:30px;box-shadow:0 4px 16px #8b5cf688;justify-content:center}
+#sheet{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;z-index:9}
+#sheet>div{background:var(--bg);width:100%;max-width:560px;max-height:92%;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal button{padding:0;min-height:40px;position:relative;background:var(--s1);border:0}.cal .sel{background:var(--ac)}.cal .dot:after{content:"";position:absolute;bottom:4px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--ok)}
+.tag{display:inline-block;background:var(--s2);border-radius:99px;padding:2px 8px;font-size:12px;margin-right:4px}
+.big{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;margin:8px 0}
+.empty{text-align:center;color:var(--mu);padding:24px 8px}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .5s}}
+</style></head><body>
+<div id="app"><div id="main"></div>
+<nav id="nav"></nav></div><div id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sc"></div></div>
+<script>
+const APP_NAME="Playlog",SLOGAN="Your gaming story";document.title=APP_NAME;
+const ST={playing:"Jugando",done:"Completados",backlog:"Backlog",wish:"Deseados"};
+// Reglas XP centralizadas (derivadas de los registros: editar/borrar recalcula, sin farmeo)
+const XP={session:10,perHour:20,maxMinPerDay:600,completed:100};
+let S={games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""};
+try{const r=localStorage.getItem("playlog_v1");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s),e=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const ymd=d=>{d=new Date(d);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const today=()=>ymd(new Date()),H=m=>(m/60).toFixed(1)+" h",fm=m=>m>=60?Math.floor(m/60)+"h "+(m%60)+"m":m+" min";
+const gm=id=>S.sessions.filter(s=>s.gameId===id).reduce((a,s)=>a+s.min,0);
+const G=id=>S.games.find(g=>g.id===id);
+let tab="home",lib={st:"playing",q:""},cal={y:new Date().getFullYear(),m:new Date().getMonth(),sel:today()};
+function stats(){
+ const dm={};S.sessions.forEach(s=>dm[s.date]=(dm[s.date]||0)+s.min);
+ let xp=0;Object.values(dm).forEach(m=>xp+=Math.min(m,XP.maxMinPerDay)/60*XP.perHour);
+ xp=Math.round(xp+S.sessions.length*XP.session+S.games.filter(g=>g.status==="done").length*XP.completed);
+ const lv=Math.floor(Math.sqrt(xp/50))+1,lo=50*(lv-1)**2,hi=50*lv**2;
+ const days=Object.keys(dm).sort();let rec=0,run=0,prev=null;
+ days.forEach(d=>{const t=new Date(d+"T12:00");run=prev&&Math.round((t-prev)/864e5)===1?run+1:1;prev=t;rec=Math.max(rec,run)});
+ let cur=0,c=new Date();if(!dm[ymd(c)])c.setDate(c.getDate()-1);
+ while(dm[ymd(c)]){cur++;c.setDate(c.getDate()-1)}
+ return{xp,lv,lo,hi,dm,cur,rec:Math.max(rec,cur)};
+}
+function range(p){const n=new Date(),y=n.getFullYear(),m=n.getMonth();let a;
+ if(p==="day")a=today();else if(p==="week"){const d=new Date(n);d.setDate(n.getDate()-((n.getDay()+6)%7));a=ymd(d)}
+ else if(p==="month")a=ymd(new Date(y,m,1));else a=ymd(new Date(y,0,1));
+ return S.sessions.filter(s=>s.date>=a&&s.date<=today())}
+function missions(){const w=range("week"),mo=range("month");
+ return[{n:"Diaria: registra 1 sesión hoy",v:range("day").length,t:1},
+ {n:"Semanal: 3 días activos",v:new Set(w.map(s=>s.date)).size,t:3},
+ {n:"Mensual: 10 horas jugadas",v:Math.round(mo.reduce((a,s)=>a+s.min,0)/6)/10,t:10}]}
+const bar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`;
+function nav(){const t=[["home","🏠","Inicio"],["lib","🎮","Biblioteca"],["+","+",""],["diary","📅","Diario"],["prof","👤","Perfil"]];
+ $("#nav").innerHTML=t.map(([k,i,l])=>k==="+"?`<button class="plus" aria-label="Registrar sesión" onclick="openLog()">+</button>`:`<button class="${tab===k?"on":""}" onclick="go('${k}')"><b>${i}</b>${l}</button>`).join("")}
+function go(t){tab=t;R()}
+function R(){nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib")list()}
+function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing");
+ return`<h1>¡Hola, ${e(S.user.name)}!</h1><div class="mu">${APP_NAME} · ${SLOGAN}</div>
+ <div class="card" style="margin-top:12px"><div class="row sp"><b>Nivel ${s.lv}</b><span class="mu">🔥 Racha ${s.cur} d</span></div>
+ ${bar(s.xp-s.lo,s.hi-s.lo)}<div class="mu">${s.xp} XP · faltan ${s.hi-s.xp} para el nivel ${s.lv+1}</div></div>
+ <h2>Jugando ahora</h2>${pl.length?pl.map(gc).join(""):`<div class="empty">Aún no tienes juegos en curso.<br><button class="pri" onclick="go('lib')">Ir a la biblioteca</button></div>`}
+ <h2>Misiones activas</h2>${missions().map(m=>`<div class="card"><div class="row sp"><span>${m.n}</span><span class="mu">${Math.min(m.v,m.t)}/${m.t}${m.v>=m.t?" ✅":""}</span></div>${bar(m.v,m.t)}</div>`).join("")}
+ <h2>Noticias y lanzamientos</h2><div class="card mu">Sin conexión a una API real todavía: no se muestran noticias ni tendencias para no inventar datos. Conecta RAWG/IGDB y una fuente de noticias mediante una función serverless (pendiente).</div>`}
+function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" style="cursor:pointer"><div class="row">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:`<div style="width:56px;height:56px;border-radius:8px;background:var(--s2);display:grid;place-items:center">🎮</div>`}<div><b>${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${H(gm(g.id))}</div></div></div><span>›</span></div>`}
+function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><button class="pri" onclick="catSearch()">+ Juego</button></div>
+ <input placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()" style="margin-top:8px">
+ <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.st='${k}';R()">${v}</button>`).join("")}
+ ${lib.st==="backlog"?`<button onclick="randomBacklog()">🎲 Aleatorio</button>`:""}</div><div id="list"></div>`}
+function list(){const q=lib.q.toLowerCase(),a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q));
+ $("#list").innerHTML=a.length?a.map(gc).join(""):`<div class="empty">No hay juegos aquí todavía.</div>`}
+function randomBacklog(){const b=S.games.filter(g=>g.status==="backlog");b.length?openGame(b[Math.floor(Math.random()*b.length)].id):alert("Tu backlog está vacío.")}
+function sheet(h){$("#sc").innerHTML=h;$("#sheet").style.display="flex"}
+function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)}
+function addGame(){sheet(`<h1>Nuevo juego</h1><button class="pri" style="width:100%;margin:10px 0" onclick="catSearch()">🔍 Buscar en catálogo (RAWG)</button><div class="mu">O crea una ficha manual (también para fangames):</div>
+ <label>Título</label><input id="gt"><label>Plataforma</label><input id="gp" placeholder="PC, Switch, PS5…"><label>Género</label><input id="gg">
+ <label>Formato</label><select id="gf"><option>Digital</option><option>Físico</option></select>
+ <label>Estado</label><select id="gs">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
+ <div class="row" style="margin-top:14px"><button onclick="closeSheet()">Cancelar</button><button class="pri" onclick="saveGame()">Guardar</button></div>`)}
+function saveGame(){const t=$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
+ S.games.push({id:uid(),title:t,platform:$("#gp").value.trim().slice(0,40),genre:$("#gg").value.trim().slice(0,40),format:$("#gf").value,status:$("#gs").value,notes:"",goals:[],rating:null});
+ if(S.games.at(-1).platform)S.pref=S.games.at(-1).platform;save();closeSheet();R()}
+function openGame(id){const g=G(id);if(!g)return;const gl=g.goals,dn=gl.filter(x=>x.done).length;
+ const ss=S.sessions.filter(s=>s.gameId===id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
+ sheet(`${g.cover?`<img src="${e(g.cover)}" alt="Portada de ${e(g.title)}" referrerpolicy="no-referrer" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:10px">`:""}<div class="row sp"><h1>${e(g.title)}</h1><button onclick="closeSheet()">✕</button></div>
+ <div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")} · ${g.format} · ${H(gm(id))}</div>
+ <label>Estado</label><select onchange="setStatus('${id}',this.value)">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${g.status===k?"selected":""}>${v}</option>`).join("")}</select>
+ ${g.rating?`<div class="card" style="margin-top:10px">⭐ ${g.rating.score??"—"}/10 ${g.rating.date?"· "+g.rating.date:""}<div class="mu">${e(g.rating.review||"")}</div><button onclick="rate('${id}')">Editar valoración</button></div>`:""}
+ <h2>Objetivos</h2>${gl.length?`<div class="mu">${Math.round(dn/gl.length*100)}% (${dn}/${gl.length}) · Objetivos personalizados: no son logros verificados automáticamente.</div>`:`<div class="mu">Sin objetivos: no se muestra porcentaje.</div>`}
+ ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${e(x.name)}</span><button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
+ <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo objetivo"><button onclick="addGoal('${id}')">Añadir</button></div>
+ <h2>Notas</h2><textarea onchange="G('${id}').notes=this.value;save()">${e(g.notes)}</textarea>
+ <h2>Sesiones recientes</h2>${ss.map(s=>`<div class="mu">${s.date} · ${fm(s.min)} ${e(s.note)}</div>`).join("")||`<div class="mu">Ninguna</div>`}
+ <button class="dng" style="margin-top:16px" onclick="delGame('${id}')">Eliminar juego</button>`)}
+function setStatus(id,v){const g=G(id),was=g.status;g.status=v;save();if(v==="done"&&was!=="done"){rate(id)}else{openGame(id);R()}}
+function rate(id){const r=G(id).rating||{};sheet(`<h1>Valoración (opcional)</h1><label>Fecha de finalización</label><input type="date" id="rd" value="${r.date||today()}">
+ <label>Nota (1-10)</label><input type="number" id="rs" min="1" max="10" value="${r.score??""}"><label>Reseña</label><textarea id="rr">${e(r.review||"")}</textarea>
+ <div class="row" style="margin-top:14px"><button onclick="openGame('${id}');R()">Omitir</button><button class="pri" onclick="saveRate('${id}')">Guardar</button></div>`)}
+function saveRate(id){let n=parseInt($("#rs").value);n=n>=1&&n<=10?n:null;G(id).rating={date:$("#rd").value,score:n,review:$("#rr").value.slice(0,2000)};save();openGame(id);R()}
+function goal(id,i){const x=G(id).goals[i];x.done=!x.done;save();openGame(id)}
+function delGoal(id,i){G(id).goals.splice(i,1);save();openGame(id)}
+function addGoal(id){const n=$("#ng").value.trim();if(n){G(id).goals.push({name:n.slice(0,100),done:false});save();openGame(id)}}
+function delGame(id){if(!confirm("¿Eliminar el juego y sus sesiones?"))return;S.games=S.games.filter(g=>g.id!==id);S.sessions=S.sessions.filter(s=>s.gameId!==id);save();closeSheet();R()}
+// Cronómetro con marcas temporales persistidas
+const el=()=>{const t=S.timer;return t?t.acc+(t.run?Date.now()-t.start:0):0};
+function openLog(){if(!S.games.length){return sheet(`<div class="empty">Primero añade un juego a tu biblioteca.<br><br><button class="pri" onclick="closeSheet();go('lib');catSearch()">Añadir juego</button></div>`)}
+ const opts=S.games.filter(g=>g.status!=="wish");
+ sheet(`<div class="row sp"><h1>Registrar sesión</h1><button onclick="closeSheet()">✕</button></div>
+ <label>Juego</label><select id="lg" onchange="const g=G(this.value);$('#lp').value=g.platform||S.pref">${opts.map(g=>`<option value="${g.id}">${e(g.title)}</option>`).join("")}</select>
+ <label>Fecha</label><input type="date" id="ld" value="${today()}"><label>Plataforma</label><input id="lp" value="${e(opts[0]?.platform||S.pref)}">
+ <div class="card" style="margin-top:12px"><div class="big" id="tm">00:00:00</div><div class="row" id="tb"></div></div>
+ <label>Duración (minutos)</label><input type="number" id="lm" min="1" max="1440" inputmode="numeric"><label>Nota (opcional)</label><textarea id="ln" maxlength="500"></textarea>
+ <button class="pri" style="width:100%;margin-top:14px" onclick="saveSession()">Guardar sesión</button>`);
+ window._sid=uid();tb();window._ti=setInterval(tick,500);tick()}
+function tick(){const x=$("#tm");if(!x)return;const s=Math.floor(el()/1e3);x.textContent=[s/3600,s/60%60,s%60].map(v=>String(Math.floor(v)).padStart(2,"0")).join(":")}
+function tb(){const t=S.timer;$("#tb").innerHTML=!t?`<button class="pri" onclick="tm('start')">▶ Iniciar</button>`:t.run?`<button onclick="tm('pause')">⏸ Pausar</button><button onclick="tm('stop')">⏹ Detener</button>`:`<button class="pri" onclick="tm('resume')">▶ Reanudar</button><button onclick="tm('stop')">⏹ Detener</button>`}
+function tm(a){const t=S.timer,n=Date.now();
+ if(a==="start")S.timer={start:n,acc:0,run:true};
+ if(a==="pause"){t.acc+=n-t.start;t.run=false}
+ if(a==="resume"){t.start=n;t.run=true}
+ if(a==="stop"){const m=Math.max(1,Math.round(el()/6e4));S.timer=null;$("#lm").value=m}
+ save();tb();tick()}
+function saveSession(){const m=parseInt($("#lm").value);if(!(m>=1&&m<=1440))return alert("Indica una duración válida (o usa el cronómetro y pulsa Detener).");
+ if(S.sessions.some(s=>s.id===window._sid))return;
+ S.sessions.push({id:window._sid,gameId:$("#lg").value,date:$("#ld").value||today(),platform:$("#lp").value.slice(0,40),min:m,note:$("#ln").value.slice(0,500)});
+ S.pref=$("#lp").value;if(S.timer&&!S.timer.run&&false)S.timer=null;save();closeSheet();R()}
+function vDiary(){const{y,m,sel}=cal,dm=stats().dm,f=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate();
+ let c="";for(let i=0;i<f;i++)c+="<span></span>";
+ for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));c+=`<button class="${dm[k]?"dot":""} ${k===sel?"sel":""}" onclick="cal.sel='${k}';R()">${d}</button>`}
+ const ss=S.sessions.filter(s=>s.date===sel),tot=ss.reduce((a,s)=>a+s.min,0);
+ return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1>${new Date(y,m,1).toLocaleDateString("es",{month:"long",year:"numeric"})}</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
+ <div class="cal mu" style="margin:8px 0">${["L","M","X","J","V","S","D"].map(d=>`<span>${d}</span>`).join("")}</div><div class="cal">${c}</div>
+ <h2>${sel} · ${fm(tot)}</h2>${ss.map(s=>`<div class="card" onclick="editS('${s.id}')"><b>${e(G(s.gameId)?.title||"?")}</b> <span class="tag">${e(s.platform||"—")}</span> <span class="tag">${fm(s.min)}</span><div class="mu">${e(s.note)}</div></div>`).join("")||`<div class="empty">Sin sesiones este día.</div>`}
+ <button class="pri" style="width:100%" onclick="openLog()">+ Registrar sesión</button>`}
+function cm(d){cal.m+=d;if(cal.m<0){cal.m=11;cal.y--}if(cal.m>11){cal.m=0;cal.y++}R()}
+function editS(id){const s=S.sessions.find(x=>x.id===id);sheet(`<h1>Editar sesión</h1><label>Fecha</label><input type="date" id="ed" value="${s.date}"><label>Minutos</label><input type="number" id="em" min="1" max="1440" value="${s.min}">
+ <label>Nota</label><textarea id="en">${e(s.note)}</textarea><div class="row" style="margin-top:14px"><button class="dng" onclick="delS('${id}')">Eliminar</button><button class="pri" onclick="updS('${id}')">Guardar</button></div>`)}
+function updS(id){const s=S.sessions.find(x=>x.id===id),m=parseInt($("#em").value);if(!(m>=1&&m<=1440))return alert("Duración no válida");s.min=m;s.date=$("#ed").value||s.date;s.note=$("#en").value.slice(0,500);save();closeSheet();R()}
+function delS(id){if(confirm("¿Eliminar esta sesión? XP y horas se recalcularán.")){S.sessions=S.sessions.filter(x=>x.id!==id);save();closeSheet();R()}}
+function vProf(){const s=stats(),tot=S.sessions.reduce((a,x)=>a+x.min,0),top=S.games.map(g=>[g,gm(g.id)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,3);
+ const per=[["day","Hoy"],["week","Semana"],["month","Mes"],["year","Año"]].map(([p,l])=>{const r=range(p);return`<tr><td>${l}</td><td>${r.length}</td><td>${H(r.reduce((a,x)=>a+x.min,0))}</td><td>${new Set(r.map(x=>x.gameId)).size}</td><td>${new Set(r.map(x=>x.date)).size}</td></tr>`}).join("");
+ return`<div class="card row"><div style="font-size:40px">🎮</div><div style="flex:1"><input value="${e(S.user.name)}" onchange="S.user.name=this.value.slice(0,30)||'Jugador';save()"><div class="mu">Nivel ${s.lv} · ${s.xp}/${s.hi} XP</div></div></div>${bar(s.xp-s.lo,s.hi-s.lo)}
+ <h2>Estadísticas</h2><div class="card">🔥 Racha: ${s.cur} d · Récord: ${s.rec} d<br>⏱ ${H(tot)} · ${S.sessions.length} sesiones · ${S.games.filter(g=>g.status==="done").length} completados</div>
+ <table style="width:100%;font-size:13px;text-align:center"><tr class="mu"><td></td><td>Ses.</td><td>Horas</td><td>Juegos</td><td>Días</td></tr>${per}</table>
+ <h2>Más jugados</h2>${top.map(([g,m])=>`<div class="card row sp">${e(g.title)}<span class="mu">${H(m)}</span></div>`).join("")||`<div class="empty">Registra sesiones para ver tu top.</div>`}
+ <h2>Misiones</h2>${missions().map(m=>`<div class="mu">${m.v>=m.t?"✅":"⬜"} ${m.n}</div>`).join("")}
+ <h2>Ajustes</h2><div class="card"><div class="mu">Datos guardados solo en este navegador (modo local). Importación desde Steam/PSN/Xbox/Nintendo: no disponible aún.</div>
+ <div class="row" style="margin-top:8px"><button onclick="exp()">Exportar JSON</button><button class="dng" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar datos</button></div></div>
+ <div class="mu">${APP_NAME} MVP · Premium: estructura futura, sin cobros.</div>`}
+function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
+let CR=[];
+function catSearch(){
+ sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
+async function catGo(){const q=$("#cq").value.trim();if(!q)return;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
+ try{const r=await fetch(`/.netlify/functions/search?q=${encodeURIComponent(q)}`);if(!r.ok)throw new Error("error "+r.status);const d=await r.json();CR=d.results||[];
+ $("#cr").innerHTML=CR.length?CR.map((g,i)=>`<div class="card row sp"><div class="row" style="flex:1">${g.background_image?`<img src="${e(g.background_image)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:""}<div><b>${e(g.name)}</b><div class="mu">${e(g.released||"s/f")} · ${e((g.platforms||[]).map(p=>p.platform.name).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="catAdd(${i})">Añadir</button></div>`).join(""):`<div class="empty">Sin resultados.</div>`}
+ catch(x){$("#cr").innerHTML=`<div class="empty">No se pudo buscar (${e(x.message)}). Revisa la clave o la conexión.<br><button onclick="catGo()">Reintentar</button></div>`}}
+function catAdd(i){const g=CR[i];S.games.push({id:uid(),title:g.name,platform:(g.platforms||[])[0]?.platform.name||"",genre:(g.genres||[]).map(x=>x.name).join(", "),format:"Digital",status:lib.st,notes:"",goals:[],rating:null,cover:g.background_image||"",released:g.released||"",rawgId:g.id});save();alert(g.name+" añadido a "+ST[lib.st]);R()}
+R();
+</script></body></html>
