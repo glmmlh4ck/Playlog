@@ -42,14 +42,15 @@ exports.handler = async (event) => {
   if (c && now - c.t < 864e5) return out(200, c.b);
 
   try {
-    const games = await igdb("games",
-      `search "${q}"; fields name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name; where version_parent = null; limit 20;`);
+    const raw = await igdb("games",
+      `search "${q}"; fields name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name,total_rating_count; where version_parent = null; limit 50;`);
+    const games = raw.sort((a, b) => (b.total_rating_count || 0) - (a.total_rating_count || 0)).slice(0, 20); // los más conocidos primero
     const ids = games.map(g => g.id);
     let ttb = {};
     if (ids.length) {
       try {
         const t = await igdb("game_time_to_beats", `fields game_id,hastily,normally,completely; where game_id = (${ids.join(",")}); limit 50;`);
-        t.forEach(x => (ttb[x.game_id] = { main: hrs(x.normally || x.hastily), extra: hrs(x.completely ? x.normally : null), full: hrs(x.completely) }));
+        t.forEach(x => (ttb[x.game_id] = { fast: hrs(x.hastily), main: hrs(x.normally), full: hrs(x.completely) }));
       } catch (e) { /* la duración es opcional */ }
     }
     const body = JSON.stringify({ results: games.map(g => ({

@@ -139,7 +139,7 @@ function openGame(id){const g=G(id);if(!g)return;const gl=g.goals,dn=gl.filter(x
  <label>Estado</label><select onchange="setStatus('${id}',this.value)">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${g.status===k?"selected":""}>${v}</option>`).join("")}</select>
  <div class="row" style="margin-top:8px">${g.status==="done"?`<button onclick="replay('${id}')">🔁 Rejugar</button>`:""}<button onclick="setCover('${id}')">🖼 Cambiar portada</button></div>
  ${g.rating?`<div class="card" style="margin-top:10px">⭐ ${g.rating.score??"—"}/10 ${g.rating.date?"· "+g.rating.date:""}<div class="mu">${e(g.rating.review||"")}</div><button onclick="rate('${id}')">Editar valoración</button></div>`:""}
- ${t.main||t.extra||t.full?`<h2>Duración estimada</h2><div class="stats" style="grid-template-columns:repeat(3,1fr)">${[["main","Historia"],["extra","Hist. + extras"],["full","100%"]].map(([k,l])=>`<div><b>${t[k]?t[k]+" h":"—"}</b><span>${l}</span></div>`).join("")}</div>`:""}
+ ${t.fast||t.main||t.full?`<h2>Duración estimada</h2><div class="stats" style="grid-template-columns:repeat(3,1fr)">${[["fast","Rápida"],["main","Normal"],["full","100%"]].map(([k,l])=>`<div><b>${t[k]?t[k]+" h":"—"}</b><span>${l}</span></div>`).join("")}</div>`:""}
  ${g.tags?.length?`<h2>Etiquetas</h2>${g.tags.map(x=>`<span class="tag">${e(x)}</span>`).join("")}`:""}
  ${g.summary?`<h2>Resumen</h2><div class="mu">${e(g.summary)}</div>`:""}
  ${g.similar?.length?`<h2>Juegos similares</h2>${g.similar.map(x=>`<span class="tag">${e(x)}</span>`).join("")}`:""}
