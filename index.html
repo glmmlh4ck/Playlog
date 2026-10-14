@@ -58,9 +58,10 @@ summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 .rc-x{position:absolute;top:calc(6px + env(safe-area-inset-top,0px));right:10px;width:46px;background:none;border:0;font-size:22px;color:#fff}.rc-body{width:100%;max-width:420px}
 .rc-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}.rc-hint{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom,0px));opacity:.8;font-size:13px}
 @media (prefers-reduced-motion:no-preference){.rc-body{animation:pop .35s ease-out}@keyframes pop{from{transform:scale(.9);opacity:0}}}
-.cal .l1{background:#8b5cf633}.cal .l2{background:#8b5cf666}.cal .l3{background:#8b5cf699}.cal .l4{background:#8b5cf6cc}.cal button.sel{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0}
+.cal button.sel{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0}
 .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bd{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:10px 6px;text-align:center;opacity:.55}
 .bd.on{opacity:1;border-color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}.bd b{display:block;font-size:12px;line-height:1.2;margin-top:2px}.bd span{display:block;font-size:10px;color:var(--mu)}
+.cv .fan{position:absolute;top:6px;left:6px;z-index:1;background:#000b;border-radius:8px;padding:2px 7px;font-size:10px;font-style:normal;font-weight:700}
 </style></head><body>
 <div id="app"><div id="main"></div>
 <nav id="nav"></nav></div><div id="rc" onclick="rcTap(event)"></div><div id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sc"></div></div>
@@ -78,7 +79,7 @@ const ymd=d=>{d=new Date(d);return d.getFullYear()+"-"+String(d.getMonth()+1).pa
 const today=()=>ymd(new Date()),H=m=>{m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?h+"h "+r+"min":h+"h"):r+"min"},fm=H;
 const gm=id=>S.sessions.filter(s=>s.gameId===id).reduce((a,s)=>a+s.min,0);
 const G=id=>S.games.find(g=>g.id===id);
-const PLAT=["PC","PlayStation 5","PlayStation 4","PlayStation 3","PlayStation 2","PlayStation","PS Vita","PSP","Xbox Series X|S","Xbox One","Xbox 360","Xbox","Nintendo Switch","Nintendo Switch 2","Wii U","Wii","GameCube","Nintendo 64","SNES","NES","Nintendo 3DS","Nintendo DS","Game Boy Advance","Game Boy","Steam Deck","Mac","Linux","iOS","Android","Sega Mega Drive","Otra"];
+const PLAT=["PC","PlayStation 5","PlayStation 4","PlayStation 3","PlayStation 2","PlayStation","PS Vita","PSP","Xbox Series X|S","Xbox One","Xbox 360","Xbox","Nintendo Switch","Nintendo Switch 2","Wii U","Wii","GameCube","Nintendo 64","SNES","NES","Nintendo 3DS","Nintendo DS","Game Boy Advance","Game Boy","Steam Deck","Mac","Linux","iOS","Android","Consola Android","Game Boy Color","Sega Master System","Sega Mega Drive","Sega Saturn","Dreamcast","Neo Geo","PC Engine","Atari 2600","Anbernic","Retroid Pocket","Miyoo Mini","Powkiddy","Ayn Odin","Ayaneo","ROG Ally","Lenovo Legion Go","MSI Claw","Analogue Pocket","Playdate","Meta Quest","Steam Machine","Otra"];
 const GEN=["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
 const fd=d=>d?d.split("-").reverse().join("/"):"";
 let tab="home",lib={st:"playing",q:"",f:{pl:"",gen:"",fmt:"",sort:"name"}},cal={y:new Date().getFullYear(),m:new Date().getMonth(),sel:today()};
@@ -118,7 +119,7 @@ function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><button class="pri
  <div class="row" style="margin-top:8px"><input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()"><button onclick="filt()" style="white-space:nowrap">⚙️ Filtros${Object.values(lib.f).filter((v,i)=>i<3&&v).length?" ("+Object.values(lib.f).filter((v,i)=>i<3&&v).length+")":""}</button></div>
  <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.st='${k}';R()">${v}</button>`).join("")}
  </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Juego aleatorio del Backlog</button>`:""}<div id="list"></div>`}
-function gg(g){const rt=g.rating?.score;return`<div class="poster" onclick="openGame('${g.id}')"><div class="cv">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.title)}</b><span>⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}</span></div>`}
+function gg(g){const rt=g.rating?.score;return`<div class="poster" onclick="openGame('${g.id}')"><div class="cv">${g.fangame?`<i class="fan">FAN</i>`:""}${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.title)}</b><span>⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}</span></div>`}
 function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q)&&(!F.pl||g.platform===F.pl)&&(!F.gen||(g.genre||"").split(",").map(z=>z.trim()).includes(F.gen))&&(!F.fmt||g.format===F.fmt));
  if(!a.length)return $("#list").innerHTML=`<div class="empty">No hay juegos aquí todavía.</div>`;
  if(lib.st!=="done"){const so={name:(x,y)=>x.title.localeCompare(y.title),date:(x,y)=>(y.released||"").localeCompare(x.released||""),hours:(x,y)=>gm(y.id)-gm(x.id),rating:(x,y)=>(y.rating?.score||0)-(x.rating?.score||0)};a=[...a].sort(so[F.sort]||so.name);return $("#list").innerHTML=`<div class="grid">${a.map(gg).join("")}</div>`}
@@ -138,25 +139,26 @@ function tg(el){const x=el.dataset.g;window._gs.has(x)?window._gs.delete(x):wind
 function verChg(i){const b=CR[i],v=b.versions[$("#gv").value];$("#gp").innerHTML=platOpts([...v.platforms,...b.platforms],"")}
 function addSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[];
  sheet(`<div class="row sp"><h1>Añadir juego</h1><button onclick="closeSheet()">✕</button></div>
- ${i>=0?`<div class="row">${th({cover:b.cover},56,74)}<b>${e(b.title)}</b></div>`:`<label>Título</label><input id="gt" autocapitalize="words">`}
+ ${i>=0?`<div class="row">${th({cover:b.cover},56,74)}<b>${e(b.title)}</b></div>`:`<label>Título</label><input id="gt" autocapitalize="words"><label>Portada (enlace a una imagen, opcional)</label><input id="gcv" placeholder="https://…" inputmode="url">`}
  ${vs.length>1?`<label>Versión</label><select id="gv" onchange="verChg(${i})">${vs.map((v,k)=>`<option value="${k}">${e(v.title)}${v.released?" ("+v.released.slice(0,4)+")":""}</option>`).join("")}</select>`:""}
  <label>¿Dónde lo añadimos?</label><select id="gs" onchange="$('#gd').style.display=this.value==='done'?'block':'none'">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
  <label>Plataforma</label><select id="gp">${platOpts(vs.length>1?[...vs[0].platforms,...b.platforms]:pl(b),"")}</select>
  <label>Formato</label><select id="gf"><option>Digital</option><option>Físico</option></select>
  <label>Géneros</label>${gchips(b.genres||[])}
+ <label class="row" style="color:var(--tx);font-size:15px"><input type="checkbox" id="gfg" style="width:24px;min-height:24px">Es un fangame o ROM hack</label>
  <label>Reto o modo (opcional)</label><input id="gc" list="chl" placeholder="Nuzlocke, Randomizer…"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
  <div id="gd" style="display:${lib.st==="done"?"block":"none"}"><label>Fecha de finalización</label><input type="date" id="gdt" value="${today()}"><label>Tiempo de juego total (horas, opcional)</label><input type="number" id="gh" min="0" step="0.5" inputmode="decimal"></div>
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveGame(${i})">Guardar</button>`)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
  const st=$("#gs").value,id=uid(),p=$("#gp").value,vs=b.versions||[],k=$("#gv")?+$("#gv").value:0,v=vs[k]||{};
- const g={id,title:t,platform:p,platforms:b.platforms||[],genre:[...window._gs].join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:v.cover||b.cover||"",released:v.released||b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,run:1,challenge:($("#gc").value||"").trim().slice(0,40),versions:vs,version:k};
+ const g={id,title:t,platform:p,platforms:b.platforms||[],genre:[...window._gs].join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:v.cover||b.cover||($("#gcv")&&$("#gcv").value.trim().startsWith("http")?$("#gcv").value.trim():""),fangame:$("#gfg").checked,released:v.released||b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,run:1,challenge:($("#gc").value||"").trim().slice(0,40),versions:vs,version:k};
  if(st==="done"){g.doneDate=$("#gdt").value||today();const h=parseFloat($("#gh").value);if(h>0)S.sessions.push({id:uid(),gameId:id,date:g.doneDate,platform:p,min:Math.round(h*60),note:"Tiempo total al completar",run:1})}
  S.games.push(g);if(p)S.pref=p;save();closeSheet();R();getBanner(id)}
 function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);const gl=g.goals,dn=gl.filter(x=>x.done).length,t=g.ttb||{};
  const ss=S.sessions.filter(s=>s.gameId===id).sort((a,b)=>b.date.localeCompare(a.date)),rd=g.doneDate||g.rating?.date;
  sheet(`${g.banner?`<img src="${e(g.banner)}" alt="Portada" referrerpolicy="no-referrer" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:10px">`:g.cover?`<img src="${e(g.cover)}" alt="Portada" referrerpolicy="no-referrer" style="width:100%;height:230px;object-fit:contain;background:var(--s2);border-radius:12px;margin-bottom:10px">`:""}<div class="row sp"><h1>${e(g.title)}</h1><button onclick="closeSheet()">✕</button></div>
  <div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")} · ${g.format} · ⏱ ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>
- ${g.challenge?`<span class="tag" style="margin-top:6px">🎯 ${e(g.challenge)}</span>`:""}
+ ${g.fangame?`<span class="tag" style="margin-top:6px">🛠 Fangame</span>`:""}${g.challenge?`<span class="tag" style="margin-top:6px">🎯 ${e(g.challenge)}</span>`:""}
  ${g.versions?.length>1?`<label>Versión</label><select onchange="setVersion('${id}',this.value)">${g.versions.map((v,k)=>`<option value="${k}" ${k===(g.version||0)?"selected":""}>${e(v.title)}${v.released?" ("+v.released.slice(0,4)+")":""}</option>`).join("")}</select>`:""}
  <label>Estado</label><select onchange="setStatus('${id}',this.value)">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${g.status===k?"selected":""}>${v}</option>`).join("")}</select>
  <div class="row" style="margin-top:8px;flex-wrap:wrap">${g.status==="done"||g.status==="drop"?`<button onclick="replay('${id}')">🔁 Rejugar</button>`:""}<button onclick="editGame('${id}')">✏️ Editar</button><button onclick="setCover('${id}')">🖼 Portada</button></div>
@@ -174,9 +176,10 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
 function editGame(id){const g=G(id);sheet(`<div class="row sp"><h1>Editar juego</h1><button onclick="closeSheet()">✕</button></div>
  <label>Nombre</label><input id="et" value="${e(g.title)}"><label>Plataforma</label><select id="ep2">${platOpts(pl(g),g.platform)}</select>
  <label>Géneros</label>${gchips((g.genre||"").split(",").map(z=>z.trim()).filter(Boolean))}<label>Formato</label><select id="ef"><option ${g.format==="Digital"?"selected":""}>Digital</option><option ${g.format==="Físico"?"selected":""}>Físico</option></select>
+ <label class="row" style="color:var(--tx);font-size:15px"><input type="checkbox" id="efg" style="width:24px;min-height:24px" ${g.fangame?"checked":""}>Es un fangame o ROM hack</label>
  <label>Reto o modo</label><input id="ec" list="chl" value="${e(g.challenge||"")}"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveEdit('${id}')">Guardar cambios</button>`)}
-function saveEdit(id){const g=G(id),t=$("#et").value.trim().slice(0,120);if(!t)return alert("El nombre no puede estar vacío");g.title=t;g.platform=$("#ep2").value;g.genre=[...window._gs].join(", ");g.format=$("#ef").value;g.challenge=$("#ec").value.trim().slice(0,40);save();openGame(id);R()}
+function saveEdit(id){const g=G(id),t=$("#et").value.trim().slice(0,120);if(!t)return alert("El nombre no puede estar vacío");g.title=t;g.platform=$("#ep2").value;g.genre=[...window._gs].join(", ");g.format=$("#ef").value;g.challenge=$("#ec").value.trim().slice(0,40);g.fangame=$("#efg").checked;save();openGame(id);R()}
 function setVersion(id,k){const g=G(id),v=g.versions[k];g.version=+k;if(v.cover)g.cover=v.cover;if(v.released)g.released=v.released;if(v.platforms.length&&!v.platforms.includes(g.platform))g.platform=v.platforms[0];save();openGame(id);R()}
 async function getBanner(id){const g=G(id);if(!g||g.banner||g.bannerTried)return;g.bannerTried=true;save();const nz=x=>x.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
  try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>x.background_image&&nz(x.name)===nz(g.title));
@@ -219,7 +222,7 @@ function saveSession(){const m=(parseInt($("#lh").value)||0)*60+(parseInt($("#lm
  g.platform=p;S.pref=p;save();closeSheet();R()}
 function vDiary(){const{y,m,sel}=cal,dm=stats().dm,f=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate();
  let c="";for(let i=0;i<f;i++)c+="<span></span>";
- for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));c+=`<button class="${dm[k]?"l"+(dm[k]<60?1:dm[k]<120?2:dm[k]<240?3:4):""} ${k===sel?"sel":""}" onclick="cal.sel='${k}';R()">${d}</button>`}
+ for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));c+=`<button class="${dm[k]?"dot":""} ${k===sel?"sel":""}" onclick="cal.sel='${k}';R()">${d}</button>`}
  const ss=S.sessions.filter(s=>s.date===sel),tot=ss.reduce((a,s)=>a+s.min,0);
  return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1>${new Date(y,m,1).toLocaleDateString("es",{month:"long",year:"numeric"})}</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
  <div class="cal mu" style="margin:8px 0">${["L","M","X","J","V","S","D"].map(d=>`<span>${d}</span>`).join("")}</div><div class="cal">${c}</div>
