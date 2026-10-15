@@ -107,7 +107,7 @@ const bar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></
 const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',lib:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5M16 11.5h.01M18.5 13.5h.01"/>',diary:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/>',prof:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'};
 function nav(){const t=[["home","Inicio"],["lib","Biblioteca"],["+",""],["diary","Diario"],["prof","Perfil"]];
  $("#nav").innerHTML=t.map(([k,l])=>k==="+"?`<button class="plus" aria-label="Añadir" onclick="openPlus()">+</button>`:`<button class="${tab===k?"on":""}" onclick="go('${k}')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${l}</button>`).join("")}
-function go(t){tab=t;R()}
+function go(t){if(t==="diary"){const n=new Date();cal.y=n.getFullYear();cal.m=n.getMonth();cal.sel=today()}tab=t;R()}
 function R(){nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib")list()}
 function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing"),up=S.games.filter(g=>g.status==="wish"&&g.released&&g.released>today()).sort((a,b)=>a.released.localeCompare(b.released));
  const mem=[];S.games.forEach(g=>comps(g).forEach(d=>{const n=new Date(),t=new Date(d+"T12:00"),a=new Date(n.getFullYear(),t.getMonth(),t.getDate(),12),df=Math.round((n-a)/864e5),y=n.getFullYear()-t.getFullYear();if(y>0&&Math.abs(df)<=3)mem.push({g,y,d,df})}));
@@ -120,7 +120,7 @@ function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" sty
 function vLib(){return`<h1>Biblioteca</h1>
  <div class="row" style="margin-top:8px"><input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()"><button onclick="filt()" style="white-space:nowrap">⚙️ Filtros${Object.values(lib.f).filter((v,i)=>i<3&&v).length?" ("+Object.values(lib.f).filter((v,i)=>i<3&&v).length+")":""}</button></div>
  <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.st='${k}';R()">${v}</button>`).join("")}
- </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Juego aleatorio del Backlog</button>`:""}<div id="list"></div>`}
+ </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button>`:""}<div id="list"></div>`}
 function comps(g){if(!g.completions)g.completions=g.doneDate?[g.doneDate]:[];return g.completions}
 function gg(g){const rt=g.rating?.score,n=comps(g).length;return`<div class="poster" onclick="openGame('${g.id}')"><div class="cv">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.title)}</b><span>⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}${n>1?" · 🏁×"+n:""}</span></div>`}
 function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q)&&(!F.pl||g.platform===F.pl)&&(!F.gen||(g.genre||"").split(",").map(z=>z.trim()).includes(F.gen))&&(!F.fmt||g.format===F.fmt));
@@ -131,7 +131,33 @@ function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.st
  $("#list").innerHTML=Object.keys(by).sort((x,y)=>x==="Sin fecha"?1:y==="Sin fecha"?-1:y.localeCompare(x)).map(k=>`<h2>${k}</h2><div class="grid">${by[k].sort((x,y)=>dd(x).localeCompare(dd(y))).map(gg).join("")}</div>`).join("")}
 function filt(){const F=lib.f,pls=[...new Set(S.games.map(g=>g.platform).filter(Boolean))].sort(),gs=[...new Set(S.games.flatMap(g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean)))].sort(),op=(a,v)=>a.map(x=>`<option ${x===v?"selected":""}>${e(x)}</option>`).join("");
  sheet(`<div class="row sp"><h1>Filtros</h1><button onclick="closeSheet()">✕</button></div><label>Plataforma</label><select id="fp"><option value="">Todas</option>${op(pls,F.pl)}</select><label>Género</label><select id="fg"><option value="">Todos</option>${op(gs,F.gen)}</select><label>Formato</label><select id="ff"><option value="">Todos</option>${op(["Digital","Físico"],F.fmt)}</select><label>Ordenar por</label><select id="fs">${[["name","Nombre"],["date","Fecha de lanzamiento"],["hours","Horas acumuladas"],["rating","Valoración"]].map(([k,v])=>`<option value="${k}" ${F.sort===k?"selected":""}>${v}</option>`).join("")}</select><div class="row" style="margin-top:16px"><button onclick="lib.f={pl:'',gen:'',fmt:'',sort:'name'};closeSheet();R()">Quitar filtros</button><button class="pri" onclick="lib.f={pl:$('#fp').value,gen:$('#fg').value,fmt:$('#ff').value,sort:$('#fs').value};closeSheet();R()">Aplicar</button></div>`)}
-function randomBacklog(){const b=S.games.filter(g=>g.status==="backlog");b.length?openGame(b[Math.floor(Math.random()*b.length)].id):alert("Tu backlog está vacío.")}
+function randomBacklog(){const n=S.games.filter(g=>g.status==="backlog").length;if(!n)return alert("Tu backlog está vacío.");
+ sheet(`<div class="row sp"><h1>🎲 Aleatorizar</h1><button onclick="closeSheet()">✕</button></div><div class="mu">${n} ${n===1?"juego":"juegos"} en tu backlog</div>
+ <button class="pri" style="width:100%;padding:16px;margin-top:14px" onclick="window._rb={gen:'',dur:'',plt:'',mode:''};window._rbLast='';rbGo()">🎲 Uno al azar</button>
+ <button style="width:100%;padding:16px;margin-top:10px" onclick="rbAsk()">🧭 Ayúdame a elegir</button>`)}
+function rbAsk(){const B=S.games.filter(g=>g.status==="backlog"),gs=[...new Set(B.flatMap(g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean)))].sort(),ps=[...new Set(B.map(g=>g.platform).filter(Boolean))].sort();
+ window._rb={gen:"",dur:"",plt:"",mode:""};
+ const grp=(k,t,o)=>o.length?`<label>${t}</label><div>${[["","Cualquiera"],...o].map(([v,l])=>`<span class="chipb ${v===""?"on":""}" data-v="${e(v)}" onclick="rbSet('${k}',this)">${e(l)}</span>`).join("")}</div>`:"";
+ sheet(`<div class="row sp"><h1>🧭 Ayúdame a elegir</h1><button onclick="closeSheet()">✕</button></div>
+ ${grp("gen","¿Qué género te apetece?",gs.map(x=>[x,x]))}
+ ${grp("dur","¿Cuánto tiempo quieres dedicarle?",B.some(g=>g.ttb)?[["s","Corto (menos de 10 h)"],["m","Medio (10–30 h)"],["l","Largo (más de 30 h)"]]:[])}
+ ${grp("plt","¿En qué plataforma?",ps.map(x=>[x,x]))}
+ ${grp("mode","¿Solo o acompañado?",B.some(g=>g.tags?.length)?[["1","Un jugador"],["2","Multijugador"]]:[])}
+ <button class="pri" style="width:100%;margin-top:16px" onclick="window._rbLast='';rbGo()">Buscar juego</button>`)}
+function rbSet(k,el){window._rb[k]=el.dataset.v;[...el.parentNode.children].forEach(c=>c.classList.toggle("on",c===el))}
+function rbMatch(){const q=window._rb;return S.games.filter(g=>{if(g.status!=="backlog")return false;
+ if(q.gen&&!(g.genre||"").split(",").map(z=>z.trim()).includes(q.gen))return false;
+ if(q.plt&&g.platform!==q.plt)return false;
+ if(q.mode){const t=g.tags||[];if(q.mode==="1"&&!t.includes("Single player"))return false;if(q.mode==="2"&&!t.some(x=>x==="Multiplayer"||x==="Co-operative"||x==="Split screen"))return false}
+ if(q.dur){const h=g.ttb?(g.ttb.main||g.ttb.fast||g.ttb.full):null;if(h==null)return false;if(q.dur==="s"&&!(h<10))return false;if(q.dur==="m"&&!(h>=10&&h<=30))return false;if(q.dur==="l"&&!(h>30))return false}
+ return true})}
+function rbGo(){let m=rbMatch();const n=m.length;if(n>1)m=m.filter(g=>g.id!==window._rbLast);
+ if(!m.length)return sheet(`<div class="row sp"><h1>Sin resultados</h1><button onclick="closeSheet()">✕</button></div><div class="empty">Ningún juego de tu backlog cumple esas respuestas.<br>Los juegos sin duración, género o etiquetas conocidas no cuentan al filtrar por ellos.</div><button class="pri" style="width:100%" onclick="rbAsk()">Cambiar respuestas</button>`);
+ const g=m[Math.floor(Math.random()*m.length)],t=g.ttb,h=t?(t.main||t.fast||t.full):0;window._rbLast=g.id;
+ sheet(`<div class="row sp"><h1>Te toca jugar…</h1><button onclick="closeSheet()">✕</button></div>
+ <div class="card row" style="margin-top:8px">${th(g,80,106)}<div style="min-width:0"><b style="font-size:18px">${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")}</div>${h?`<div class="mu">⏱ Unas ${H(Math.round(h*60))} para completarlo</div>`:""}<div class="mu">Coincide con ${n} ${n===1?"juego":"juegos"} de tu backlog</div></div></div>
+ <div class="row" style="flex-wrap:wrap;margin-top:10px">${n>1?`<button onclick="rbGo()">🎲 Otro</button>`:""}<button onclick="openGame('${g.id}')">Ver ficha</button><button class="pri" onclick="setStatus('${g.id}','playing')">▶ Empezar a jugar</button></div>
+ <button style="width:100%;margin-top:10px" onclick="rbAsk()">Cambiar respuestas</button>`)}
 function sheet(h){$("#sc").innerHTML=h;$("#sheet").style.display="flex"}
 function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)}
 function addGame(){addSheet(-1)}
@@ -141,12 +167,12 @@ function th(g,w,h){return g?.cover?`<img src="${e(g.cover)}" alt="" loading="laz
 function gchips(a){window._gs=new Set(a);return`<div style="margin-top:4px">${[...GEN,...a.filter(x=>!GEN.includes(x))].map(x=>`<span class="chipb ${window._gs.has(x)?"on":""}" data-g="${e(x)}" onclick="tg(this)">${e(x)}</span>`).join("")}</div>`}
 function tg(el){const x=el.dataset.g;window._gs.has(x)?window._gs.delete(x):window._gs.add(x);el.classList.toggle("on")}
 function verChg(i){const b=CR[i],v=b.versions[$("#gv").value];$("#gp").innerHTML=platOpts([...v.platforms,...b.platforms],"")}
-function addSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[];
+function addSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.max(0,vs.findIndex(v=>v.self));
  sheet(`<div class="row sp"><h1>Añadir juego</h1><button onclick="closeSheet()">✕</button></div>
- ${i>=0?`<div class="row">${th({cover:b.cover},56,74)}<b>${e(b.title)}</b></div>`:`<label>Título</label><input id="gt" autocapitalize="words"><label>Portada (enlace a una imagen, opcional)</label><input id="gcv" placeholder="https://…" inputmode="url">`}
- ${vs.length>1?`<label>Versión</label><select id="gv" onchange="verChg(${i})">${vs.map((v,k)=>`<option value="${k}">${e(v.title)}${v.released?" ("+v.released.slice(0,4)+")":""}</option>`).join("")}</select>`:""}
+ ${i>=0?`<div class="row">${th({cover:b.cover},56,74)}<b>${e(b.title)}</b></div>`:`<label>Título</label><input id="gt" autocapitalize="words"><label>Portada (enlace a una imagen, opcional)</label><input id="gcv" placeholder="https://…" inputmode="url">${ttbInputs(null)}`}
+ ${vs.length>1?`<label>Versión</label><select id="gv" onchange="verChg(${i})">${vs.map((v,k)=>`<option value="${k}" ${k===si?"selected":""}>${vLabel(v)}</option>`).join("")}</select>`:""}
  <label>¿Dónde lo añadimos?</label><select id="gs" onchange="$('#gd').style.display=this.value==='done'?'block':'none'">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
- <label>Plataforma</label><select id="gp">${platOpts(vs.length>1?[...vs[0].platforms,...b.platforms]:pl(b),"")}</select>
+ <label>Plataforma</label><select id="gp">${platOpts(vs.length>1?[...vs[si].platforms,...b.platforms]:pl(b),"")}</select>
  <label>Formato</label><select id="gf"><option>Digital</option><option>Físico</option></select>
  <label>Géneros</label>${gchips(b.genres||[])}
  <label>Reto o modo (opcional)</label><input id="gc" list="chl" placeholder="Nuzlocke, Randomizer…"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
@@ -154,7 +180,7 @@ function addSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[];
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveGame(${i})">Guardar</button>`)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
  const st=$("#gs").value,id=uid(),p=$("#gp").value,vs=b.versions||[],k=$("#gv")?+$("#gv").value:0,v=vs[k]||{},cu=$("#gcv")&&$("#gcv").value.trim().startsWith("http")?$("#gcv").value.trim():"";
- const g={id,title:t,platform:p,platforms:b.platforms||[],genre:[...window._gs].join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:v.cover||b.cover||cu,released:v.released||b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,run:1,challenge:($("#gc").value||"").trim().slice(0,40),versions:vs,version:k,playAt:st==="playing"?Date.now():0,completions:[]};
+ const g={id,title:t,platform:p,platforms:b.platforms||[],genre:[...window._gs].join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:v.cover||b.cover||cu,released:v.released||b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||(i<0?readTtb():null),run:1,challenge:($("#gc").value||"").trim().slice(0,40),versions:vs,version:k,playAt:st==="playing"?Date.now():0,completions:[]};
  if(st==="done"){g.doneDate=$("#gdt").value||today();g.completions=[g.doneDate];const h=parseFloat($("#gh").value);if(h>0)S.sessions.push({id:uid(),gameId:id,date:g.doneDate,platform:p,min:Math.round(h*60),note:"Tiempo total al completar",run:1})}
  S.games.push(g);if(p)S.pref=p;save();closeSheet();R();getBanner(id)}
 function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);const gl=g.goals,dn=gl.filter(x=>x.done).length,t=g.ttb||{};
@@ -162,7 +188,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  sheet(`${g.banner?`<img src="${e(g.banner)}" alt="Portada" referrerpolicy="no-referrer" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:10px">`:g.cover?`<img src="${e(g.cover)}" alt="Portada" referrerpolicy="no-referrer" style="width:100%;height:230px;object-fit:contain;background:var(--s2);border-radius:12px;margin-bottom:10px">`:""}<div class="row sp"><h1>${e(g.title)}</h1><button onclick="closeSheet()">✕</button></div>
  <div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")} · ${g.format} · ⏱ ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>
  ${g.challenge?`<span class="tag" style="margin-top:6px">🎯 ${e(g.challenge)}</span>`:""}
- ${g.versions?.length>1?`<label>Versión</label><select onchange="setVersion('${id}',this.value)">${g.versions.map((v,k)=>`<option value="${k}" ${k===(g.version||0)?"selected":""}>${e(v.title)}${v.released?" ("+v.released.slice(0,4)+")":""}</option>`).join("")}</select>`:""}
+ ${g.versions?.length>1?`<label>Versión</label><select onchange="setVersion('${id}',this.value)">${g.versions.map((v,k)=>`<option value="${k}" ${k===(g.version||0)?"selected":""}>${vLabel(v)}</option>`).join("")}</select>`:""}
  <label>Estado</label><select onchange="setStatus('${id}',this.value)">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${g.status===k?"selected":""}>${v}</option>`).join("")}</select>
  <div class="row" style="margin-top:8px;flex-wrap:wrap">${g.status==="done"||g.status==="drop"?`<button onclick="replay('${id}')">🔁 Rejugar</button>`:""}<button onclick="editGame('${id}')">✏️ Editar</button><button onclick="setCover('${id}')">🖼 Portada</button></div>
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fd(rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
@@ -170,18 +196,18 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ${g.tags?.length?`<h2>Etiquetas</h2>${g.tags.map(x=>`<span class="tag">${e(x)}</span>`).join("")}`:""}
  ${g.summary?`<h2>Resumen</h2><div class="mu">${e(g.summary)}</div>`:""}
  ${g.similar?.length?`<h2>Juegos similares</h2>${g.similar.map(x=>`<span class="tag">${e(x)}</span>`).join("")}`:""}
- <h2>Objetivos</h2>${gl.length?`<div class="mu">${Math.round(dn/gl.length*100)}% (${dn}/${gl.length}) · Objetivos personalizados: no son logros verificados automáticamente.</div>`:`<div class="mu">Sin objetivos: no se muestra porcentaje.</div>`}
+ <h2>Logros</h2>${gl.length?`<div class="mu">${Math.round(dn/gl.length*100)}% (${dn}/${gl.length}) · Logros personalizados: no se verifican automáticamente.</div>`:`<div class="mu">Sin logros: no se muestra porcentaje.</div>`}
  ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${e(x.name)}</span><button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
- <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo objetivo"><button onclick="addGoal('${id}')">Añadir</button></div>
+ <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo logro"><button onclick="addGoal('${id}')">Añadir</button></div>
  <h2>Notas</h2><textarea onchange="G('${id}').notes=this.value;save()">${e(g.notes)}</textarea>
  <h2>Sesiones (${ss.length})</h2>${ss.map(s=>`<div class="mu">${comps(g).includes(s.date)?"⭐ ":""}${fd(s.date)} - ${fm(s.min)}${s.note?" - "+e(s.note):""}${s.run>1?" (Partida "+s.run+")":""}</div>`).join("")||`<div class="mu">Ninguna</div>`}
  <button class="dng" style="margin-top:16px" onclick="delGame('${id}')">Eliminar juego</button>`)}
 function editGame(id){const g=G(id);sheet(`<div class="row sp"><h1>Editar juego</h1><button onclick="closeSheet()">✕</button></div>
  <label>Nombre</label><input id="et" value="${e(g.title)}"><label>Plataforma</label><select id="ep2">${platOpts(pl(g),g.platform)}</select>
  <label>Géneros</label>${gchips((g.genre||"").split(",").map(z=>z.trim()).filter(Boolean))}<label>Formato</label><select id="ef"><option ${g.format==="Digital"?"selected":""}>Digital</option><option ${g.format==="Físico"?"selected":""}>Físico</option></select>
- <label>Reto o modo</label><input id="ec" list="chl" value="${e(g.challenge||"")}"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
+ ${ttbInputs(g.ttb)}<label>Reto o modo</label><input id="ec" list="chl" value="${e(g.challenge||"")}"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveEdit('${id}')">Guardar cambios</button>`)}
-function saveEdit(id){const g=G(id),t=$("#et").value.trim().slice(0,120);if(!t)return alert("El nombre no puede estar vacío");g.title=t;g.platform=$("#ep2").value;g.genre=[...window._gs].join(", ");g.format=$("#ef").value;g.challenge=$("#ec").value.trim().slice(0,40);save();openGame(id);R()}
+function saveEdit(id){const g=G(id),t=$("#et").value.trim().slice(0,120);if(!t)return alert("El nombre no puede estar vacío");g.title=t;g.platform=$("#ep2").value;g.genre=[...window._gs].join(", ");g.format=$("#ef").value;g.challenge=$("#ec").value.trim().slice(0,40);g.ttb=readTtb();save();openGame(id);R()}
 function setVersion(id,k){const g=G(id),v=g.versions[k];g.version=+k;if(v.cover)g.cover=v.cover;if(v.released)g.released=v.released;if(v.platforms.length&&!v.platforms.includes(g.platform))g.platform=v.platforms[0];save();openGame(id);R()}
 async function getBanner(id){const g=G(id);if(!g||g.banner||g.bannerTried)return;g.bannerTried=true;save();const nz=x=>x.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
  try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>x.background_image&&nz(x.name)===nz(g.title));
@@ -196,7 +222,7 @@ function rate(id){const r=G(id).rating||{};sheet(`<h1>Valoración (opcional)</h1
 function saveRate(id,skip){const g=G(id),d=$("#rd").value;
  if(skip){if(g.rating)g.rating={...g.rating,date:d}}else{let n=parseInt($("#rs").value);n=n>=1&&n<=10?n:null;g.rating={date:d,score:n,review:$("#rr").value.slice(0,2000)}}
  if(d){const c=comps(g),k=c.indexOf(g.doneDate);if(k>=0)c[k]=d;else c.push(d);g.completions=[...new Set(c)].sort();g.doneDate=g.completions[g.completions.length-1]}save();openGame(id);R()}
-function goal(id,i){const x=G(id).goals[i];x.done=!x.done;save();openGame(id)}
+function goal(id,i){const x=G(id).goals[i];x.done=!x.done;x.at=x.done?today():"";save();openGame(id)}
 function delGoal(id,i){G(id).goals.splice(i,1);save();openGame(id)}
 function addGoal(id){const n=$("#ng").value.trim();if(n){G(id).goals.push({name:n.slice(0,100),done:false});save();openGame(id)}}
 function delGame(id){if(!confirm("¿Eliminar el juego y sus sesiones?"))return;S.games=S.games.filter(g=>g.id!==id);S.sessions=S.sessions.filter(s=>s.gameId!==id);save();closeSheet();R()}
@@ -227,11 +253,11 @@ function saveSession(){const m=(parseInt($("#lh").value)||0)*60+(parseInt($("#lm
  g.platform=p;S.pref=p;S.lastLog=g.id;save();closeSheet();R()}
 function vDiary(){const{y,m,sel}=cal,dm=stats().dm,cd=new Set(S.games.flatMap(g=>comps(g))),f=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate();
  let c="";for(let i=0;i<f;i++)c+="<span></span>";
- for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));c+=`<button class="${dm[k]?"dot":""} ${cd.has(k)?"gold":""} ${k===sel?"sel":""}" onclick="cal.sel='${k}';R()">${d}</button>`}
+ for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));c+=`<button class="${dm[k]?"dot":""} ${cd.has(k)?"gold":""} ${k===sel?"sel":""}" onclick="if(cal.sel==='${k}')openLog('${k}');else{cal.sel='${k}';R()}">${d}</button>`}
  const ss=S.sessions.filter(s=>s.date===sel),tot=ss.reduce((a,s)=>a+s.min,0);
- return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1>${new Date(y,m,1).toLocaleDateString("es",{month:"long",year:"numeric"})}</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
+ return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1 style="cursor:pointer;text-align:center" onclick="pickMonth()">${new Date(y,m,1).toLocaleDateString("es",{month:"long",year:"numeric"})} ▾</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
  <div class="cal mu" style="margin:8px 0">${["L","M","X","J","V","S","D"].map(d=>`<span>${d}</span>`).join("")}</div><div class="cal">${c}</div>
- <div class="row sp"><h2 style="margin:20px 0 10px">${sel.split("-").reverse().join("/")} · ${fm(tot)}</h2><button style="min-height:36px" onclick="cal.y=new Date().getFullYear();cal.m=new Date().getMonth();cal.sel=today();R()">Hoy</button></div>
+ <h2 style="margin:20px 0 10px">${sel.split("-").reverse().join("/")} · ${fm(tot)}</h2>
  ${S.games.filter(g=>comps(g).includes(sel)).map(g=>`<div class="card row" style="border-color:#f5c518">${th(g,40,54)}<b style="flex:1">🏁 Completaste ${e(g.title)}</b></div>`).join("")}${ss.map(s=>{const g=G(s.gameId);return`<div class="card row" style="cursor:pointer" onclick="editS('${s.id}')">${th(g,52,70)}<div style="min-width:0"><b>${g&&comps(g).includes(s.date)?"⭐ ":""}${e(g?.title||"?")}</b><div class="mu">${e(s.platform||"—")} · ${fm(s.min)}</div>${s.note?`<div class="mu">${e(s.note)}</div>`:""}</div></div>`}).join("")||`<div class="empty">Sin sesiones este día.</div>`}
  <button class="pri" style="width:100%" onclick="openLog(cal.sel)">+ Registrar sesión el ${sel.split("-").reverse().join("/")}</button>`}
 function cm(d){cal.m+=d;if(cal.m<0){cal.m=11;cal.y--}if(cal.m>11){cal.m=0;cal.y++}R()}
@@ -244,13 +270,13 @@ function updS(id){const s=S.sessions.find(x=>x.id===id),m=(parseInt($("#eh").val
 function delS(id){if(confirm("¿Eliminar esta sesión? XP y horas se recalcularán.")){S.sessions=S.sessions.filter(x=>x.id!==id);save();closeSheet();R()}}
 function vProf(){const s=stats(),tot=S.sessions.reduce((a,x)=>a+x.min,0),yr=String(new Date().getFullYear()),
  top=S.games.map(g=>[g,gm(g.id)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,3),gen={},plt={};
- S.sessions.forEach(x=>{const g=G(x.gameId);(g?.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(z=>gen[z]=(gen[z]||0)+x.min);if(x.platform)plt[x.platform]=(plt[x.platform]||0)+x.min});
+ S.sessions.forEach(x=>{const g=G(x.gameId);if(g?.status==="wish")return;(g?.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(z=>gen[z]=(gen[z]||0)+x.min);if(x.platform)plt[x.platform]=(plt[x.platform]||0)+x.min});
  const inYr=g=>{const c=comps(g);return c.length?c.some(d=>d.startsWith(yr)):(g.doneDate||g.rating?.date||"").startsWith(yr)},best=S.games.filter(g=>g.rating?.score&&inYr(g)).sort((a,b)=>b.rating.score-a.rating.score).slice(0,5);
  const per=[["week","Esta semana"],["month","Este mes"],["year","Este año"]].map(([p,l])=>{const r=range(p),t=r.reduce((a,x)=>a+x.min,0);return`<div class="card"><b>${l}</b><div class="stats" style="grid-template-columns:1.8fr 1fr 1fr 1fr"><div><b style="font-size:17px">${H(t)}</b><span>tiempo</span></div><div><b>${r.length}</b><span>sesiones</span></div><div><b>${new Set(r.map(x=>x.gameId)).size}</b><span>juegos</span></div><div><b>${new Set(r.map(x=>x.date)).size}</b><span>días</span></div></div></div>`}).join("");
  return`<div class="card row"><label style="margin:0;cursor:pointer;flex:none">${S.user.avatar?`<img src="${S.user.avatar}" alt="Avatar" style="width:64px;height:64px;border-radius:50%;object-fit:cover">`:`<div style="font-size:34px;width:64px;height:64px;display:grid;place-items:center;border-radius:50%;background:var(--s2)">🎮</div>`}<input type="file" accept="image/*" hidden onchange="setAvatar(this)"></label><div style="flex:1"><input value="${e(S.user.name)}" onchange="S.user.name=this.value.slice(0,30)||'Jugador';save()"><div class="mu">Toca la foto para cambiarla · Nivel ${s.lv} · ${s.xp}/${s.hi} XP</div></div></div>${bar(s.xp-s.lo,s.hi-s.lo)}
  <h2>Estadísticas</h2><div class="card">🔥 Racha: ${s.cur} d · Récord: ${s.rec} d<br>⏱ ${H(tot)} · ${S.sessions.length} sesiones · ${S.games.filter(g=>g.status==="done").length} completados</div>${per}
- <h2>Resumen anual</h2><div class="row" style="flex-wrap:wrap">${[...new Set([yr,...S.sessions.map(x=>x.date.slice(0,4))])].sort().reverse().map(y=>`<button class="pri" onclick="recap('${y}')">🎞️ ${y}</button>`).join("")}</div>${pie(gen,"Géneros más jugados","gen")}${pie(plt,"Plataformas más jugadas","plt")}${pie(S.games.reduce((o,g)=>(o[g.format||"Digital"]=(o[g.format||"Digital"]||0)+1,o),{}),"Juegos físicos y digitales","fmt")}
- ${evo()}${bdg()}<h2>Mejor valorados de ${yr}</h2>${best.map(g=>`<div class="card row">${th(g,40,54)}<b style="flex:1">${e(g.title)}<div class="mu" style="font-weight:400">🏁 ${fd(comps(g).filter(d=>d.startsWith(yr)).pop()||g.doneDate)}</div></b><span>⭐ ${g.rating.score}</span></div>`).join("")||`<div class="empty">Completa y puntúa juegos este año para verlos aquí.</div>`}
+ <h2>Resumen anual</h2><div class="row" style="flex-wrap:wrap">${[...new Set([yr,...S.sessions.map(x=>x.date.slice(0,4))])].sort().reverse().map(y=>`<button class="pri" onclick="recap('${y}')">🎞️ ${y}</button>`).join("")}</div>${pie(gen,"Géneros más jugados","gen")}${pie(plt,"Plataformas más jugadas","plt")}${pie(S.games.filter(g=>g.status!=="wish").reduce((o,g)=>(o[g.format||"Digital"]=(o[g.format||"Digital"]||0)+1,o),{}),"Juegos físicos y digitales","fmt")}
+ ${evo()}${bdg()}${logros()}<h2>Mejor valorados de ${yr}</h2>${best.map(g=>`<div class="card row">${th(g,40,54)}<b style="flex:1">${e(g.title)}<div class="mu" style="font-weight:400">🏁 ${fd(comps(g).filter(d=>d.startsWith(yr)).pop()||g.doneDate)}</div></b><span>⭐ ${g.rating.score}</span></div>`).join("")||`<div class="empty">Completa y puntúa juegos este año para verlos aquí.</div>`}
  <h2>Más jugados</h2>${top.map(([g,m])=>`<div class="card row">${th(g,44,58)}<b style="flex:1">${e(g.title)}</b><span class="mu">⏱ ${H(m)}</span></div>`).join("")||`<div class="empty">Registra sesiones para ver tu top.</div>`}
  <h2>Ajustes</h2><div class="card">
  <div class="mu" style="margin-top:12px">Datos guardados solo en este navegador (modo local).</div>
@@ -263,9 +289,9 @@ function pie(o,t,kind){const a=Object.entries(o).sort((x,y)=>y[1]-x[1]).slice(0,
  return`<h2>${t}</h2><div class="card row"><div class="pie" style="background:conic-gradient(${g});cursor:pointer" onclick="pieClick(event,'${kind}')"></div><div style="flex:1;min-width:0">${a.map(([k,v],i)=>`<div class="row" style="font-size:13px;cursor:pointer;padding:4px 0" onclick="pieShow('${kind}',${i})"><i style="width:10px;height:10px;border-radius:50%;background:${PC[i]};flex:none"></i><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(k)}</span><span class="mu">${Math.round(v/sum*100)}%</span></div>`).join("")}</div></div><div class="mu" style="margin-top:-4px;margin-bottom:8px">Toca un trozo para ver los juegos.</div>`}
 function pieClick(ev,kind){const p=window._pie?.[kind];if(!p)return;const b=ev.currentTarget.getBoundingClientRect(),dx=ev.clientX-(b.left+b.width/2),dy=ev.clientY-(b.top+b.height/2);let f=Math.atan2(dx,-dy)/(2*Math.PI);if(f<0)f+=1;const i=p.f.findIndex(x=>f<=x);pieShow(kind,i<0?p.f.length-1:i)}
 function pieShow(kind,i){const lab=window._pie[kind].a[i];let rows=[];
- if(kind==="gen")rows=S.games.filter(g=>(g.genre||"").split(",").map(z=>z.trim()).includes(lab)).map(g=>[g,gm(g.id)]).filter(x=>x[1]>0);
- else if(kind==="plt"){const m={};S.sessions.filter(x=>x.platform===lab).forEach(x=>m[x.gameId]=(m[x.gameId]||0)+x.min);rows=Object.entries(m).map(([id,v])=>[G(id),v]).filter(x=>x[0])}
- else rows=S.games.filter(g=>(g.format||"Digital")===lab).map(g=>[g,gm(g.id)]);
+ if(kind==="gen")rows=S.games.filter(g=>g.status!=="wish"&&(g.genre||"").split(",").map(z=>z.trim()).includes(lab)).map(g=>[g,gm(g.id)]).filter(x=>x[1]>0);
+ else if(kind==="plt"){const m={};S.sessions.filter(x=>x.platform===lab).forEach(x=>m[x.gameId]=(m[x.gameId]||0)+x.min);rows=Object.entries(m).map(([id,v])=>[G(id),v]).filter(x=>x[0]&&x[0].status!=="wish")}
+ else rows=S.games.filter(g=>g.status!=="wish"&&(g.format||"Digital")===lab).map(g=>[g,gm(g.id)]);
  rows.sort((a,b)=>b[1]-a[1]);
  sheet(`<div class="row sp"><h1>${e(lab)}</h1><button onclick="closeSheet()">✕</button></div><div class="mu" style="margin-bottom:10px">${rows.length} ${rows.length===1?"juego":"juegos"}</div>${rows.map(([g,m])=>`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<b style="flex:1">${e(g.title)}</b><span class="mu">⏱ ${H(m)}</span></div>`).join("")}`)}
 function rcTap(ev){const o=window._rc;if(!o)return;const b=ev.currentTarget.getBoundingClientRect();if((ev.clientX-b.left)/b.width<.3)o.i=Math.max(0,o.i-1);else if(o.i>=o.sl.length-1)return $("#rc").style.display="none";else o.i++;rcShow()}
@@ -318,6 +344,18 @@ function catRender(){const m=S.catMode||"off",of=CALL.filter(g=>g.official!==fal
  const body=m==="all"?`${of.map((g,i)=>row(g,i)).join("")}${un.length?`<h2>No oficiales</h2>`:""}${un.map((g,i)=>row(g,i+of.length)).join("")}`:CR.map((g,i)=>row(g,i)).join("");
  $("#cr").innerHTML=tabs+(body||`<div class="empty">Sin resultados con este filtro.</div>`)}
 function lastS(g){return S.sessions.filter(x=>x.gameId===g.id).reduce((m,x)=>x.date>m?x.date:m,"")}
+function pickMonth(){const y0=new Date().getFullYear(),MN=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],ys=[];for(let y=y0+1;y>=2000;y--)ys.push(y);
+ sheet(`<div class="row sp"><h1>Elegir mes</h1><button onclick="closeSheet()">✕</button></div><label>Año</label><select onchange="cal.y=+this.value;pickMonth()">${ys.map(y=>`<option ${y===cal.y?"selected":""}>${y}</option>`).join("")}</select><div class="grid" style="margin-top:14px">${MN.map((n,i)=>`<button class="${i===cal.m?"pri":""}" onclick="pickM(${i})">${n}</button>`).join("")}</div>`)}
+function pickM(i){const n=new Date();cal.m=i;cal.sel=cal.y===n.getFullYear()&&i===n.getMonth()?today():ymd(new Date(cal.y,i,1));closeSheet();R()}
+function vLabel(v){return e(v.title)+(v.released?" ("+v.released.slice(0,4)+")":"")+(v.platforms?.length?" · "+e(v.platforms.slice(0,2).join(", ")):"")}
+function ttbInputs(t){t=t||{};return`<label>Duración estimada en horas (opcional)</label><div class="row">${[["td1","Rápida",t.fast],["td2","Normal",t.main],["td3","100 %",t.full]].map(([id,p,v])=>`<input id="${id}" type="number" min="0" step="0.5" inputmode="decimal" placeholder="${p}" value="${v??""}">`).join("")}</div>`}
+function readTtb(){const f=id=>{const v=parseFloat($("#"+id)?.value);return v>0?v:null},t={fast:f("td1"),main:f("td2"),full:f("td3")};return t.fast||t.main||t.full?t:null}
+function logros(){const gs=S.games.filter(g=>g.goals?.length&&g.status!=="wish"),all=gs.flatMap(g=>g.goals.map(x=>({g,x}))),done=all.filter(a=>a.x.done);
+ if(!all.length)return`<h2>Logros</h2><div class="empty">Añade logros a tus juegos desde su ficha y verás aquí tu progreso.</div>`;
+ const rec=done.filter(a=>a.x.at).sort((a,b)=>b.x.at.localeCompare(a.x.at)).slice(0,5);
+ return`<h2>Logros</h2><div class="card"><div class="row sp"><b>${done.length} de ${all.length} conseguidos</b><span class="mu">${Math.round(done.length/all.length*100)}%</span></div>${bar(done.length,all.length)}<div class="mu" style="margin-top:8px">Son logros personalizados: no se verifican automáticamente.</div></div>
+ ${rec.length?`<div class="mu" style="margin:6px 0">Últimos conseguidos</div>${rec.map(a=>`<div class="card row" style="cursor:pointer" onclick="openGame('${a.g.id}')">${th(a.g,36,48)}<div style="flex:1;min-width:0"><b>🏆 ${e(a.x.name)}</b><div class="mu">${e(a.g.title)} · ${fd(a.x.at)}</div></div></div>`).join("")}`:""}
+ <div class="mu" style="margin:10px 0 6px">Por juego</div>${[...gs].sort((a,b)=>b.goals.filter(x=>x.done).length/b.goals.length-a.goals.filter(x=>x.done).length/a.goals.length).map(g=>{const d=g.goals.filter(x=>x.done).length;return`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,40,54)}<div style="flex:1;min-width:0"><b>${e(g.title)}</b><div class="row sp mu"><span>${d}/${g.goals.length} logros</span><span>${Math.round(d/g.goals.length*100)}%</span></div>${bar(d,g.goals.length)}</div></div>`}).join("")}`}
 function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];

@@ -49,7 +49,7 @@ exports.handler = async (event) => {
   recent.push(now); hits.set(ip, recent);
   if (hits.size > 2000) hits.clear();
 
-  const ck = "v3:" + q.toLowerCase(), c = cache.get(ck);
+  const ck = "v4:" + q.toLowerCase(), c = cache.get(ck);
   if (c && now - c.t < 864e5) return out(200, c.b);
 
   try {
@@ -57,6 +57,7 @@ exports.handler = async (event) => {
     (await igdb("games", `search "${q}"; fields ${FIELDS}; where version_parent = null; limit 100;`)).forEach(g => pool.set(g.id, g));
     // Nombres alternativos (títulos en español u otros idiomas), si IGDB los tiene registrados
     try { (await igdb("games", `fields ${FIELDS}; where alternative_names.name ~ *"${q}"* & version_parent = null; limit 50;`)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ }
+    const main = [...pool.keys()]; // cada juego encontrado sale por separado
     // Trae también las versiones relacionadas (remakes, remasters, ports) que no salieron en la búsqueda
     const miss = new Set();
     pool.forEach(g => rel(g).forEach(i => pool.has(i) || miss.add(i)));
@@ -81,18 +82,18 @@ exports.handler = async (event) => {
     const groups = new Map();
     pool.forEach(g => { const r = find(g.id); if (!groups.has(r)) groups.set(r, []); groups.get(r).push(g); });
     const ql = q.toLowerCase();
-    const results = [...groups.values()].map(list => {
-      const p = [...list].sort((a, b) => a.name.length - b.name.length || (b.total_rating_count || 0) - (a.total_rating_count || 0))[0];
-      const dates = list.map(iso).filter(Boolean).sort();
-      const alt = list.flatMap(g => names(g.alternative_names)).find(n => n.toLowerCase().includes(ql) && !p.name.toLowerCase().includes(ql)) || "";
+    const results = main.map(id => {
+      const g = pool.get(id), list = groups.get(find(id)) || [g];
+      const alt = names(g.alternative_names).find(n => n.toLowerCase().includes(ql) && !g.name.toLowerCase().includes(ql)) || "";
       return {
-        id: p.id, title: p.name, alt, released: dates[0] || "", cover: cov(p) || list.map(cov).find(Boolean) || "",
-        platforms: [...new Set(list.flatMap(g => names(g.platforms)))], genres: names(p.genres),
-        tags: [...names(p.game_modes), ...names(p.player_perspectives), ...names(p.themes)],
-        summary: p.summary || "", similar: names(p.similar_games).slice(0, 8), ttb: ttb[p.id] || null,
-        official: list.some(g => (g.involved_companies || []).some(c => c.publisher)),
-        pop: Math.max(...list.map(g => g.total_rating_count || 0)),
-        versions: list.length > 1 ? list.map(g => ({ title: g.name, released: iso(g), cover: cov(g), platforms: names(g.platforms) }))
+        id: g.id, title: g.name, alt, released: iso(g), cover: cov(g) || list.map(cov).find(Boolean) || "",
+        platforms: names(g.platforms), genres: names(g.genres),
+        tags: [...names(g.game_modes), ...names(g.player_perspectives), ...names(g.themes)],
+        summary: g.summary || "", similar: names(g.similar_games).slice(0, 8), ttb: ttb[g.id] || null,
+        official: (g.involved_companies || []).some(c => c.publisher),
+        pop: g.total_rating_count || 0,
+        // versiones relacionadas (remakes, remasters, ports...) para elegir dentro del juego
+        versions: list.length > 1 ? list.map(x => ({ title: x.name, released: iso(x), cover: cov(x), platforms: names(x.platforms), self: x.id === g.id }))
           .sort((a, b) => (a.released || "9").localeCompare(b.released || "9")) : []
       };
     }).sort((a, b) => b.pop - a.pop).slice(0, 60)
