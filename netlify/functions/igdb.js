@@ -28,7 +28,7 @@ const names = a => (a || []).map(x => x.name).filter(Boolean);
 const hrs = s => (s ? Math.round((s / 3600) * 10) / 10 : null);
 const iso = g => (g.first_release_date ? new Date(g.first_release_date * 1000).toISOString().slice(0, 10) : "");
 const cov = g => (g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` : "");
-const FIELDS = "name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name,involved_companies.publisher,alternative_names.name";
+const FIELDS = "name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name,involved_companies.publisher,alternative_names.name,version_parent.name";
 
 exports.handler = async (event) => {
   const q = (event.queryStringParameters?.q || "").trim().slice(0, 80).replace(/["\\*]/g, "");
@@ -42,14 +42,19 @@ exports.handler = async (event) => {
   recent.push(now); hits.set(ip, recent);
   if (hits.size > 2000) hits.clear();
 
-  const ck = "v5:" + q.toLowerCase(), c = cache.get(ck);
+  const ck = "v6:" + q.toLowerCase(), c = cache.get(ck);
   if (c && now - c.t < 864e5) return out(200, c.b);
 
   try {
     const pool = new Map();
-    (await igdb("games", `search "${q}"; fields ${FIELDS}; where version_parent = null; limit 100;`)).forEach(g => pool.set(g.id, g));
+    const page = off => igdb("games", `search "${q}"; fields ${FIELDS}; limit 100; offset ${off};`);
+    (await page(0)).forEach(g => pool.set(g.id, g));
+    (await Promise.all([100, 200].map(o => page(o).catch(() => [])))).flat().forEach(g => pool.set(g.id, g));
     // Nombres alternativos (títulos en español u otros idiomas), si IGDB los tiene registrados
-    try { (await igdb("games", `fields ${FIELDS}; where alternative_names.name ~ *"${q}"* & version_parent = null; limit 50;`)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ }
+    try { (await igdb("games", `fields ${FIELDS}; where alternative_names.name ~ *"${q}"*; limit 50;`)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ }
+    // Descarta solo las "ediciones" de otro juego (p. ej. "X Deluxe Edition"); versiones con nombre propio (Let's Go Pikachu / Eevee) se mantienen
+    const keep = g => { const pn = (g.version_parent?.name || "").toLowerCase(); return !pn || !g.name.toLowerCase().includes(pn); };
+    [...pool.values()].forEach(g => keep(g) || pool.delete(g.id));
     const ids = [...pool.keys()];
     let ttb = {};
     if (ids.length) {
