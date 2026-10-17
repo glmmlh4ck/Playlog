@@ -18,7 +18,7 @@ exports.handler = async (event) => {
   if (hits.size > 2000) hits.clear();
 
   // Caché 24 h para no gastar peticiones con búsquedas repetidas
-  const ck = q.toLowerCase(), c = cache.get(ck);
+  const ck = "v2:" + q.toLowerCase(), c = cache.get(ck);
   if (c && now - c.t < 864e5) return out(200, c.b, { "X-Cache": "HIT" });
 
   try {
@@ -26,7 +26,7 @@ exports.handler = async (event) => {
     if (!r.ok) return out(502, { error: "RAWG respondió " + r.status });
     const d = await r.json();
     const body = JSON.stringify({ results: (d.results || []).map(g => ({
-      id: g.id, name: g.name, released: g.released, background_image: g.background_image,
+      id: g.id, name: g.name, released: g.released, background_image: g.background_image, metacritic: g.metacritic ?? null,
       platforms: (g.platforms || []).map(p => ({ platform: { name: p.platform.name } })),
       genres: (g.genres || []).map(x => ({ name: x.name })) })) });
     cache.set(ck, { t: now, b: body });
