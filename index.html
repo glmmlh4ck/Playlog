@@ -63,6 +63,51 @@ summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 .bd.on{opacity:1;border-color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}.bd b{display:block;font-size:12px;line-height:1.2;margin-top:2px}.bd span{display:block;font-size:10px;color:var(--mu)}
 .cv .fan{position:absolute;top:6px;left:6px;z-index:1;background:#000b;border-radius:8px;padding:2px 7px;font-size:10px;font-style:normal;font-weight:700}
 .cal .gold{box-shadow:inset 0 0 0 2px #f5c518;color:#f5c518;font-weight:700}.cal .gold:before{content:"★";position:absolute;top:1px;right:4px;font-size:10px}
+/* ===== Pantalla Añadir juego ===== */
+.ag-top{display:flex;gap:16px;align-items:stretch;margin-top:14px}
+.ag-cv{flex:none;width:132px;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--s2);border:1px solid var(--bd)}
+.ag-cv img,.ag-sim img,.ag-shots img{display:block;width:100%;height:100%;object-fit:cover}
+.ph{width:100%;height:100%;display:grid;place-items:center;font-size:32px;background:var(--s2)}
+.ag-info{display:flex;flex-direction:column;justify-content:center;gap:8px;min-width:0}
+.ag-info h1{font-size:22px;line-height:1.2;overflow-wrap:anywhere}
+.ag-dev{color:var(--ac2);font-weight:600;font-size:14px}.ag-date{color:var(--mu);font-size:14px}
+.ag-desc{margin-top:14px;font-size:14px;line-height:1.5;max-height:200px;overflow-y:auto}
+.ag-sc{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ag-sc .card{margin:0;text-align:center}
+.ag-dur{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ag-dur div{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:12px 4px;text-align:center}.ag-dur b{display:block;font-size:18px}.ag-dur span{font-size:11px;color:var(--mu)}
+.ag-trk{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.ag-trk button{width:100%;padding:10px 2px;font-size:12px;min-height:46px;text-align:center}.ag-trk button:hover{background:linear-gradient(135deg,#7c3aed,#9d6bff);border-color:transparent}
+.ag-shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ag-shots img{aspect-ratio:16/9;border-radius:12px;border:1px solid var(--bd)}
+.ag-sim{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.ag-sim div{cursor:pointer;min-width:0}.ag-sim img,.ag-sim .ph{aspect-ratio:3/4;height:auto;border-radius:12px;border:1px solid var(--bd)}.ag-sim span{display:block;font-size:11px;margin-top:4px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ===== Escritorio (PC): barra lateral + contenido ancho ===== */
+@media(min-width:900px){
+body{display:block;background:var(--bg);-webkit-user-select:auto;user-select:auto;font-size:16px}
+#app{width:100%;max-width:none;height:100dvh;margin:0;border-radius:0;border:0;box-shadow:none;flex-direction:row;overflow:hidden;background:radial-gradient(80% 55% at 60% -10%,#2d1b5e 0%,transparent 65%)}
+nav{order:-1;flex:none;width:230px;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:6px;padding:26px 14px;border-top:0;border-right:1px solid var(--bd);overflow-y:auto}
+nav:before{content:"🎮 Playlog";order:-2;font-size:22px;font-weight:700;letter-spacing:-.02em;padding:0 14px 20px}
+nav button{flex-direction:row;justify-content:flex-start;gap:12px;width:100%;min-width:0;min-height:46px;padding:10px 14px;font-size:15px;border-radius:12px}
+nav button:hover{background:#ffffff0d}
+nav button.on{background:#8b5cf626}
+nav button.on:after{display:none}
+nav .plus{order:-1;width:100%;height:48px;gap:8px;margin:0 0 14px;font-size:22px;font-weight:600;justify-content:center;border-radius:14px;box-shadow:0 4px 14px #7c3aed66}
+nav .plus:after{content:"Añadir";font-size:15px}
+nav .plus:hover{background:linear-gradient(135deg,#8b4cf0,#b08cff)}
+#main{padding:32px clamp(24px,4vw,64px) 48px}
+#main>*{max-width:1040px;margin-left:auto;margin-right:auto}
+h1{font-size:30px}
+.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:22px 16px}
+.tabs{display:flex;flex-wrap:wrap}
+.tabs button{flex:0 0 auto;width:auto;padding:6px 22px}
+.cal button{min-height:56px}
+#sheet>div{max-width:640px;max-height:90%;border-radius:24px;padding-top:22px}
+#sheet>div:before{display:none}
+#main::-webkit-scrollbar,#sheet>div::-webkit-scrollbar{width:10px}
+#main::-webkit-scrollbar-thumb,#sheet>div::-webkit-scrollbar-thumb{background:#ffffff22;border-radius:9px;border:2px solid transparent;background-clip:padding-box}
+}
+@media(hover:hover){
+.poster .cv{transition:transform .15s,border-color .15s}
+.poster:hover .cv{transform:translateY(-4px);border-color:var(--ac)}
+.card[onclick]:hover{border-color:#8b5cf666}
+.pri:hover{filter:brightness(1.12)}
+}
 </style></head><body>
 <div id="app"><div id="main"></div>
 <nav id="nav"></nav></div><div id="rc" onclick="rcTap(event)"></div><div id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sc"></div></div>
@@ -161,14 +206,14 @@ function rbGo(){let m=rbMatch();const n=m.length;if(n>1)m=m.filter(g=>g.id!==win
  <button style="width:100%;margin-top:10px" onclick="rbAsk()">Cambiar respuestas</button>`)}
 function sheet(h){$("#sc").innerHTML=h;$("#sheet").style.display="flex"}
 function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)}
-function addGame(){addSheet(-1)}
+function addGame(){manualSheet(-1)}
 function pl(g){return g?.platforms||[]}
 function platOpts(list,sel){const k=[...new Set([sel,...list].filter(Boolean))],o=a=>a.map(p=>`<option ${p===sel?"selected":""}>${e(p)}</option>`).join(""),rest=PLAT.filter(p=>!k.includes(p));return k.length?`<optgroup label="Plataformas del juego">${o(k)}</optgroup><optgroup label="Otras plataformas">${o(rest)}</optgroup>`:o(PLAT)}
 function th(g,w,h){return g?.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:${w}px;height:${h}px;object-fit:cover;border-radius:10px;flex:none">`:`<div style="width:${w}px;height:${h}px;border-radius:10px;background:var(--s2);display:grid;place-items:center;flex:none">🎮</div>`}
 function gchips(a){window._gs=new Set(a);return`<div style="margin-top:4px">${[...GEN,...a.filter(x=>!GEN.includes(x))].map(x=>`<span class="chipb ${window._gs.has(x)?"on":""}" data-g="${e(x)}" onclick="tg(this)">${e(x)}</span>`).join("")}</div>`}
 function tg(el){const x=el.dataset.g;window._gs.has(x)?window._gs.delete(x):window._gs.add(x);el.classList.toggle("on")}
 function verChg(i){const b=CR[i],v=b.versions[$("#gv").value];$("#gp").innerHTML=platOpts([...v.platforms,...b.platforms],"")}
-function addSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.max(0,vs.findIndex(v=>v.self));
+function manualSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.max(0,vs.findIndex(v=>v.self));
  sheet(`<div class="row sp"><h1>Añadir juego</h1><button onclick="closeSheet()">✕</button></div>
  ${i>=0?`<div class="row">${th({cover:b.cover},56,74)}<b>${e(b.title)}</b></div>`:`<label>Título</label><input id="gt" autocapitalize="words"><label>Portada (enlace a una imagen, opcional)</label><input id="gcv" placeholder="https://…" inputmode="url">${ttbInputs(null)}`}
  
@@ -179,6 +224,24 @@ function addSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.max
  <label>Reto o modo (opcional)</label><input id="gc" list="chl" placeholder="Nuzlocke, Randomizer…"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
  <div id="gd" style="display:${lib.st==="done"?"block":"none"}"><label>Fecha de finalización</label><input type="date" id="gdt" value="${today()}"><label>Tiempo de juego total (horas, opcional)</label><input type="number" id="gh" min="0" step="0.5" inputmode="decimal"></div>
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveGame(${i})">Guardar</button>`)}
+function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math.round(x*60)):"—",
+ mine=S.games.filter(g=>g.title.toLowerCase()===b.title.toLowerCase()&&g.rating?.score),ps=mine.length?(mine.reduce((n,g)=>n+g.rating.score,0)/mine.length).toFixed(1).replace(/\.0$/,""):"—",
+ cs=b.critic,cc=cs==null?"var(--mu)":cs>=75?"#22c55e":cs>=50?"#eab308":"#ef4444",
+ big=(src,ph)=>src?`<img src="${e(src)}" alt="" referrerpolicy="no-referrer">`:`<div class="ph">${ph}</div>`;
+ sheet(`<div class="row sp"><button onclick="backToSearch()" aria-label="Volver">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
+ <div class="ag-top"><div class="ag-cv">${big(b.cover,"🎮")}</div><div class="ag-info"><h1>${e(b.title)}</h1><div class="ag-dev">${e(b.dev||"Desarrolladora desconocida")}</div><div class="ag-date">${b.released?e(fd(b.released)):"Sin fecha de salida"}</div></div></div>
+ <div class="card ag-desc">${b.summary?e(b.summary):`<span class="mu">Sin descripción.</span>`}${(b.genres||[]).length?`<div style="margin-top:10px">${b.genres.map(x=>`<span class="tag">${e(x)}</span>`).join("")}</div>`:""}</div>
+ <div class="ag-sc"><div class="card"><div class="mu">Playlog score</div><b style="font-size:30px">${ps}</b>${ps==="—"?"":`<span class="mu">/10</span>`}<div class="mu" style="font-size:11px">nota de usuarios</div></div><div class="card"><div class="mu">Critic score</div><b style="font-size:30px;color:${cc}">${cs??"—"}</b>${cs==null?"":`<span class="mu">/100</span>`}<div class="mu" style="font-size:11px">${b.criticN?"media de "+b.criticN+" críticas":"sin críticas"}</div></div></div>
+ <h2>Duración</h2><div class="ag-dur"><div><b>${hh(t.fast)}</b><span>Main story</span></div><div><b>${hh(t.main)}</b><span>Main + extras</span></div><div><b>${hh(t.full)}</b><span>Completionist</span></div></div>
+ <h2>Track this game</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button onclick="trackGame(${i},'${k}')">${l}</button>`).join("")}</div>
+ ${(b.screens||[]).length?`<h2>Screenshots</h2><div class="ag-shots">${b.screens.slice(0,2).map(u=>`<img src="${e(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join("")}</div>`:""}
+ ${(b.simG||[]).length?`<h2>Juegos similares</h2><div class="ag-sim">${b.simG.slice(0,4).map(x=>`<div data-n="${e(x.name)}" onclick="simGo(this.dataset.n)">${big(x.cover,"🎮")}<span>${e(x.name)}</span></div>`).join("")}</div>`:""}`)}
+function backToSearch(){catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender()}
+function simGo(n){catSearch();$("#cq").value=n;catGo()}
+function trackGame(i,st){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),p=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
+ const g={id,title:b.title,platform:p,platforms:pf,genre:(b.genres||[]).join(", "),format:"Digital",status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,dev:b.dev||"",critic:b.critic??null,run:1,challenge:"",versions:[],version:0,playAt:st==="playing"?Date.now():0,completions:[]};
+ if(st==="done"){g.doneDate=today();g.completions=[g.doneDate]}
+ S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
  const st=$("#gs").value,id=uid(),p=$("#gp").value,vs=b.versions||[],k=$("#gv")?+$("#gv").value:0,v=vs[k]||{},cu=$("#gcv")&&$("#gcv").value.trim().startsWith("http")?$("#gcv").value.trim():"";
  const g={id,title:t,platform:p,platforms:b.platforms||[],genre:[...window._gs].join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:v.cover||b.cover||cu,released:v.released||b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||(i<0?readTtb():null),run:1,challenge:($("#gc").value||"").trim().slice(0,40),versions:vs,version:k,playAt:st==="playing"?Date.now():0,completions:[]};
@@ -188,7 +251,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  const ss=S.sessions.filter(s=>s.gameId===id).sort((a,b)=>b.date.localeCompare(a.date)),rd=g.doneDate||g.rating?.date;
  sheet(`${g.banner?`<img src="${e(g.banner)}" alt="Portada" referrerpolicy="no-referrer" style="width:100%;height:170px;object-fit:cover;border-radius:12px;margin-bottom:10px">`:g.cover?`<img src="${e(g.cover)}" alt="Portada" referrerpolicy="no-referrer" style="width:100%;height:230px;object-fit:contain;background:var(--s2);border-radius:12px;margin-bottom:10px">`:""}<div class="row sp"><h1>${e(g.title)}</h1><button onclick="closeSheet()">✕</button></div>
  <div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")} · ${g.format} · ⏱ ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>
- ${metaTag(g)}${g.challenge?`<span class="tag" style="margin-top:6px">🎯 ${e(g.challenge)}</span>`:""}
+ ${g.challenge?`<span class="tag" style="margin-top:6px">🎯 ${e(g.challenge)}</span>`:""}
   <label>Estado</label><select onchange="setStatus('${id}',this.value)">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${g.status===k?"selected":""}>${v}</option>`).join("")}</select>
  <div class="row" style="margin-top:8px;flex-wrap:wrap">${g.status==="done"||g.status==="drop"?`<button onclick="replay('${id}')">🔁 Rejugar</button>`:""}<button onclick="editGame('${id}')">✏️ Editar</button><button onclick="addToList('${id}')">📋 Listas</button><button onclick="setCover('${id}')">🖼 Portada</button></div>
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fd(rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
@@ -209,11 +272,9 @@ function editGame(id){const g=G(id);sheet(`<div class="row sp"><h1>Editar juego<
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveEdit('${id}')">Guardar cambios</button>`)}
 function saveEdit(id){const g=G(id),t=$("#et").value.trim().slice(0,120);if(!t)return alert("El nombre no puede estar vacío");g.title=t;g.platform=$("#ep2").value;g.genre=[...window._gs].join(", ");g.format=$("#ef").value;g.challenge=$("#ec").value.trim().slice(0,40);g.ttb=readTtb()||(g.ttb?.src==="hltb"?null:g.ttb);save();openGame(id);R()}
 function setVersion(id,k){const g=G(id),v=g.versions[k];g.version=+k;if(v.cover)g.cover=v.cover;if(v.released)g.released=v.released;if(v.platforms.length&&!v.platforms.includes(g.platform))g.platform=v.platforms[0];save();openGame(id);R()}
-async function getBanner(id){const g=G(id);if(!g)return;const nb=!g.banner&&!g.bannerTried,nm=!g.metaTried;if(!nb&&!nm)return;g.bannerTried=true;g.metaTried=true;save();
- const nz=x=>x.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
- try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>nz(x.name)===nz(g.title));
- if(m){if(m.background_image&&!g.banner)g.banner=m.background_image;if(m.metacritic)g.meta=m.metacritic;save();if(window._og===id)openGame(id)}}catch(_){}}
-function metaTag(g){if(!g.meta)return"";const c=g.meta>=75?"#34d399":g.meta>=50?"#f59e0b":"#f87171";return`<span class="tag" style="margin-top:6px;background:${c}26;color:${c}">Metacritic ${g.meta} <small style="opacity:.7">(vía RAWG)</small></span>`}
+async function getBanner(id){const g=G(id);if(!g||g.banner||g.bannerTried)return;g.bannerTried=true;save();const nz=x=>x.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>x.background_image&&nz(x.name)===nz(g.title));
+ if(m){g.banner=m.background_image;save();if(window._og===id)openGame(id)}}catch(_){}}
 function imp(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.games)||!Array.isArray(d.sessions))throw 0;if(!confirm("Se reemplazarán tus datos actuales por los del archivo ("+d.games.length+" juegos, "+d.sessions.length+" sesiones). ¿Continuar?"))return;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);save();R()}catch(x){alert("El archivo no es un JSON válido de Playlog.")}};rd.readAsText(f);inp.value=""}
 function replay(id){const g=G(id);g.run=(g.run||1)+1;g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
 function setCover(id){const u=prompt("Pega el enlace (URL) de la imagen de portada:");if(u&&/^https?:\/\//.test(u.trim())){G(id).cover=u.trim();save();openGame(id);R()}}
@@ -446,10 +507,11 @@ function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(ne
 let CR=[];
 function catSearch(){
  sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
-async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
+async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
  const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("error "+r.status);return r.json()};
  try{let d;try{d=await get("/.netlify/functions/igdb?q="+encodeURIComponent(q))}catch(_){d=await get("/.netlify/functions/search?q="+encodeURIComponent(q))}
  CALL=(d.results||[]).map(g=>g.title?g:{title:g.name,released:g.released,cover:g.background_image,platforms:(g.platforms||[]).map(p=>p.platform.name),genres:(g.genres||[]).map(x=>x.name),tags:[],similar:[],summary:"",ttb:null,versions:[]}).sort((a,b)=>(b.released||"").localeCompare(a.released||""));catRender()}
  catch(x){$("#cr").innerHTML=catEmpty("No se pudo buscar ("+e(x.message)+"). Revisa tu conexión.")}}
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"){closeSheet();$("#rc").style.display="none"}});
 R();
 </script></body></html>
