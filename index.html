@@ -71,12 +71,13 @@ summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 .ag-info{display:flex;flex-direction:column;justify-content:center;gap:8px;min-width:0}
 .ag-info h1{font-size:22px;line-height:1.2;overflow-wrap:anywhere}
 .ag-dev{color:var(--ac2);font-weight:600;font-size:14px}.ag-date{color:var(--mu);font-size:14px}
-.ag-desc{margin-top:14px;font-size:14px;line-height:1.5;max-height:200px;overflow-y:auto}
+.ag-desc{margin-top:14px;font-size:14px;line-height:1.5}
 .ag-sc{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ag-sc .card{margin:0;text-align:center}
 .ag-dur{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ag-dur div{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:12px 4px;text-align:center}.ag-dur b{display:block;font-size:18px}.ag-dur span{font-size:11px;color:var(--mu)}
 .ag-trk{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.ag-trk button{width:100%;padding:10px 2px;font-size:12px;min-height:46px;text-align:center}.ag-trk button:hover{background:linear-gradient(135deg,#7c3aed,#9d6bff);border-color:transparent}
-.ag-shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ag-shots img{aspect-ratio:16/9;border-radius:12px;border:1px solid var(--bd)}
+.ag-shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ag-shots.odd img:first-child{grid-column:span 2}.ag-shots img{aspect-ratio:16/9;border-radius:12px;border:1px solid var(--bd)}
 .ag-sim{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.ag-sim div{cursor:pointer;min-width:0}.ag-sim img,.ag-sim .ph{aspect-ratio:3/4;height:auto;border-radius:12px;border:1px solid var(--bd)}.ag-sim span{display:block;font-size:11px;margin-top:4px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(min-width:900px){.ag-sim{grid-template-columns:repeat(5,1fr)}}
 /* ===== Escritorio (PC): barra lateral + contenido ancho ===== */
 @media(min-width:900px){
 body{display:block;background:var(--bg);-webkit-user-select:auto;user-select:auto;font-size:16px}
@@ -233,13 +234,21 @@ function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math
  <div class="card ag-desc">${b.summary?e(b.summary):`<span class="mu">Sin descripción.</span>`}${(b.genres||[]).length?`<div style="margin-top:10px">${b.genres.map(x=>`<span class="tag">${e(x)}</span>`).join("")}</div>`:""}</div>
  <div class="ag-sc"><div class="card"><div class="mu">Playlog score</div><b style="font-size:30px">${ps}</b>${ps==="—"?"":`<span class="mu">/10</span>`}<div class="mu" style="font-size:11px">nota de usuarios</div></div><div class="card"><div class="mu">Critic score</div><b style="font-size:30px;color:${cc}">${cs??"—"}</b>${cs==null?"":`<span class="mu">/100</span>`}<div class="mu" style="font-size:11px">${b.criticN?"media de "+b.criticN+" críticas":"sin críticas"}</div></div></div>
  <h2>Duración</h2><div class="ag-dur"><div><b>${hh(t.fast)}</b><span>Main story</span></div><div><b>${hh(t.main)}</b><span>Main + extras</span></div><div><b>${hh(t.full)}</b><span>Completionist</span></div></div>
- <h2>Track this game</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button onclick="trackGame(${i},'${k}')">${l}</button>`).join("")}</div>
- ${(b.screens||[]).length?`<h2>Screenshots</h2><div class="ag-shots">${b.screens.slice(0,2).map(u=>`<img src="${e(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join("")}</div>`:""}
- ${(b.simG||[]).length?`<h2>Juegos similares</h2><div class="ag-sim">${b.simG.slice(0,4).map(x=>`<div data-n="${e(x.name)}" onclick="simGo(this.dataset.n)">${big(x.cover,"🎮")}<span>${e(x.name)}</span></div>`).join("")}</div>`:""}`)}
+ <h2>Track this game</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button onclick="trackPick(${i},'${k}')">${l}</button>`).join("")}</div>
+ <div id="ag-det">${agDet(b)}</div>`);window._agB=b;agLoad(b)}
+function agDet(b){const sh=b.screens||[],sm=b.simG||[];
+ if(!b._det&&b.id&&b.dev!==undefined)return`<div class="mu" style="margin-top:22px">Cargando capturas y juegos similares…</div>`;
+ const big=(src)=>src?`<img src="${e(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`;
+ return(sh.length?`<h2>Screenshots</h2><div class="ag-shots${sh.length%2?" odd":""}">${sh.slice(0,5).map(u=>`<img src="${e(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join("")}</div>`:"")+(sm.length?`<h2>Juegos similares</h2><div class="ag-sim">${sm.slice(0,12).map(x=>`<div data-n="${e(x.name)}" onclick="simGo(this.dataset.n)">${big(x.cover)}<span>${e(x.name)}</span></div>`).join("")}</div>`:"")}
+async function agLoad(b){if(b._det||!b.id||b.dev===undefined)return;
+ try{const r=await fetch("/.netlify/functions/igdb?id="+b.id);if(!r.ok)throw 0;const d=await r.json();b.screens=d.screens||[];b.simG=d.simG||[]}catch(_){b.screens=b.screens||[];b.simG=b.simG||[]}
+ b._det=1;const el=$("#ag-det");if(el&&window._agB===b)el.innerHTML=agDet(b)}
+function trackPick(i,st){if(!["done","backlog","playing"].includes(st))return trackGame(i,st,"Digital");const b=CR[i];if(!b)return;
+ sheet(`<div class="row sp"><button onclick="addSheet(${i})">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><h1 style="text-align:center;margin-top:20px">${e(b.title)}</h1><div class="mu" style="text-align:center;margin:8px 0 20px">¿Lo tienes en físico o en digital?</div><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
 function backToSearch(){catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender()}
 function simGo(n){catSearch();$("#cq").value=n;catGo()}
-function trackGame(i,st){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),p=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
- const g={id,title:b.title,platform:p,platforms:pf,genre:(b.genres||[]).join(", "),format:"Digital",status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,dev:b.dev||"",critic:b.critic??null,run:1,challenge:"",versions:[],version:0,playAt:st==="playing"?Date.now():0,completions:[]};
+function trackGame(i,st,fmt){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),p=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
+ const g={id,title:b.title,platform:p,platforms:pf,genre:(b.genres||[]).join(", "),format:fmt||"Digital",status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,dev:b.dev||"",critic:b.critic??null,run:1,challenge:"",versions:[],version:0,playAt:st==="playing"?Date.now():0,completions:[]};
  if(st==="done"){g.doneDate=today();g.completions=[g.doneDate]}
  S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
@@ -455,7 +464,9 @@ function delList(id){if(confirm("¿Eliminar esta lista? Los juegos no se borran.
 function addToList(gid){S.lists=S.lists||[];sheet(`<div class="row sp"><h1>Añadir a lista</h1><button onclick="openGame('${gid}')">✕</button></div>${S.lists.map(l=>`<label class="row" style="color:var(--tx);font-size:15px;margin:10px 0"><input type="checkbox" style="width:24px;min-height:24px" ${l.ids.includes(gid)?"checked":""} onchange="togList('${gid}','${l.id}')">${e(l.name)}</label>`).join("")||`<div class="empty">Aún no tienes listas.</div>`}<div class="row" style="margin-top:12px"><input id="nl2" placeholder="Nueva lista" maxlength="40"><button class="pri" onclick="newListFor('${gid}')">Crear y añadir</button></div>`)}
 function togList(gid,lid){const l=S.lists.find(x=>x.id===lid);l.ids=l.ids.includes(gid)?l.ids.filter(x=>x!==gid):[...l.ids,gid];save()}
 function newListFor(gid){const n=$("#nl2").value.trim().slice(0,40);if(!n)return;S.lists.push({id:uid(),name:n,ids:[gid]});save();addToList(gid)}
-function togPlat(id){const g=G(id);g.platinum=!g.platinum;g.platAt=g.platinum?today():"";save();openGame(id)}
+function togPlat(id){const g=G(id);if(g.platinum){g.platinum=false;g.platAt="";save();openGame(id);return}
+ sheet(`<div class="row sp"><h1>🏆 Platino conseguido</h1><button onclick="openGame('${id}')" aria-label="Cancelar">✕</button></div><label>¿Qué día lo conseguiste?</label><input type="date" id="pd" value="${today()}" max="${today()}"><button class="pri" style="width:100%;margin-top:16px" onclick="savePlat('${id}')">Guardar</button>`)}
+function savePlat(id){const g=G(id),d=$("#pd").value;if(!d)return alert("Elige una fecha");g.platinum=true;g.platAt=d;save();openGame(id)}
 function csvCell(v){v=String(v??"");return v.includes(",")||v.includes('"')||v.includes(String.fromCharCode(10))?'"'+v.split('"').join('""')+'"':v}
 function dl(name,txt,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
 const STN={playing:"Playing",done:"Completed",backlog:"Backlog",wish:"Wishlist",drop:"Dropped"};
