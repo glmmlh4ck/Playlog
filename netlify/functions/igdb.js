@@ -28,7 +28,10 @@ const names = a => (a || []).map(x => x.name).filter(Boolean);
 const hrs = s => (s ? Math.round((s / 3600) * 10) / 10 : null);
 const iso = g => (g.first_release_date ? new Date(g.first_release_date * 1000).toISOString().slice(0, 10) : "");
 const cov = g => (g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg` : "");
-const FIELDS = "name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name,involved_companies.publisher,alternative_names.name,version_parent.name";
+const shot = g => (g.screenshots || []).slice(0, 2).map(x => `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${x.image_id}.jpg`);
+const sim = g => (g.similar_games || []).slice(0, 6).map(x => ({ name: x.name, cover: x.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${x.cover.image_id}.jpg` : "" }));
+const dev = g => { const c = (g.involved_companies || []); const d = c.find(x => x.developer) || c.find(x => x.publisher) || c[0]; return d?.company?.name || ""; };
+const FIELDS = "name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name,similar_games.cover.image_id,involved_companies.publisher,involved_companies.developer,involved_companies.company.name,screenshots.image_id,aggregated_rating,aggregated_rating_count,alternative_names.name,version_parent.name";
 
 exports.handler = async (event) => {
   const q = (event.queryStringParameters?.q || "").trim().slice(0, 80).replace(/["\\*]/g, "");
@@ -42,7 +45,7 @@ exports.handler = async (event) => {
   recent.push(now); hits.set(ip, recent);
   if (hits.size > 2000) hits.clear();
 
-  const ck = "v6:" + q.toLowerCase(), c = cache.get(ck);
+  const ck = "v7:" + q.toLowerCase(), c = cache.get(ck);
   if (c && now - c.t < 864e5) return out(200, c.b);
 
   try {
@@ -72,7 +75,8 @@ exports.handler = async (event) => {
         id: g.id, title: g.name, alt, released: iso(g), cover: cov(g),
         platforms: names(g.platforms), genres: names(g.genres),
         tags: [...names(g.game_modes), ...names(g.player_perspectives), ...names(g.themes)],
-        summary: g.summary || "", similar: names(g.similar_games).slice(0, 8), ttb: ttb[g.id] || null,
+        summary: g.summary || "", similar: names(g.similar_games).slice(0, 8), simG: sim(g), ttb: ttb[g.id] || null,
+        dev: dev(g), screens: shot(g), critic: g.aggregated_rating ? Math.round(g.aggregated_rating) : null, criticN: g.aggregated_rating_count || 0,
         // Oficial: tiene editora registrada; los anunciados o sin fecha con empresa implicada también cuentan
         official: comps.some(c => c.publisher) || (upcoming && comps.length > 0),
         versions: []
