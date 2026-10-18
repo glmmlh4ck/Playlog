@@ -165,7 +165,7 @@ const bar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></
 const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',lib:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5M16 11.5h.01M18.5 13.5h.01"/>',diary:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/>',prof:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'};
 function nav(){const t=[["home","Inicio"],["lib","Biblioteca"],["+",""],["diary","Diario"],["prof","Perfil"]];
  $("#nav").innerHTML=t.map(([k,l])=>k==="+"?`<button class="plus" aria-label="Añadir" onclick="openPlus()">+</button>`:`<button class="${tab===k?"on":""}" onclick="go('${k}')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${l}</button>`).join("")}
-function go(t){if(t==="diary"){const n=new Date();cal.y=n.getFullYear();cal.m=n.getMonth();cal.sel=today()}tab=t;R()}
+function go(t){if(t==="diary"){const n=new Date();cal.y=n.getFullYear();cal.m=n.getMonth();cal.sel=today()}const ch=t!==tab;tab=t;R();if(ch)$("#main").scrollTop=0}
 function R(){nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib")list()}
 function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing"),up=S.games.filter(g=>g.status==="wish"&&g.released&&g.released>today()).sort((a,b)=>a.released.localeCompare(b.released));
  const mem=[];S.games.forEach(g=>comps(g).forEach(d=>{const n=new Date(),t=new Date(d+"T12:00"),a=new Date(n.getFullYear(),t.getMonth(),t.getDate(),12),df=Math.round((n-a)/864e5),y=n.getFullYear()-t.getFullYear();if(y>0&&Math.abs(df)<=3)mem.push({g,y,d,df})}));
@@ -216,7 +216,8 @@ function rbGo(){let m=rbMatch();const n=m.length;if(n>1)m=m.filter(g=>g.id!==win
  <div class="card row" style="margin-top:8px">${th(g,80,106)}<div style="min-width:0"><b style="font-size:18px">${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")}</div>${h?`<div class="mu">⏱ Unas ${H(Math.round(h*60))} para completarlo</div>`:""}<div class="mu">Coincide con ${n} ${n===1?"juego":"juegos"} de tu backlog</div></div></div>
  <div class="row" style="flex-wrap:wrap;margin-top:10px">${n>1?`<button onclick="rbGo()">🎲 Otro</button>`:""}<button onclick="openGame('${g.id}')">Ver ficha</button><button class="pri" onclick="setStatus('${g.id}','playing')">▶ Empezar a jugar</button></div>
  <button style="width:100%;margin-top:10px" onclick="rbAsk()">Cambiar respuestas</button>`)}
-function sheet(h){$("#sc").innerHTML=h;$("#sheet").style.display="flex"}
+function sheet(h){const d=$("#sc"),k=t=>(/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(t)||[])[1]||"",was=$("#sheet").style.display==="flex",same=was&&k(h)===window._shk;
+ window._shk=k(h);d.innerHTML=h;$("#sheet").style.display="flex";if(!same)d.scrollTop=0}
 function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)}
 function addGame(){manualSheet(-1)}
 function pl(g){return g?.platforms||[]}
