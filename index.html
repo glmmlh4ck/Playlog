@@ -65,6 +65,16 @@ summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 .cv .fan{position:absolute;top:6px;left:6px;z-index:1;background:#000b;border-radius:8px;padding:2px 7px;font-size:10px;font-style:normal;font-weight:700}
 .cal .gold{box-shadow:inset 0 0 0 2px #f5c518;color:#f5c518;font-weight:700}.cal .gold:before{content:"★";position:absolute;top:1px;right:4px;font-size:10px}
 /* ===== Pantalla Añadir juego ===== */
+.trk{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.trk button{grid-column:span 2;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:12px 4px;min-height:88px;border-radius:16px;text-align:center;background:linear-gradient(160deg,rgba(var(--c),.34),rgba(var(--c),.08));border:1px solid rgba(var(--c),.6);box-shadow:0 4px 14px rgba(var(--c),.18)}
+.trk button:nth-child(n+4){grid-column:span 3}
+.trk button i{font-style:normal;font-size:26px;line-height:1.1}.trk button b{font-size:14px}.trk button small{font-size:11px;color:var(--mu)}
+.trk button:active{transform:scale(.96)}.trk button:hover{filter:brightness(1.15)}
+.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}.clamp.open{display:block}
+.lnk{background:none;border:0;padding:8px 0 0;min-height:0;width:auto;color:var(--ac2);font-weight:600;box-shadow:none}
+.ag-gen{margin:10px 0 12px}
+#sheet>div{overscroll-behavior:contain}
+
 .ag-top{display:flex;gap:16px;align-items:stretch;margin-top:14px}
 .ag-cv{flex:none;width:132px;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--s2);border:1px solid var(--bd)}
 .ag-cv img,.ag-sim img,.ag-shots img{display:block;width:100%;height:100%;object-fit:cover}
@@ -232,23 +242,34 @@ function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math
  big=(src,ph)=>src?`<img src="${e(src)}" alt="" referrerpolicy="no-referrer">`:`<div class="ph">${ph}</div>`;
  sheet(`<div class="row sp"><button onclick="backToSearch()" aria-label="Volver">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
  <div class="ag-top"><div class="ag-cv">${big(b.cover,"🎮")}</div><div class="ag-info"><h1>${e(b.title)}</h1><div class="ag-dev">${e(b.dev||"Desarrolladora desconocida")}</div><div class="ag-date">${b.released?e(fd(b.released)):"Sin fecha de salida"}</div></div></div>
- <div class="card ag-desc">${b.summary?e(b.summary):`<span class="mu">Sin descripción.</span>`}${(b.genres||[]).length?`<div style="margin-top:10px">${b.genres.map(x=>`<span class="tag">${e(x)}</span>`).join("")}</div>`:""}</div>
+ <div class="card ag-desc">${b.summary?`<div id="ag-sum" class="clamp">${e(b.summary)}</div><button id="ag-more" class="lnk" style="display:none" onclick="agMore()">Ver más</button>`:`<span class="mu">Sin descripción.</span>`}</div>${(b.genres||[]).length?`<div class="ag-gen">${b.genres.map(x=>`<span class="tag">${e(x)}</span>`).join("")}</div>`:""}
  <div class="ag-sc"><div class="card"><div class="mu">Playlog score</div><b style="font-size:30px">${ps}</b>${ps==="—"?"":`<span class="mu">/10</span>`}<div class="mu" style="font-size:11px">nota de usuarios</div></div><div class="card"><div class="mu">Critic score</div><b style="font-size:30px;color:${cc}">${cs??"—"}</b>${cs==null?"":`<span class="mu">/100</span>`}<div class="mu" style="font-size:11px">${b.criticN?"media de "+b.criticN+" críticas":"sin críticas"}</div></div></div>
  <h2>Duración</h2><div class="ag-dur"><div><b>${hh(t.fast)}</b><span>Main story</span></div><div><b>${hh(t.main)}</b><span>Main + extras</span></div><div><b>${hh(t.full)}</b><span>Completionist</span></div></div>
- <h2>Track this game</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button onclick="trackPick(${i},'${k}')">${l}</button>`).join("")}</div>
- <div id="ag-det">${agDet(b)}</div>`);window._agB=b;agLoad(b)}
+ <h2>Track this game</h2><div class="mu" style="margin:-4px 0 10px">Toca una opción para añadirlo a tu biblioteca 👇</div><div class="trk">${[["done","✅","Completed","Ya lo terminé","34,197,94"],["playing","🎮","Playing","Jugando ahora","139,92,246"],["backlog","🕒","To-Play","Pendiente","56,189,248"],["wish","💖","Wishlist","Lo quiero","244,114,182"],["drop","🚫","Dropped","Lo dejé","248,113,113"]].map(([k,ic,l,sub,c])=>`<button style="--c:${c}" onclick="trackPick(${i},'${k}')"><i>${ic}</i><b>${l}</b><small>${sub}</small></button>`).join("")}</div>
+ <div id="ag-det">${agDet(b)}</div>`);window._agB=b;agLoad(b);agClamp()}
 function agDet(b){const sh=b.screens||[],sm=b.simG||[];
  if(!b._det&&b.id&&b.dev!==undefined)return`<div class="mu" style="margin-top:22px">Cargando capturas y juegos similares…</div>`;
  const big=(src)=>src?`<img src="${e(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`;
- return(sh.length?`<h2>Screenshots</h2><div class="ag-shots${sh.length%2?" odd":""}">${sh.slice(0,5).map(u=>`<img src="${e(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join("")}</div>`:"")+(sm.length?`<h2>Juegos similares</h2><div class="ag-sim">${sm.slice(0,8).map(x=>`<div data-n="${e(x.name)}" onclick="simGo(this.dataset.n)">${big(x.cover)}<span>${e(x.name)}</span></div>`).join("")}</div>`:"")}
+ return(sh.length?`<h2>Screenshots</h2><div class="ag-shots${sh.length%2?" odd":""}">${sh.slice(0,5).map(u=>`<img src="${e(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join("")}</div>`:"")+(sm.length?`<h2>Juegos similares</h2><div class="ag-sim">${sm.slice(0,8).map((x,k)=>`<div data-k="${k}" onclick="simGo(+this.dataset.k)">${big(x.cover)}<span>${e(x.name)}</span></div>`).join("")}</div>`:"")}
 async function agLoad(b){if(b._det||!b.id||b.dev===undefined)return;
  try{const r=await fetch("/.netlify/functions/igdb?id="+b.id);if(!r.ok)throw 0;const d=await r.json();b.screens=d.screens||[];b.simG=d.simG||[]}catch(_){b.screens=b.screens||[];b.simG=b.simG||[]}
  b._det=1;const el=$("#ag-det");if(el&&window._agB===b)el.innerHTML=agDet(b)}
 function trackPick(i,st){if(!["done","backlog","playing"].includes(st))return trackGame(i,st,"Digital");const b=CR[i];if(!b)return;
- sheet(`<div class="row sp"><button onclick="addSheet(${i})">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><h1 style="text-align:center;margin-top:20px">${e(b.title)}</h1><div class="mu" style="text-align:center;margin:8px 0 20px">¿Lo tienes en físico o en digital?</div><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
-function backToSearch(){catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender()}
-function simGo(n){catSearch();$("#cq").value=n;catGo()}
-function trackGame(i,st,fmt){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),p=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
+ const pf=pl(b),def=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
+ sheet(`<div class="row sp"><button onclick="addSheet(${i})">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><h1 style="text-align:center;margin-top:20px">${e(b.title)}</h1><div class="mu" style="text-align:center;margin-top:6px">Un último paso para añadirlo</div>
+ <label>¿En qué consola o plataforma lo juegas?</label><select id="tp">${platOpts(pf,def)}</select>
+ <label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
+function agClamp(){const run=()=>{const el=$("#ag-sum"),m=$("#ag-more");if(el&&m&&!el.classList.contains("open"))m.style.display=el.scrollHeight>el.clientHeight+1?"block":"none"};requestAnimationFrame(run);setTimeout(run,300)}
+function agMore(){const el=$("#ag-sum"),m=$("#ag-more");m.textContent=el.classList.toggle("open")?"Ver menos":"Ver más"}
+function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender()}
+function agShow(b){CR=[b];addSheet(0)}
+function simSearch(n){catSearch();$("#cq").value=n;catGo()}
+async function simGo(k){const cur=window._agB,x=(cur?.simG||[])[k];if(!x)return;if(!x.id)return simSearch(x.name);
+ sheet(`<div class="row sp"><button id="sg-back">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="empty" style="margin-top:30px">Cargando ${e(x.name)}…</div>`);
+ let cancel=false;$("#sg-back").onclick=()=>{cancel=true;agShow(cur)};
+ try{const r=await fetch("/.netlify/functions/igdb?gid="+x.id);if(!r.ok)throw 0;const d=await r.json();if(!d.game)throw 0;if(cancel)return;
+  (window._agBack=window._agBack||[]).push(cur);agShow(d.game)}catch(_){if(!cancel)simSearch(x.name)}}
+function trackGame(i,st,fmt){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),p=$("#tp")?$("#tp").value:(pf.includes(S.pref)?S.pref:(pf[0]||S.pref||""));
  const g={id,title:b.title,platform:p,platforms:pf,genre:(b.genres||[]).join(", "),format:fmt||"Digital",status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,dev:b.dev||"",critic:b.critic??null,run:1,challenge:"",versions:[],version:0,playAt:st==="playing"?Date.now():0,completions:[]};
  if(st==="done"){g.doneDate=today();g.completions=[g.doneDate]}
  S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id)}
@@ -435,7 +456,7 @@ let CALL=[];
 function catEmpty(msg){const q=($("#cq")?.value||"").trim(),w=q.split(" ")[0],sg=[...new Set([w,"Zelda","Pokémon","Mario","Final Fantasy","Sonic"].filter(x=>x&&x.toLowerCase()!==q.toLowerCase()))].slice(0,5);
  return`<div class="empty">${msg}<div style="margin-top:12px">${sg.map(x=>`<span class="chipb" data-v="${e(x)}" onclick="$('#cq').value=this.dataset.v;catGo()">🔎 ${e(x)}</span>`).join("")}</div><div class="row" style="justify-content:center;margin-top:8px"><button onclick="catGo()">Reintentar</button><button class="pri" onclick="addGame()">Crear ficha manual</button></div></div>`}
 function catRender(){const m=S.catMode||"off",of=CALL.filter(g=>g.official!==false),un=CALL.filter(g=>g.official===false);
- const row=(g,i)=>`<div class="card row sp"><div class="row" style="flex:1;min-width:0">${th(g,48,64)}<div style="min-width:0"><b>${e(g.title)}</b>${g.alt?`<div class="mu">también: ${e(g.alt)}</div>`:""}<div class="mu">${e((g.released||"s/f").slice(0,4))} · ${e((g.platforms||[]).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="addSheet(${i})">Añadir</button></div>`;
+ const row=(g,i)=>`<div class="card row sp"><div class="row" style="flex:1;min-width:0">${th(g,48,64)}<div style="min-width:0"><b>${e(g.title)}</b>${g.alt?`<div class="mu">también: ${e(g.alt)}</div>`:""}<div class="mu">${e((g.released||"s/f").slice(0,4))} · ${e((g.platforms||[]).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="window._agBack=[];addSheet(${i})">Añadir</button></div>`;
  CR=m==="off"?of:m==="un"?un:[...of,...un];
  const tabs=`<div class="tabs">${[["off","Oficiales",of.length],["un","No oficiales",un.length],["all","Todos",CALL.length]].map(([k,l,n])=>`<button class="${m===k?"on":""}" onclick="S.catMode='${k}';save();catRender()">${l} (${n})</button>`).join("")}</div><div class="mu" style="margin-bottom:8px">Oficial = juego con editora registrada en IGDB.</div>`;
  const body=m==="all"?`${of.map((g,i)=>row(g,i)).join("")}${un.length?`<h2>No oficiales</h2>`:""}${un.map((g,i)=>row(g,i+of.length)).join("")}`:CR.map((g,i)=>row(g,i)).join("");
@@ -530,6 +551,25 @@ async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window
  const h=pb.getBoundingClientRect().height,it=parseFloat(getComputedStyle(pb).paddingTop)||0;pb.remove();
  const g=Math.round(sh-h);r.classList.toggle("gap",g>0&&g<=100&&it>0)}catch(_){}};
  fix();addEventListener("resize",fix);addEventListener("orientationchange",()=>setTimeout(fix,300))})();
+// Deslizar hacia abajo (desde arriba del todo) cierra las ventanas y los recaps
+(function(){let sy=0,sx=0,dy=0,t=null,mode="",eng=false,on=false;
+ const reset=()=>{t.style.transition="";t.style.transform="";t.style.opacity=""};
+ document.addEventListener("touchstart",ev=>{on=false;eng=false;if(ev.touches.length!==1)return;
+  const sh=$("#sheet"),rc=$("#rc");
+  if(sh.style.display==="flex"&&sh.contains(ev.target)){t=$("#sheet>div");mode="sheet";if(t.scrollTop>0)return}
+  else if(rc.style.display==="flex"&&rc.contains(ev.target)){t=rc;mode="rc";const bd=ev.target.closest&&ev.target.closest(".rc-body");if(bd&&bd.scrollTop>0)return}
+  else return;
+  if(ev.target.closest&&ev.target.closest("textarea,input,select"))return;
+  sy=ev.touches[0].clientY;sx=ev.touches[0].clientX;dy=0;on=true},{passive:true});
+ document.addEventListener("touchmove",ev=>{if(!on)return;const y=ev.touches[0].clientY-sy,x=ev.touches[0].clientX-sx;
+  if(!eng){if(y<-6||Math.abs(x)>Math.abs(y)+4&&Math.abs(x)>10){on=false;return}if(y<=8)return;eng=true}
+  dy=Math.max(0,y);if(ev.cancelable)ev.preventDefault();t.style.transition="none";t.style.transform="translateY("+dy*.9+"px)";if(mode==="rc")t.style.opacity=String(1-Math.min(.6,dy/500))},{passive:false});
+ document.addEventListener("touchend",ev=>{if(!on||!eng){on=false;return}on=false;eng=false;if(ev.cancelable)ev.preventDefault();
+  const el=t,m=mode;
+  if(dy>110){el.style.transition="transform .2s ease-out, opacity .2s";el.style.transform="translateY("+(m==="rc"?innerHeight:el.offsetHeight)+"px)";if(m==="rc")el.style.opacity="0";
+   setTimeout(()=>{if(m==="sheet")closeSheet();else el.style.display="none";el.style.transition="";el.style.transform="";el.style.opacity=""},200)}
+  else{el.style.transition="transform .2s ease-out, opacity .2s";el.style.transform="";el.style.opacity="";setTimeout(()=>{el.style.transition=""},220)}},{passive:false});
+ document.addEventListener("touchcancel",()=>{if(on&&eng){reset()}on=false;eng=false})})();
 document.addEventListener("keydown",ev=>{if(ev.key==="Escape"){closeSheet();$("#rc").style.display="none"}});
 R();
 </script></body></html>
