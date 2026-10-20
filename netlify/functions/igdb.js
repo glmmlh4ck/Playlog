@@ -63,9 +63,20 @@ async function oneGame(id) {
   } catch (e) { /* la duración es opcional */ }
   return { game: shape(g, ttb, "") };
 }
+// Sugerencias rápidas mientras se escribe (8 resultados, sin agrupar ni duraciones)
+const sgc = new Map(), sgh = new Map();
+let upc = { t: 0, b: "" };
+async function suggest(q) {
+  const r = await igdb("games", `search "${q}"; fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name; where version_parent = null; limit 8;`);
+  return { items: r.map(g => ({
+    id: g.id, title: g.name, year: g.first_release_date ? new Date(g.first_release_date * 1000).getFullYear() : "",
+    cover: g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_small/${g.cover.image_id}.jpg` : "",
+    platforms: (g.platforms || []).slice(0, 3).map(p => p.abbreviation || p.name)
+  })) };
+}
 const dcache = new Map(), dhits = new Map();
 async function detail(id) {
-  const [g] = await igdb("games", `fields screenshots.image_id,similar_games.name,similar_games.cover.image_id,genres,themes; where id = ${id};`);
+  const [g] = await igdb("games", `fields screenshots.image_id,similar_games.name,similar_games.cover.image_id,genres,themes,dlcs.name,dlcs.first_release_date,dlcs.cover.image_id,expansions.name,expansions.first_release_date,expansions.cover.image_id,standalone_expansions.name,standalone_expansions.first_release_date,standalone_expansions.cover.image_id; where id = ${id};`);
   if (!g) return { screens: [], simG: [] };
   const simG = sim(g), seen = new Set([Number(id), ...(g.similar_games || []).map(x => x.id)]);
   const gen = g.genres || [], th = g.themes || [];
@@ -78,12 +89,49 @@ async function detail(id) {
       for (const x of more) { if (simG.length >= 8) break; if (seen.has(x.id)) continue; seen.add(x.id); simG.push({ id: x.id, name: x.name, cover: cov(x) }); }
     } catch (e) { /* opcional */ }
   }
-  return { screens: shot(g), simG };
+  const dl = [];
+  [["dlcs", "DLC"], ["expansions", "Expansión"], ["standalone_expansions", "Expansión"]].forEach(([f, kind]) => (g[f] || []).forEach(x => {
+    if (!dl.some(d => d.id === x.id)) dl.push({ id: x.id, name: x.name, kind, released: x.first_release_date ? new Date(x.first_release_date * 1000).toISOString().slice(0, 10) : "", cover: cov(x) });
+  }));
+  dl.sort((a, b) => (a.released || "9").localeCompare(b.released || "9"));
+  return { screens: shot(g), simG, dlcs: dl.slice(0, 30) };
 }
 
 exports.handler = async (event) => {
   const q = (event.queryStringParameters?.q || "").trim().slice(0, 80).replace(/["\\*]/g, "");
   if (!ID() || !SEC()) return out(500, { error: "Falta configurar IGDB" });
+
+  if (event.queryStringParameters && event.queryStringParameters.upcoming !== undefined) {
+    const un = Date.now();
+    if (upc.b && un - upc.t < 6 * 36e5) return out(200, upc.b);
+    try {
+      const now = Math.floor(un / 1000);
+      const r = await igdb("games", `fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name,hypes; where first_release_date > ${now} & first_release_date < ${now + 150 * 864e2} & cover != null & hypes > 2 & version_parent = null; sort hypes desc; limit 14;`);
+      const body = JSON.stringify({ items: r.sort((a, b) => a.first_release_date - b.first_release_date).map(g => ({
+        id: g.id, title: g.name, released: new Date(g.first_release_date * 1000).toISOString().slice(0, 10),
+        cover: `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg`,
+        platforms: (g.platforms || []).slice(0, 3).map(p => p.abbreviation || p.name)
+      })) });
+      upc = { t: un, b: body };
+      return out(200, body);
+    } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
+  }
+  if (event.queryStringParameters && event.queryStringParameters.suggest !== undefined) {
+    const sq = String(event.queryStringParameters.suggest).trim().slice(0, 60).replace(/["\\*]/g, "");
+    if (sq.length < 2) return out(400, { error: "Escribe al menos 2 letras" });
+    const sip = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", sn = Date.now();
+    const sr = (sgh.get(sip) || []).filter(t => sn - t < 60000);
+    if (sr.length >= 90) return out(429, { error: "Demasiadas peticiones, espera un momento" });
+    sr.push(sn); sgh.set(sip, sr); if (sgh.size > 2000) sgh.clear();
+    const sk = "s1:" + sq.toLowerCase(), sc = sgc.get(sk);
+    if (sc && sn - sc.t < 36e5) return out(200, sc.b);
+    try {
+      const body = JSON.stringify(await suggest(sq));
+      sgc.set(sk, { t: sn, b: body });
+      if (sgc.size > 1000) sgc.delete(sgc.keys().next().value);
+      return out(200, body);
+    } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
+  }
 
   const did = (event.queryStringParameters?.id || "").trim(), gid = (event.queryStringParameters?.gid || "").trim();
   if (did || gid) {
@@ -92,7 +140,7 @@ exports.handler = async (event) => {
     const dr = (dhits.get(dip) || []).filter(t => dn - t < 60000);
     if (dr.length >= 60) return out(429, { error: "Demasiadas peticiones, espera un minuto" });
     dr.push(dn); dhits.set(dip, dr); if (dhits.size > 2000) dhits.clear();
-    const dk = (gid ? "g9:" + gid : "d9:" + did), dc = dcache.get(dk);
+    const dk = (gid ? "g10:" + gid : "d10:" + did), dc = dcache.get(dk);
     if (dc && dn - dc.t < 864e5) return out(200, dc.b);
     try {
       const body = JSON.stringify(gid ? await oneGame(gid) : await detail(did));

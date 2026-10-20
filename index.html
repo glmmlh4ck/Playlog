@@ -3,32 +3,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#13131b"><meta name="color-scheme" content="dark"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Playlog"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"><title>Playlog</title>
 <style>
-:root{--bg:#0b0b10;--s1:#15151d;--s2:#1e1e29;--bd:rgba(255,255,255,.07);--tx:#f4f4f8;--mu:#9494a8;--ac:#8b5cf6;--ac2:#b69dff;--ok:#34d399;--er:#f87171;box-sizing:border-box}
-html{background:#13131b}html.gap nav{padding-bottom:6px}
+:root{--acd:#7c3aed;--acl:#9d6bff;--acr:124,58,237;--glow:#2d1b5e;--hero1:#2e1a69;--hero2:#171727;--ring:#1b1536;--navbg:rgba(21,21,29,.85);--sheet:#121219;--strip:#13131b;--onac:#fff;--bg:#0b0b10;--s1:#15151d;--s2:#1e1e29;--bd:rgba(255,255,255,.07);--tx:#f4f4f8;--mu:#9494a8;--ac:#8b5cf6;--ac2:#b69dff;--ok:#34d399;--er:#f87171;box-sizing:border-box}
+html{background:var(--strip)}html.gap nav{padding-bottom:6px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{position:fixed;inset:0;width:100%;height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--tx);font:15px/1.45 'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-#app{max-width:480px;margin:0 auto;height:100%;padding-top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;background:radial-gradient(120% 45% at 50% -8%,#2d1b5e 0%,transparent 62%)}
+#app{max-width:480px;margin:0 auto;height:100%;padding-top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;background:radial-gradient(120% 45% at 50% -8%,var(--glow) 0%,transparent 62%)}
 #main{flex:1;overflow-y:auto;padding:18px 16px 28px}
 h1{font-size:26px;font-weight:700;margin:0 0 2px;letter-spacing:-.02em}
 h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--mu);font-weight:600;margin:24px 0 10px}
 .card{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:14px;margin-bottom:10px;box-shadow:0 6px 20px #0006}
 .mu{color:var(--mu);font-size:13px}.row{display:flex;gap:10px;align-items:center}.sp{justify-content:space-between}
 .bar{height:8px;background:var(--s2);border-radius:99px;overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#7c3aed,#c4b5fd);box-shadow:0 0 12px #8b5cf699}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acd),var(--ac2));box-shadow:0 0 12px rgba(var(--acr),.6)}
 button,input,select,textarea{font:inherit;color:var(--tx);background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;min-height:46px;width:100%;outline:0}
-input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px #8b5cf63d}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(var(--acr),.24)}
 button{cursor:pointer;width:auto;font-weight:500;transition:transform .12s,background .2s}button:active{transform:scale(.97)}
-.pri{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;font-weight:600;box-shadow:0 4px 14px #7c3aed66}.dng{color:var(--er)}
+.pri{background:linear-gradient(135deg,var(--acd),var(--acl));border:0;font-weight:600;box-shadow:0 4px 14px rgba(var(--acr),.4)}.dng{color:var(--er)}
 textarea{min-height:76px}label{display:block;margin:12px 0 5px;color:var(--mu);font-size:13px}
 .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:12px 0}.tabs button:nth-child(-n+3){grid-column:span 2}.tabs button:nth-child(n+4){grid-column:span 3}.tabs button{width:100%;white-space:nowrap;min-height:40px;padding:6px 0;font-size:12px;text-align:center;border-radius:99px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center}.stats b{display:block;font-size:22px}.stats span{font-size:11px;color:var(--mu)}.pie{width:110px;height:110px;border-radius:50%;flex:none;position:relative}.pie:after{content:"";position:absolute;inset:26px;border-radius:50%;background:var(--s1)}
-.tabs .on{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;box-shadow:0 3px 12px #7c3aed66}
-nav{display:flex;align-items:center;justify-content:space-around;background:rgba(21,21,29,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+.tabs .on{background:linear-gradient(135deg,var(--acd),var(--acl));border:0;box-shadow:0 3px 12px rgba(var(--acr),.4)}
+nav{display:flex;align-items:center;justify-content:space-around;background:var(--navbg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}
 nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mu);min-width:60px;padding:4px;position:relative}
 nav button.on{color:var(--ac2)}nav button.on:after{content:"";position:absolute;bottom:-3px;width:5px;height:5px;border-radius:50%;background:var(--ac2);box-shadow:0 0 8px var(--ac)}
-nav .plus{background:linear-gradient(135deg,#7c3aed,#a47bff);color:#fff;border-radius:50%;width:58px;height:58px;margin-top:-28px;font-size:32px;font-weight:300;justify-content:center;box-shadow:0 0 0 6px var(--bg),0 8px 22px #7c3aedaa}
-.hero{display:flex;gap:16px;align-items:center;padding:18px;border-radius:22px;margin:14px 0 4px;background:linear-gradient(135deg,#2e1a69,#171727);border:1px solid #8b5cf655;box-shadow:0 10px 30px #5b2fd144}
+nav .plus{background:linear-gradient(135deg,var(--acd),var(--acl));color:#fff;border-radius:50%;width:58px;height:58px;margin-top:-28px;font-size:32px;font-weight:300;justify-content:center;box-shadow:0 0 0 6px var(--bg),0 8px 22px var(--acd)aa}
+.hero{display:flex;gap:16px;align-items:center;padding:18px;border-radius:22px;margin:14px 0 4px;background:linear-gradient(135deg,var(--hero1),var(--hero2));border:1px solid rgba(var(--acr),.33);box-shadow:0 10px 30px rgba(var(--acr),.27)}
 .ring{width:88px;height:88px;border-radius:50%;background:conic-gradient(var(--ac2) calc(var(--p)*1%),#ffffff1c 0);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;flex:none}
-.ring:before{content:"";position:absolute;inset:7px;border-radius:50%;background:#1b1536}.ring>*{position:relative}.ring b{font-size:28px;line-height:1}.ring small{font-size:9px;letter-spacing:.14em;color:var(--mu)}
+.ring:before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--ring)}.ring>*{position:relative}.ring b{font-size:28px;line-height:1}.ring small{font-size:9px;letter-spacing:.14em;color:var(--mu)}
 .chip{display:inline-block;background:#ffffff14;border-radius:99px;padding:3px 11px;font-size:12px;margin:8px 6px 0 0}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px}html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%}body{-webkit-user-select:none;user-select:none}input,textarea{-webkit-user-select:text;user-select:text}
 #main{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}button{touch-action:manipulation}
@@ -37,33 +37,48 @@ input,select,textarea{font-size:16px}h1{font-size:24px}.tabs button{min-height:4
 .poster{cursor:pointer;min-width:0}
 .cv{position:relative;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:var(--s2);border:1px solid var(--bd);box-shadow:0 6px 18px #0007}
 .cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.cv .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;background:linear-gradient(135deg,#2d1b5e,#1a1a26)}
+.cv .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;background:linear-gradient(135deg,var(--glow),#1a1a26)}
 .poster b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.25;margin-top:8px;font-weight:500}
 .poster span{font-size:11px;color:var(--mu)}
 #sheet{position:fixed;inset:0;background:#000b;backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:9}
-#sheet>div{background:#121219;border:1px solid var(--bd);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+#sheet>div{background:var(--sheet);border:1px solid var(--bd);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 #sheet>div:before{content:"";display:block;width:42px;height:4px;background:#ffffff33;border-radius:9px;margin:0 auto 14px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}
 .cal button{padding:0;min-height:42px;position:relative;background:var(--s1);border:1px solid var(--bd);border-radius:12px}
-.cal .sel{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;box-shadow:0 3px 12px #7c3aed66}
+.cal .sel{background:linear-gradient(135deg,var(--acd),var(--acl));border:0;box-shadow:0 3px 12px rgba(var(--acr),.4)}
 .cal .dot:after{content:"";position:absolute;bottom:5px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
-.tag{display:inline-block;background:#8b5cf626;color:var(--ac2);border-radius:99px;padding:2px 10px;font-size:12px;margin-right:4px}
+.tag{display:inline-block;background:rgba(var(--acr),.15);color:var(--ac2);border-radius:99px;padding:2px 10px;font-size:12px;margin-right:4px}
 .big{font-size:46px;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;margin:6px 0 10px;letter-spacing:.02em}
 .empty{text-align:center;color:var(--mu);padding:28px 12px;border:1px dashed #ffffff22;border-radius:18px;margin-bottom:10px}
 @keyframes up{from{transform:translateY(34px);opacity:0}}
 @media (prefers-reduced-motion:no-preference){#sheet>div{animation:up .25s ease-out}.bar i{transition:width .6s}}
-.chipb{display:inline-block;padding:7px 12px;border-radius:99px;background:var(--s2);border:1px solid var(--bd);margin:0 6px 8px 0;font-size:13px;cursor:pointer}.chipb.on{background:linear-gradient(135deg,#7c3aed,#9d6bff);border-color:transparent}
+.chipb{display:inline-block;padding:7px 12px;border-radius:99px;background:var(--s2);border:1px solid var(--bd);margin:0 6px 8px 0;font-size:13px;cursor:pointer}.chipb.on{background:linear-gradient(135deg,var(--acd),var(--acl));border-color:transparent}
 summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 #rc{position:fixed;inset:0;z-index:30;display:none;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#fff;padding:60px 28px 50px}
 .rc-bars{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:16px;right:60px;display:flex;gap:4px}.rc-bars i{flex:1;height:4px;border-radius:9px;background:#ffffff44}.rc-bars i.on{background:#fff}
 .rc-x{position:absolute;top:calc(6px + env(safe-area-inset-top,0px));right:10px;width:46px;background:none;border:0;font-size:22px;color:#fff}.rc-body{width:100%;max-width:420px;max-height:78vh;overflow-y:auto}
 .rc-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}.rc-hint{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom,0px));opacity:.8;font-size:13px}
 @media (prefers-reduced-motion:no-preference){.rc-body{animation:pop .35s ease-out}@keyframes pop{from{transform:scale(.9);opacity:0}}}
-.cal button.sel{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0}
+.cal button.sel{background:linear-gradient(135deg,var(--acd),var(--acl));border:0}
 .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bd{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:10px 6px;text-align:center;opacity:.55}
 .bd.on{opacity:1;border-color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}.bd b{display:block;font-size:12px;line-height:1.2;margin-top:2px}.bd span{display:block;font-size:10px;color:var(--mu)}
 .cv .fan{position:absolute;top:6px;left:6px;z-index:1;background:#000b;border-radius:8px;padding:2px 7px;font-size:10px;font-style:normal;font-weight:700}
 .cal .gold{box-shadow:inset 0 0 0 2px #f5c518;color:#f5c518;font-weight:700}.cal .gold:before{content:"★";position:absolute;top:1px;right:4px;font-size:10px}
+.pri,.tabs .on,.chipb.on,.cal .sel,nav .plus{color:var(--onac)}
+/* ===== Temas, selección múltiple, sugerencias ===== */
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0 14px}
+.thm{display:flex;align-items:center;gap:10px;justify-content:flex-start;width:100%}.thm.on{border-color:var(--ac);box-shadow:0 0 0 2px rgba(var(--acr),.4)}
+.sw{display:flex}.sw i{width:16px;height:16px;border-radius:50%;margin-right:-5px;border:1px solid #0009}
+.accs{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+.acc{width:36px;height:36px;min-height:0;border-radius:50%;padding:0;border:3px solid transparent}.acc.on{border-color:#fff}
+.accs input[type=color]{width:36px;height:36px;min-height:0;padding:0;border-radius:50%;border:2px dashed #ffffff55;background:none;cursor:pointer}
+.poster{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.poster .ck{position:absolute;top:7px;left:7px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:#0007;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff}
+.poster.picked .cv{outline:3px solid var(--ac);outline-offset:-3px}.poster.picked .ck{background:var(--ac);border-color:var(--ac);color:var(--onac)}
+.poster.picked .cv:after{content:"";position:absolute;inset:0;background:rgba(var(--acr),.28)}
+.selbar{position:sticky;bottom:6px;z-index:5;background:var(--sheet);border:1px solid rgba(var(--acr),.55);border-radius:18px;padding:10px 12px;box-shadow:0 10px 30px #000a;margin-top:14px}
+.selact{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.selact button{width:100%}
+.sgl{margin-top:10px}.sgi{display:flex;gap:12px;align-items:center;padding:8px;border:1px solid var(--bd);border-radius:14px;background:var(--s1);margin-bottom:8px;cursor:pointer}.sgi:hover{border-color:rgba(var(--acr),.5)}
 /* ===== Pantalla Añadir juego ===== */
 .trk{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
 .trk button{grid-column:span 2;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:12px 4px;min-height:88px;border-radius:16px;text-align:center;background:linear-gradient(160deg,rgba(var(--c),.34),rgba(var(--c),.08));border:1px solid rgba(var(--c),.6);box-shadow:0 4px 14px rgba(var(--c),.18)}
@@ -85,21 +100,21 @@ summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 .ag-desc{margin-top:14px;font-size:14px;line-height:1.5}
 .ag-sc{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ag-sc .card{margin:0;text-align:center}
 .ag-dur{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ag-dur div{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:12px 4px;text-align:center}.ag-dur b{display:block;font-size:18px}.ag-dur span{font-size:11px;color:var(--mu)}
-.ag-trk{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.ag-trk button{width:100%;padding:10px 2px;font-size:12px;min-height:46px;text-align:center}.ag-trk button.on{background:linear-gradient(135deg,#7c3aed,#9d6bff);border:0;font-weight:600}.ag-trk button:hover{background:linear-gradient(135deg,#7c3aed,#9d6bff);border-color:transparent}
+.ag-trk{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.ag-trk button{width:100%;padding:10px 2px;font-size:12px;min-height:46px;text-align:center}.ag-trk button.on{background:linear-gradient(135deg,var(--acd),var(--acl));border:0;font-weight:600}.ag-trk button:hover{background:linear-gradient(135deg,var(--acd),var(--acl));border-color:transparent}
 .ag-shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ag-shots.odd img:first-child{grid-column:span 2}.ag-shots img{aspect-ratio:16/9;border-radius:12px;border:1px solid var(--bd)}
 .ag-sim{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.ag-sim div{cursor:pointer;min-width:0}.ag-sim img,.ag-sim .ph{aspect-ratio:3/4;height:auto;border-radius:12px;border:1px solid var(--bd)}.ag-sim span{display:block;font-size:11px;margin-top:4px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(min-width:900px){.ag-sim{grid-template-columns:repeat(5,1fr)}}
 /* ===== Escritorio (PC): barra lateral + contenido ancho ===== */
 @media(min-width:900px){
 body{display:block;background:var(--bg);-webkit-user-select:auto;user-select:auto;font-size:16px}
-#app{width:100%;max-width:none;height:100dvh;margin:0;border-radius:0;border:0;box-shadow:none;flex-direction:row;overflow:hidden;background:radial-gradient(80% 55% at 60% -10%,#2d1b5e 0%,transparent 65%)}
+#app{width:100%;max-width:none;height:100dvh;margin:0;border-radius:0;border:0;box-shadow:none;flex-direction:row;overflow:hidden;background:radial-gradient(80% 55% at 60% -10%,var(--glow) 0%,transparent 65%)}
 nav{order:-1;flex:none;width:230px;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:6px;padding:26px 14px;border-top:0;border-right:1px solid var(--bd);overflow-y:auto}
 nav:before{content:"🎮 Playlog";order:-2;font-size:22px;font-weight:700;letter-spacing:-.02em;padding:0 14px 20px}
 nav button{flex-direction:row;justify-content:flex-start;gap:12px;width:100%;min-width:0;min-height:46px;padding:10px 14px;font-size:15px;border-radius:12px}
 nav button:hover{background:#ffffff0d}
-nav button.on{background:#8b5cf626}
+nav button.on{background:rgba(var(--acr),.15)}
 nav button.on:after{display:none}
-nav .plus{order:-1;width:100%;height:48px;gap:8px;margin:0 0 14px;font-size:22px;font-weight:600;justify-content:center;border-radius:14px;box-shadow:0 4px 14px #7c3aed66}
+nav .plus{order:-1;width:100%;height:48px;gap:8px;margin:0 0 14px;font-size:22px;font-weight:600;justify-content:center;border-radius:14px;box-shadow:0 4px 14px rgba(var(--acr),.4)}
 nav .plus:after{content:"Añadir";font-size:15px}
 nav .plus:hover{background:linear-gradient(135deg,#8b4cf0,#b08cff)}
 #main{padding:32px clamp(24px,4vw,64px) 48px}
@@ -117,20 +132,33 @@ h1{font-size:30px}
 @media(hover:hover){
 .poster .cv{transition:transform .15s,border-color .15s}
 .poster:hover .cv{transform:translateY(-4px);border-color:var(--ac)}
-.card[onclick]:hover{border-color:#8b5cf666}
+.card[onclick]:hover{border-color:rgba(var(--acr),.4)}
 .pri:hover{filter:brightness(1.12)}
 }
+
+/* Niveles, temporadas y tarjetas Story */
+.lvr{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--s2)}.lvr:first-child{border-top:0}
+.lvb{flex:none;min-width:46px;text-align:center;border-radius:12px;padding:6px 4px;background:linear-gradient(135deg,var(--acd),var(--acr));color:var(--onac);font-weight:800;font-size:13px}
+.hs{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}.hs::-webkit-scrollbar{display:none}
+.nw{flex:0 0 220px;scroll-snap-align:start;background:var(--s1,var(--card));border-radius:16px;overflow:hidden;color:var(--tx);text-decoration:none;display:flex;flex-direction:column;border:1px solid var(--s2)}
+.nw img,.nw .ph{width:100%;height:110px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--s2)}.nw b{font-size:14px;line-height:1.25;padding:10px 12px 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.nw span{font-size:11px;color:var(--mu);padding:0 12px 10px;margin-top:auto}
+.up{flex:0 0 118px;scroll-snap-align:start;cursor:pointer;display:flex;flex-direction:column;gap:4px}.up img,.up .ph{width:118px;height:158px;border-radius:12px;object-fit:cover;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:28px}.up b{font-size:12.5px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.up span{font-size:11px;color:var(--mu)}
+.alert{border:1px solid var(--ring);background:linear-gradient(135deg,var(--hero1),var(--hero2))}
+.sea{background:linear-gradient(135deg,var(--hero1),var(--hero2));border:1px solid var(--ring)}
+.stp{width:100%;border-radius:18px;display:block;margin:10px 0}
 </style></head><body>
 <div id="app"><div id="main"></div>
 <nav id="nav"></nav></div><div id="rc" onclick="rcTap(event)"></div><div id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sc"></div></div>
 <script>
-const APP_NAME="Playlog",SLOGAN="Your gaming story";document.title=APP_NAME;
+var LANG="es";const ML=()=>LANG==="en"?"JFMAMJJASOND":"EFMAMJJASOND";const APP_NAME="Playlog",SLOGAN="Your gaming story";document.title=APP_NAME;
 const ST={playing:"Jugando",done:"Completados",backlog:"Backlog",wish:"Deseados",drop:"Abandonados"};
 // Reglas XP centralizadas (derivadas de los registros: editar/borrar recalcula, sin farmeo)
 const XP={session:10,perHour:20,maxMinPerDay:600,completed:100};
+var ACCT=null,_pt=null;
 let S={games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""};
 try{const r=localStorage.getItem("playlog_v1");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
-const save=()=>{try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(e){}};
+LANG=S.lang||((navigator.language||"es").toLowerCase().startsWith("es")?"es":"en");document.documentElement.lang=LANG;
+const save=()=>{S._u=Date.now();try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(e){}if(typeof queuePush==="function")queuePush()};
 const $=s=>document.querySelector(s),e=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const ymd=d=>{d=new Date(d);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
@@ -165,23 +193,134 @@ const bar=(v,t)=>`<div class="bar"><i style="width:${Math.min(100,v/t*100)}%"></
 const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',lib:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5M16 11.5h.01M18.5 13.5h.01"/>',diary:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/>',prof:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'};
 function nav(){const t=[["home","Inicio"],["lib","Biblioteca"],["+",""],["diary","Diario"],["prof","Perfil"]];
  $("#nav").innerHTML=t.map(([k,l])=>k==="+"?`<button class="plus" aria-label="Añadir" onclick="openPlus()">+</button>`:`<button class="${tab===k?"on":""}" onclick="go('${k}')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${l}</button>`).join("")}
-function go(t){if(t==="diary"){const n=new Date();cal.y=n.getFullYear();cal.m=n.getMonth();cal.sel=today()}const ch=t!==tab;tab=t;R();if(ch)$("#main").scrollTop=0}
-function R(){nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib")list()}
-function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing"),up=S.games.filter(g=>g.status==="wish"&&g.released&&g.released>today()).sort((a,b)=>a.released.localeCompare(b.released));
+function go(t){if(t!=="lib")lib.sel=null;if(t==="diary"){const n=new Date();cal.y=n.getFullYear();cal.m=n.getMonth();cal.sel=today()}const ch=t!==tab;tab=t;R();if(ch)$("#main").scrollTop=0}
+function R(){nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib"){list();selUi()}if(tab==="home")homeLoad()}
+function ago(t){const m=Math.round((Date.now()-t)/6e4);return m<60?"hace "+Math.max(1,m)+" min":m<1440?"hace "+Math.round(m/60)+" h":"hace "+Math.round(m/1440)+" d"}
+function dleft(d){return Math.ceil((new Date(d+"T12:00")-new Date())/864e5)}
+function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing"),up=S.games.filter(g=>g.status==="wish"&&g.released&&g.released>today()).sort((a,b)=>a.released.localeCompare(b.released)),soon=up.filter(g=>dleft(g.released)<=7);
  const mem=[];S.games.forEach(g=>comps(g).forEach(d=>{const n=new Date(),t=new Date(d+"T12:00"),a=new Date(n.getFullYear(),t.getMonth(),t.getDate(),12),df=Math.round((n-a)/864e5),y=n.getFullYear()-t.getFullYear();if(y>0&&Math.abs(df)<=3)mem.push({g,y,d,df})}));
  return`<h1>¡Hola, ${e(S.user.name)}!</h1><div class="mu">${APP_NAME} · ${SLOGAN}</div>
  <div class="hero"><div class="ring" style="--p:${Math.round((s.xp-s.lo)/(s.hi-s.lo)*100)}"><b>${s.lv}</b><small>NIVEL</small></div><div style="flex:1"><div class="mu">${s.xp} XP</div><b style="font-size:17px">Faltan ${s.hi-s.xp} XP</b><div><span class="chip">🔥 ${s.cur} días de racha</span><span class="chip">🏆 récord ${s.rec}</span></div></div></div>
- ${mem.length?`<h2>🎉 Recuerdos</h2>${mem.map(m=>`<div class="card row" style="cursor:pointer" onclick="openGame('${m.g.id}')">${th(m.g,44,58)}<div>Hace ${m.y} ${m.y===1?"año":"años"} te pasaste <b>${e(m.g.title)}</b><div class="mu">${fd(m.d)}${m.df===0?" · ¡es hoy!":""}</div></div></div>`).join("")}`:""}<h2>Jugando ahora</h2>${pl.length?pl.map(gc).join(""):`<div class="empty">Aún no tienes juegos en curso.<br><button class="pri" onclick="go('lib')">Ir a la biblioteca</button></div>`}
- <h2>Misiones activas</h2>${missions().map(m=>`<div class="card"><div class="row sp"><span>${m.n}</span><span class="mu">${Math.min(m.v,m.t)}/${m.t}${m.v>=m.t?" ✅":""}</span></div>${bar(m.v,m.t)}</div>`).join("")}
- <h2>Próximos lanzamientos</h2>${up.map(g=>`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<b style="flex:1">${e(g.title)}</b><span class="mu">📅 ${fd(g.released)}<br>en ${Math.ceil((new Date(g.released+"T12:00")-new Date())/864e5)} d</span></div>`).join("")||`<div class="empty">Los juegos de Deseados con fecha de salida futura aparecerán aquí.</div>`}<div class="mu" style="margin-top:6px">Noticias de videojuegos: aún no disponible.</div>`}
-function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" style="cursor:pointer"><div class="row">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:`<div style="width:56px;height:56px;border-radius:8px;background:var(--s2);display:grid;place-items:center">🎮</div>`}<div><b>${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${H(gm(g.id))}</div></div></div><span>›</span></div>`}
-function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><button onclick="listsSheet()">📋 Listas</button></div>
+ ${soon.map(g=>`<div class="card alert row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,40,54)}<div style="flex:1;min-width:0"><b>🔔 ${e(g.title)}</b><div class="mu">${dleft(g.released)<=0?"¡Sale hoy!":"Sale en "+dleft(g.released)+" día"+(dleft(g.released)===1?"":"s")} · ${fd(g.released)}</div></div></div>`).join("")}
+ ${pl.length?`<h2>Jugando ahora</h2>${pl.map(gc).join("")}`:""}
+ <h2>📰 Noticias</h2><div id="news" class="hs"><div class="mu">Cargando noticias…</div></div>
+ <h2>🗓️ Próximos lanzamientos</h2>${up.length?`<div class="mu" style="margin:-4px 0 8px">En tu lista de deseos</div>${up.map(g=>`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<b style="flex:1">${e(g.title)}</b><span class="mu">📅 ${fd(g.released)}<br>en ${dleft(g.released)} d</span></div>`).join("")}`:""}<div class="mu" style="margin:6px 0 8px">Más esperados</div><div id="upc" class="hs"><div class="mu">Cargando lanzamientos…</div></div>
+ ${seasonCard()}<h2>Misiones activas</h2>${missions().map(m=>`<div class="card"><div class="row sp"><span>${m.n}</span><span class="mu">${Math.min(m.v,m.t)}/${m.t}${m.v>=m.t?" ✅":""}</span></div>${bar(m.v,m.t)}</div>`).join("")}
+ ${mem.length?`<h2>🎉 Recuerdos</h2>${mem.map(m=>`<div class="card row" style="cursor:pointer" onclick="openGame('${m.g.id}')">${th(m.g,44,58)}<div>Hace ${m.y} ${m.y===1?"año":"años"} te pasaste <b>${e(m.g.title)}</b><div class="mu">${fd(m.d)}${m.df===0?" · ¡es hoy!":""}</div></div></div>`).join("")}`:""}`}
+// Datos de Inicio: se guardan un rato en el dispositivo para que cargue al instante
+async function cached(key,url,ttl){let c=null;try{c=JSON.parse(localStorage.getItem(key)||"null")}catch(_){}
+ if(c&&Date.now()-c.t<ttl)return c.items;
+ try{const r=await fetch(url);if(!r.ok)throw 0;const d=await r.json();if(d.items&&d.items.length){try{localStorage.setItem(key,JSON.stringify({t:Date.now(),items:d.items}))}catch(_){}return d.items}}catch(_){}
+ return c?c.items:null}
+async function homeLoad(){
+ cached("playlog_news","/.netlify/functions/news",20*6e4).then(a=>{const el=$("#news");if(!el||tab!=="home")return;
+  el.innerHTML=a&&a.length?a.slice(0,12).map(n=>`<a class="nw" href="${e(n.link)}" target="_blank" rel="noopener">${n.img?`<img src="${e(n.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:`<div class="ph">📰</div>`}<b>${e(n.title)}</b><span>${e(n.src)}${n.t?" · "+ago(n.t):""}</span></a>`).join(""):`<div class="empty" style="width:100%">No se pudieron cargar las noticias ahora mismo.</div>`});
+ cached("playlog_upc","/.netlify/functions/igdb?upcoming=1",6*36e5).then(a=>{const el=$("#upc");if(!el||tab!=="home")return;const mine=new Set(S.games.map(g=>g.igdb));
+  el.innerHTML=a&&a.length?a.map(g=>`<div class="up" onclick="upGo(${g.id})">${g.cover?`<img ${oi(g.cover,220)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}<b>${e(g.title)}</b><span>📅 ${fd(g.released)}</span>${mine.has(g.id)?`<span class="chip" style="margin:0">En tu biblioteca</span>`:""}</div>`).join(""):`<div class="empty" style="width:100%">No se pudieron cargar los lanzamientos.</div>`})}
+async function upGo(id){sheet(`<div class="row sp"><span></span><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="empty" style="margin-top:30px">Cargando…</div>`);
+ try{const r=await fetch("/.netlify/functions/igdb?gid="+id);if(!r.ok)throw 0;const d=await r.json();if(!d.game)throw 0;window._agBack=[];CALL=[];agShow(d.game)}catch(_){closeSheet();alert("No se pudo cargar el juego. Inténtalo de nuevo.")}}
+
+// ===== DLCs y expansiones dentro de la ficha del juego =====
+const DST=[["","Pendiente","⬜"],["playing","Jugando","🎮"],["done","Completado","✅"]];
+function dlcSec(g){const a=g.dlcs||[];window._dlT=window._dlT||{};if(g.igdb&&!window._dlT[g.id]){window._dlT[g.id]=1;dlcFetch(g.id)}
+ const done=a.filter(x=>x.st==="done").length;
+ return`<h2>➕ DLCs y expansiones${a.length?` (${done}/${a.length})`:""}</h2><div class="card" id="dlcs">${a.length?a.map((x,i)=>{const s=DST.find(z=>z[0]===(x.st||""))||DST[0];return`<div class="lvr"><div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.name)}</b><div class="mu">${e(x.kind||"DLC")}${x.released?" · "+fd(x.released):""}</div></div><button onclick="dlcCycle('${g.id}',${i})">${s[2]} ${s[1]}</button><b style="cursor:pointer;color:var(--er);padding:0 6px" onclick="dlcDel('${g.id}',${i})">✕</b></div>`}).join(""):`<div class="mu">${g.igdb?"Buscando DLCs en IGDB…":"Sin DLCs todavía."}</div>`}<div class="row" style="margin-top:8px"><input id="dlcn" placeholder="Añadir DLC o expansión a mano"><button onclick="dlcAdd('${g.id}')">Añadir</button></div></div>`}
+async function dlcFetch(id){const g=G(id);if(!g||!g.igdb)return;
+ try{const r=await fetch("/.netlify/functions/igdb?id="+g.igdb);if(!r.ok)throw 0;const d=await r.json();const have=new Set((g.dlcs||[]).map(x=>x.id));g.dlcs=g.dlcs||[];
+  (d.dlcs||[]).forEach(x=>{if(!have.has(x.id))g.dlcs.push({id:x.id,name:x.name,kind:x.kind,released:x.released,st:""})});save()}catch(_){}
+ if($("#dlcs")&&window._og===id)openGame(id)}
+function dlcCycle(id,i){const x=G(id).dlcs[i],o=DST.map(z=>z[0]),n=o[(o.indexOf(x.st||"")+1)%o.length];x.st=n;if(n==="done")x.at=today();save();openGame(id)}
+function dlcDel(id,i){G(id).dlcs.splice(i,1);save();openGame(id)}
+function dlcAdd(id){const v=$("#dlcn").value.trim().slice(0,100);if(!v)return;const g=G(id);g.dlcs=g.dlcs||[];g.dlcs.push({id:"m"+uid(),name:v,kind:/expansi/i.test(v)?"Expansión":"DLC",released:"",st:""});save();openGame(id)}
+// ===== Niveles por género y plataforma =====
+const LVT=["Novato","Aprendiz","Jugón","Veterano","Experto","Maestro","Leyenda"];
+function subLv(){const g={},p={};
+ const add=(o,k,h,d)=>{if(!k)return;const x=o[k]||(o[k]={h:0,d:0});x.h+=h;x.d+=d};
+ S.sessions.forEach(x=>{const gm_=G(x.gameId);if(!gm_||gm_.status==="wish")return;const h=x.min/60;(gm_.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(k=>add(g,k,h,0));add(p,x.platform||gm_.platform,h,0)});
+ S.games.filter(q=>q.status==="done").forEach(q=>{const n=Math.max(1,comps(q).length);(q.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(k=>add(g,k,0,n));add(p,q.platform,0,n)});
+ const f=o=>Object.entries(o).map(([k,v])=>{const pts=v.h+3*v.d,lv=Math.floor(Math.sqrt(pts/2))+1;return{k,h:v.h,d:v.d,pts,lv,lo:2*(lv-1)**2,hi:2*lv*lv,t:LVT[Math.min(LVT.length-1,Math.floor((lv-1)/2))]}}).sort((a,b)=>b.pts-a.pts);
+ return{g:f(g),p:f(p)}}
+function lvRows(a){return a.length?a.map(x=>`<div class="lvr"><div class="lvb">Nv ${x.lv}</div><div style="flex:1;min-width:0"><div class="row sp"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.k)}</b><span class="mu">${x.t}</span></div>${bar(x.pts-x.lo,x.hi-x.lo)}<div class="mu" style="font-size:11px">${H(x.h*60)} · ${x.d} completado${x.d===1?"":"s"} · ${Math.ceil(x.hi-x.pts)} pts para Nv ${x.lv+1}</div></div></div>`).join(""):`<div class="empty">Aún no hay datos. Registra sesiones y se irán subiendo los niveles.</div>`}
+function levelsCard(){const L=subLv(),top=[...L.g.slice(0,2),...L.p.slice(0,1)];
+ return`<div class="card" style="cursor:pointer;margin-top:12px" onclick="levelsSheet()"><div class="row sp"><b>🏅 Niveles por género y plataforma</b><span class="mu">ver todos ›</span></div>${top.length?`<div style="margin-top:8px">${top.map(x=>`<span class="chip">${e(x.k)} · Nv ${x.lv}</span>`).join("")}</div>`:`<div class="mu" style="margin-top:6px">Juega para subir de nivel en cada género y plataforma.</div>`}</div>`}
+function levelsSheet(){const L=subLv();sheet(`<div class="row sp"><h1>🏅 Niveles</h1><button onclick="closeSheet()">✕</button></div><div class="mu">Cada hora jugada suma 1 punto y cada juego completado 3 puntos al género y a la plataforma.</div><h2>Por género</h2><div class="card">${lvRows(L.g)}</div><h2>Por plataforma</h2><div class="card">${lvRows(L.p)}</div>`)}
+
+// ===== Desafíos de temporada =====
+function season(){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),i=(m===11||m<2)?0:m<5?1:m<8?2:3,sy=i===0&&m<2?y-1:y,sm=[11,2,5,8][i],a=new Date(sy,sm,1),b=new Date(sy,sm+3,0),
+ nm=["Invierno","Primavera","Verano","Otoño"][i],em=["❄️","🌸","☀️","🍂"][i];
+ return{key:nm+" "+(i===0?sy+1:sy),nm,em,a:ymd(a),b:ymd(b),left:Math.max(0,Math.ceil((b-n)/864e5))}}
+function challenges(){const se=season(),ss=S.sessions.filter(x=>x.date>=se.a&&x.date<=se.b&&G(x.gameId)&&G(x.gameId).status!=="wish"),
+ gen=new Set(),pl=new Set(),dm={};ss.forEach(x=>{const g=G(x.gameId);(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(z=>gen.add(z));if(x.platform||g.platform)pl.add(x.platform||g.platform);dm[x.date]=1});
+ const days=Object.keys(dm).sort();let run=0,rec=0,pv=null;days.forEach(d=>{const t=new Date(d+"T12:00");run=pv&&Math.round((t-pv)/864e5)===1?run+1:1;pv=t;rec=Math.max(rec,run)});
+ const inr=d=>d&&d>=se.a&&d<=se.b,done=S.games.reduce((n,g)=>n+comps(g).filter(inr).length,0),goals=S.games.reduce((n,g)=>n+(g.goals||[]).filter(x=>x.done&&inr(x.at)).length,0),
+ hrs=Math.round(ss.reduce((a,x)=>a+x.min,0)/6)/10;
+ const list=[{i:"🏁",n:"Completa 2 juegos",v:done,t:2},{i:"⏱",n:"Juega 30 horas",v:hrs,t:30},{i:"🎨",n:"Prueba 3 géneros distintos",v:gen.size,t:3},{i:"🎮",n:"Juega en 2 plataformas",v:pl.size,t:2},{i:"🎖️",n:"Consigue 5 logros",v:goals,t:5},{i:"🔥",n:"Racha de 5 días seguidos",v:rec,t:5},{i:"📅",n:"Juega en 20 días distintos",v:days.length,t:20}];
+ const nd=list.filter(c=>c.v>=c.t).length;S.seasons=S.seasons||{};const o=S.seasons[se.key];
+ if(!o||o.done!==nd||o.total!==list.length){S.seasons[se.key]={nm:se.nm,em:se.em,done:nd,total:list.length};save()}
+ return{se,list,nd}}
+function seasonCard(){const c=challenges();return`<div class="card sea" style="cursor:pointer" onclick="seasonSheet()"><div class="row sp"><b>${c.se.em} Desafíos de ${c.se.nm}</b><span class="mu">${c.nd}/${c.list.length} · quedan ${c.se.left} d ›</span></div>${bar(c.nd,c.list.length)}</div>`}
+function seasonSheet(){const c=challenges(),old=Object.entries(S.seasons||{}).filter(([k])=>k!==c.se.key).sort((a,b)=>b[0].localeCompare(a[0]));
+ sheet(`<div class="row sp"><h1>${c.se.em} ${e(c.se.key)}</h1><button onclick="closeSheet()">✕</button></div><div class="mu">Del ${fd(c.se.a)} al ${fd(c.se.b)} · quedan ${c.se.left} días. Completa los 7 desafíos para llevarte el trofeo de la temporada.</div>
+ ${c.list.map(m=>`<div class="card"><div class="row sp"><span>${m.i} ${m.n}</span><span class="mu">${Math.min(m.v,m.t)}/${m.t}${m.v>=m.t?" ✅":""}</span></div>${bar(m.v,m.t)}</div>`).join("")}
+ ${c.nd===c.list.length?`<div class="card" style="text-align:center"><div style="font-size:44px">🏆</div><b>¡Trofeo de ${e(c.se.key)} conseguido!</b></div>`:""}
+ ${old.length?`<h2>Temporadas anteriores</h2>${old.map(([k,v])=>`<div class="card row sp"><span>${v.em} ${e(k)}</span><b>${v.done===v.total?"🏆 ":""}${v.done}/${v.total}</b></div>`).join("")}`:""}`)}
+
+// ===== Tarjetas Story para compartir (1080x1920) =====
+async function shareCanvas(c,name,title){const blob=await new Promise((res,rej)=>{try{c.toBlob(res)}catch(x){rej(x)}});if(!blob)return;
+ const f=new File([blob],name,{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title})}catch(_){}return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click()}
+async function drawStory(sp){const load=u=>new Promise(res=>{if(!u)return res(null);const i=new Image();i.crossOrigin="anonymous";i.onload=()=>res(i);i.onerror=()=>res(null);i.src=u});
+ const mk=async useImg=>{const c=document.createElement("canvas");c.width=1080;c.height=1920;const x=tctx(c.getContext("2d")),cs=getComputedStyle(document.documentElement),g=x.createLinearGradient(0,0,1080,1920);
+  g.addColorStop(0,cs.getPropertyValue("--acd").trim()||"#7c3aed");g.addColorStop(1,sp.alt||"#0f0f1a");x.fillStyle=g;x.fillRect(0,0,1080,1920);
+  x.textAlign="center";x.fillStyle="#ffffffcc";x.font="700 42px system-ui,sans-serif";x.fillText(sp.kind,540,150);
+  x.font="130px system-ui,sans-serif";x.fillStyle="#fff";x.fillText(sp.emoji,540,330);
+  const im=useImg?await load(sp.cover):null;x.fillStyle="#ffffff26";rr(x,300,400,480,640,32);x.fill();
+  if(im){x.save();rr(x,300,400,480,640,32);x.clip();x.drawImage(im,300,400,480,640);x.restore()}else{x.font="160px system-ui,sans-serif";x.fillStyle="#fff";x.fillText("🎮",540,760)}
+  x.fillStyle="#fff";const wrap=(t,w,mx)=>{const ws=t.split(" "),L=[];let l="";ws.forEach(q=>{if(x.measureText(l+" "+q).width>w&&l){L.push(l);l=q}else l=l?l+" "+q:q});L.push(l);return L.slice(0,mx)};
+  x.font="800 64px system-ui,sans-serif";let y=1140;wrap(sp.title,900,2).forEach(l=>{x.fillText(l,540,y);y+=76});
+  if(sp.sub){x.font="400 38px system-ui,sans-serif";x.fillStyle="#ffffffd9";wrap(sp.sub,900,2).forEach(l=>{x.fillText(l,540,y+10);y+=48})}
+  const st=sp.stats.filter(q=>q[0]),n=st.length||1,cw=900/n;st.forEach(([v,l],k)=>{const cx=90+cw*k+cw/2;x.fillStyle="#ffffff26";rr(x,90+cw*k+8,1500,cw-16,170,28);x.fill();x.fillStyle="#fff";x.font="800 52px system-ui,sans-serif";x.fillText(v,cx,1585);x.font="400 28px system-ui,sans-serif";x.fillStyle="#ffffffcc";x.fillText(l,cx,1635)});
+  x.fillStyle="#fff";x.font="600 34px system-ui,sans-serif";x.fillText((sp.user?sp.user+" · ":"")+"playlog",540,1830);return c};
+ try{return await mk(true)}catch(_){return await mk(false)}}
+async function storySheet(sp){sheet(`<div class="row sp"><h1>📤 Tarjeta Story</h1><button onclick="closeSheet()">✕</button></div><div id="stv" class="empty">Creando tarjeta…</div>`);
+ const c=await drawStory(sp);window._stc=c;window._stn=sp.file;const v=$("#stv");if(!v)return;
+ v.className="";v.innerHTML=`<img class="stp" alt="Tarjeta" src="${c.toDataURL("image/png")}" style="max-height:62vh;width:auto;margin:10px auto"><button class="pri" style="width:100%" onclick="shareCanvas(window._stc,window._stn,'Playlog')">📤 Compartir (Instagram / TikTok)</button><div class="mu" style="text-align:center;margin-top:6px">Si tu móvil no permite compartir, se descargará la imagen.</div>`}
+function storyGame(id){const g=G(id);if(!g)return;const rd=g.doneDate||g.rating?.date,sc=g.rating?.score;
+ storySheet({kind:"JUEGO COMPLETADO",emoji:"🏁",cover:g.cover,title:g.title,sub:[g.platform,g.genre].filter(Boolean).join(" · "),stats:[[sc!=null&&sc!==""?"⭐ "+sc+"/10":"","nota"],[H(gm(id)),"jugadas"],[rd?fd(rd):"","completado"]],user:S.user.name,file:"playlog-"+id+".png"})}
+function storyGoal(id,i){const g=G(id),x=g?.goals?.[i];if(!x)return;
+ storySheet({kind:"LOGRO DESBLOQUEADO",emoji:"🎖️",cover:g.cover,title:x.name,sub:g.title,alt:"#1a1033",stats:[[g.rating?.score?"⭐ "+g.rating.score+"/10":"","nota"],[H(gm(id)),"jugadas"],[x.at?fd(x.at):"","fecha"]],user:S.user.name,file:"playlog-logro.png"})}
+function storyPlat(id){const g=G(id);if(!g)return;
+ storySheet({kind:"PLATINO CONSEGUIDO",emoji:"🏆",cover:g.cover,title:g.title,sub:g.platform||"PlayStation",alt:"#1e3a5f",stats:[[g.rating?.score?"⭐ "+g.rating.score+"/10":"","nota"],[H(gm(id)),"jugadas"],[g.platAt?fd(g.platAt):"","fecha"]],user:S.user.name,file:"playlog-platino.png"})}
+// ===== Edición en lote: mantén pulsado un juego (o "Elegir") y marca varios =====
+let _lp=null,_lpx=0,_lpy=0,_lpd=false;
+function pDown(ev,id){_lpd=false;_lpx=ev.clientX;_lpy=ev.clientY;clearTimeout(_lp);if(lib.sel)return;_lp=setTimeout(()=>{_lp=null;_lpd=true;lib.sel=new Set([id]);if(navigator.vibrate)try{navigator.vibrate(15)}catch(_){}list();selUi()},480)}
+document.addEventListener("pointermove",ev=>{if(_lp&&(Math.abs(ev.clientX-_lpx)>10||Math.abs(ev.clientY-_lpy)>10)){clearTimeout(_lp);_lp=null}},true);
+["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,()=>{clearTimeout(_lp);_lp=null;if(_lpd)setTimeout(()=>{_lpd=false},350)},true));
+function pTap(id){if(_lpd)return;if(lib.sel){lib.sel.has(id)?lib.sel.delete(id):lib.sel.add(id);list();selUi();return}openGame(id)}
+function selOn(){lib.sel=new Set();list();selUi()}
+function selOff(){lib.sel=null;list();selUi()}
+function selAll(){lib.sel=new Set(lib._vis||[]);list();selUi()}
+function selUi(){const el=$("#selbar");if(!el)return;if(!lib.sel){el.innerHTML="";return}const n=lib.sel.size;
+ el.innerHTML=`<div class="selbar"><div class="row sp"><b>${n?n+" seleccionado"+(n===1?"":"s"):"Toca los juegos para elegirlos"}</b><div class="row"><button onclick="selAll()">Todos</button><button onclick="selOff()">✕</button></div></div><div class="selact"><button ${n?"":"disabled"} onclick="selStatus()">🔄 Estado</button><button ${n?"":"disabled"} onclick="selList()">📋 Lista</button><button class="dng" ${n?"":"disabled"} onclick="selDel()">🗑 Borrar</button></div></div>`}
+function selStatus(){if(!lib.sel||!lib.sel.size)return;sheet(`<div class="row sp"><h1>Cambiar estado</h1><button onclick="closeSheet()">✕</button></div><div class="mu">${lib.sel.size} juego${lib.sel.size===1?"":"s"} seleccionado${lib.sel.size===1?"":"s"}</div>${Object.entries(ST).map(([k,v])=>`<button style="width:100%;margin-top:8px;padding:14px" onclick="selSetStatus('${k}')">${v}</button>`).join("")}`)}
+function selSetStatus(k){[...lib.sel].forEach(id=>{const g=G(id);if(!g||g.status===k)return;const was=g.status;g.status=k;if(k==="playing")g.playAt=Date.now();if(k==="done"&&was!=="done"){g.doneDate=lastS(g)||today();const c=comps(g);if(!c.includes(g.doneDate))c.push(g.doneDate);c.sort()}});save();lib.sel=null;closeSheet();R()}
+function selList(){if(!lib.sel||!lib.sel.size)return;S.lists=S.lists||[];sheet(`<div class="row sp"><h1>Añadir a lista</h1><button onclick="closeSheet()">✕</button></div><div class="mu">${lib.sel.size} juego${lib.sel.size===1?"":"s"}</div>${S.lists.map(l=>`<button style="width:100%;margin-top:8px" onclick="selToList('${l.id}')">📋 ${e(l.name)}</button>`).join("")||`<div class="empty">Aún no tienes listas.</div>`}<div class="row" style="margin-top:12px"><input id="nl3" placeholder="Nueva lista" maxlength="40"><button class="pri" onclick="selNewList()">Crear y añadir</button></div>`)}
+function selToList(id){const l=(S.lists||[]).find(x=>x.id===id);if(!l)return;lib.sel.forEach(g=>{if(!l.ids.includes(g))l.ids.push(g)});save();lib.sel=null;closeSheet();R()}
+function selNewList(){const n=$("#nl3").value.trim().slice(0,40);if(!n)return;S.lists=S.lists||[];S.lists.push({id:uid(),name:n,ids:[...lib.sel]});save();lib.sel=null;closeSheet();R()}
+function selDel(){const ids=lib.sel;if(!ids||!ids.size)return;if(!confirm("¿Eliminar "+ids.size+" juego"+(ids.size===1?"":"s")+" y sus sesiones?"))return;
+ S.games=S.games.filter(g=>!ids.has(g.id));S.sessions=S.sessions.filter(x=>!ids.has(x.gameId));(S.lists||[]).forEach(l=>l.ids=l.ids.filter(i=>!ids.has(i)));save();lib.sel=null;R()}
+// Imágenes de IGDB a través de Netlify Image CDN (tamaño justo + WebP). Si falla, se usa la original.
+const opt=(u,w)=>u&&u.startsWith("https://images.igdb.com/")?"/.netlify/images?url="+encodeURIComponent(u)+"&w="+w+"&fm=webp&q=72":u;
+const oi=(u,w)=>`src="${e(opt(u,w))}" data-o="${e(u)}" decoding="async"`;
+document.addEventListener("error",ev=>{const t=ev.target;if(t&&t.tagName==="IMG"&&t.dataset&&t.dataset.o&&!t.dataset.f){t.dataset.f="1";t.src=t.dataset.o}},true);
+function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" style="cursor:pointer"><div class="row">${g.cover?`<img ${oi(g.cover,170)} alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:`<div style="width:56px;height:56px;border-radius:8px;background:var(--s2);display:grid;place-items:center">🎮</div>`}<div><b>${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${H(gm(g.id))}</div></div></div><span>›</span></div>`}
+function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><div class="row"><button onclick="selOn()">☑️ Elegir</button><button onclick="listsSheet()">📋 Listas</button></div></div>
  <div class="row" style="margin-top:8px"><input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()"><button onclick="filt()" style="white-space:nowrap">⚙️ Filtros${Object.values(lib.f).filter((v,i)=>i<3&&v).length?" ("+Object.values(lib.f).filter((v,i)=>i<3&&v).length+")":""}</button></div>
- <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.st='${k}';R()">${v}</button>`).join("")}
- </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button>`:""}<div id="list"></div>`}
+ <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.sel=null;lib.st='${k}';R()">${v}</button>`).join("")}
+ </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button>`:""}<div id="list"></div><div id="selbar"></div>`}
 function comps(g){if(!g.completions)g.completions=g.doneDate?[g.doneDate]:[];return g.completions}
-function gg(g){const rt=g.rating?.score,n=comps(g).length;return`<div class="poster" onclick="openGame('${g.id}')"><div class="cv">${g.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.title)}</b><span>⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}${n>1?" · 🏁×"+n:""}</span></div>`}
-function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q)&&(!F.pl||g.platform===F.pl)&&(!F.gen||(g.genre||"").split(",").map(z=>z.trim()).includes(F.gen))&&(!F.fmt||g.format===F.fmt));
+function gg(g){const rt=g.rating?.score,n=comps(g).length,on=lib.sel&&lib.sel.has(g.id);return`<div class="poster${on?" picked":""}" onclick="pTap('${g.id}')" onpointerdown="pDown(event,'${g.id}')" oncontextmenu="return false"><div class="cv">${g.cover?`<img ${oi(g.cover,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}${lib.sel?`<span class="ck">${on?"✓":""}</span>`:""}</div><b>${e(g.title)}</b><span>⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}${n>1?" · 🏁×"+n:""}</span></div>`}
+function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q)&&(!F.pl||g.platform===F.pl)&&(!F.gen||(g.genre||"").split(",").map(z=>z.trim()).includes(F.gen))&&(!F.fmt||g.format===F.fmt));lib._vis=a.map(g=>g.id);
  if(!a.length)return $("#list").innerHTML=`<div class="empty">No hay juegos aquí todavía.</div>`;
  if(lib.st!=="done"){const last=g=>S.sessions.filter(x=>x.gameId===g.id).reduce((m,x)=>x.date>m?x.date:m,""),so={name:(x,y)=>x.title.localeCompare(y.title),date:(x,y)=>(y.released||"").localeCompare(x.released||""),hours:(x,y)=>gm(y.id)-gm(x.id),rating:(x,y)=>(y.rating?.score||0)-(x.rating?.score||0)};
   a=[...a].sort(lib.st==="drop"&&F.sort==="name"?(x,y)=>last(y).localeCompare(last(x)):so[F.sort]||so.name);return $("#list").innerHTML=`<div class="grid">${a.map(gg).join("")}</div>`}
@@ -222,7 +361,7 @@ function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)
 function addGame(){manualSheet(-1)}
 function pl(g){return g?.platforms||[]}
 function platOpts(list,sel){const k=[...new Set([sel,...list].filter(Boolean))],o=a=>a.map(p=>`<option ${p===sel?"selected":""}>${e(p)}</option>`).join(""),rest=PLAT.filter(p=>!k.includes(p));return k.length?`<optgroup label="Plataformas del juego">${o(k)}</optgroup><optgroup label="Otras plataformas">${o(rest)}</optgroup>`:o(PLAT)}
-function th(g,w,h){return g?.cover?`<img src="${e(g.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:${w}px;height:${h}px;object-fit:cover;border-radius:10px;flex:none">`:`<div style="width:${w}px;height:${h}px;border-radius:10px;background:var(--s2);display:grid;place-items:center;flex:none">🎮</div>`}
+function th(g,w,h){return g?.cover?`<img ${oi(g.cover,Math.min(420,w*3))} alt="" loading="lazy" referrerpolicy="no-referrer" style="width:${w}px;height:${h}px;object-fit:cover;border-radius:10px;flex:none">`:`<div style="width:${w}px;height:${h}px;border-radius:10px;background:var(--s2);display:grid;place-items:center;flex:none">🎮</div>`}
 function gchips(a){window._gs=new Set(a);return`<div style="margin-top:4px">${[...GEN,...a.filter(x=>!GEN.includes(x))].map(x=>`<span class="chipb ${window._gs.has(x)?"on":""}" data-g="${e(x)}" onclick="tg(this)">${e(x)}</span>`).join("")}</div>`}
 function tg(el){const x=el.dataset.g;window._gs.has(x)?window._gs.delete(x):window._gs.add(x);el.classList.toggle("on")}
 function verChg(i){const b=CR[i],v=b.versions[$("#gv").value];$("#gp").innerHTML=platOpts([...v.platforms,...b.platforms],"")}
@@ -240,7 +379,7 @@ function manualSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.
 function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math.round(x*60)):"—",
  mine=S.games.filter(g=>g.title.toLowerCase()===b.title.toLowerCase()&&g.rating?.score),ps=mine.length?(mine.reduce((n,g)=>n+g.rating.score,0)/mine.length).toFixed(1).replace(/\.0$/,""):"—",
  cs=b.critic,cc=cs==null?"var(--mu)":cs>=75?"#22c55e":cs>=50?"#eab308":"#ef4444",
- big=(src,ph)=>src?`<img src="${e(src)}" alt="" referrerpolicy="no-referrer">`:`<div class="ph">${ph}</div>`;
+ big=(src,ph)=>src?`<img ${oi(src,360)} alt="" referrerpolicy="no-referrer">`:`<div class="ph">${ph}</div>`;
  sheet(`<div class="row sp"><button onclick="backToSearch()" aria-label="Volver">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
  <div class="ag-top"><div class="ag-cv">${big(b.cover,"🎮")}</div><div class="ag-info"><h1>${e(b.title)}</h1><div class="ag-dev">${e(b.dev||"Desarrolladora desconocida")}</div><div class="ag-date">${b.released?e(fd(b.released)):"Sin fecha de salida"}</div></div></div>
  <div class="card ag-desc">${b.summary?`<div id="ag-sum" class="clamp">${e(b.summary)}</div><button id="ag-more" class="lnk" style="display:none" onclick="agMore()">Ver más</button>`:`<span class="mu">Sin descripción.</span>`}</div>${(b.genres||[]).length?`<div class="ag-gen">${b.genres.map(x=>`<span class="tag">${e(x)}</span>`).join("")}</div>`:""}
@@ -250,10 +389,10 @@ function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math
  <div id="ag-det">${agDet(b)}</div>`);window._agB=b;agLoad(b);agClamp()}
 function agDet(b){const sh=b.screens||[],sm=b.simG||[];
  if(!b._det&&b.id&&b.dev!==undefined)return`<div class="mu" style="margin-top:22px">Cargando capturas y juegos similares…</div>`;
- const big=(src)=>src?`<img src="${e(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`;
- return(sh.length?`<h2>Screenshots</h2><div class="ag-shots${sh.length%2?" odd":""}">${sh.slice(0,5).map(u=>`<img src="${e(u)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join("")}</div>`:"")+(sm.length?`<h2>Juegos similares</h2><div class="ag-sim">${sm.slice(0,8).map((x,k)=>`<div data-k="${k}" onclick="simGo(+this.dataset.k)">${big(x.cover)}<span>${e(x.name)}</span></div>`).join("")}</div>`:"")}
+ const big=(src)=>src?`<img ${oi(src,220)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`;
+ return(sh.length?`<h2>Screenshots</h2><div class="ag-shots${sh.length%2?" odd":""}">${sh.slice(0,5).map(u=>`<img ${oi(u,720)} alt="" loading="lazy" referrerpolicy="no-referrer">`).join("")}</div>`:"")+((b.dlcs||[]).length?`<h2>DLCs y expansiones</h2><div class="card">${b.dlcs.slice(0,8).map(x=>`<div class="lvr"><div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.name)}</b><div class="mu">${x.kind}${x.released?" · "+fd(x.released):""}</div></div></div>`).join("")}${b.dlcs.length>8?`<div class="mu">y ${b.dlcs.length-8} más…</div>`:""}</div>`:"")+(sm.length?`<h2>Juegos similares</h2><div class="ag-sim">${sm.slice(0,8).map((x,k)=>`<div data-k="${k}" onclick="simGo(+this.dataset.k)">${big(x.cover)}<span>${e(x.name)}</span></div>`).join("")}</div>`:"")}
 async function agLoad(b){if(b._det||!b.id||b.dev===undefined)return;
- try{const r=await fetch("/.netlify/functions/igdb?id="+b.id);if(!r.ok)throw 0;const d=await r.json();b.screens=d.screens||[];b.simG=d.simG||[]}catch(_){b.screens=b.screens||[];b.simG=b.simG||[]}
+ try{const r=await fetch("/.netlify/functions/igdb?id="+b.id);if(!r.ok)throw 0;const d=await r.json();b.screens=d.screens||[];b.simG=d.simG||[];b.dlcs=d.dlcs||[]}catch(_){b.screens=b.screens||[];b.simG=b.simG||[];b.dlcs=b.dlcs||[]}
  b._det=1;const el=$("#ag-det");if(el&&window._agB===b)el.innerHTML=agDet(b)}
 function trackPick(i,st){if(!["done","backlog","playing"].includes(st))return trackGame(i,st,"Digital");const b=CR[i];if(!b)return;
  const pf=pl(b),def=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
@@ -262,7 +401,7 @@ function trackPick(i,st){if(!["done","backlog","playing"].includes(st))return tr
  <label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
 function agClamp(){const run=()=>{const el=$("#ag-sum"),m=$("#ag-more");if(el&&m&&!el.classList.contains("open"))m.style.display=el.scrollHeight>el.clientHeight+1?"block":"none"};requestAnimationFrame(run);setTimeout(run,300)}
 function agMore(){const el=$("#ag-sum"),m=$("#ag-more");m.textContent=el.classList.toggle("open")?"Ver menos":"Ver más"}
-function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender()}
+function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender();else if(window._lastQ)sgType(window._lastQ)}
 function agShow(b){CR=[b];addSheet(0)}
 function simSearch(n){catSearch();$("#cq").value=n;catGo()}
 async function simGo(k){const cur=window._agB,x=(cur?.simG||[])[k];if(!x)return;if(!x.id)return simSearch(x.name);
@@ -271,7 +410,7 @@ async function simGo(k){const cur=window._agB,x=(cur?.simG||[])[k];if(!x)return;
  try{const r=await fetch("/.netlify/functions/igdb?gid="+x.id);if(!r.ok)throw 0;const d=await r.json();if(!d.game)throw 0;if(cancel)return;
   (window._agBack=window._agBack||[]).push(cur);agShow(d.game)}catch(_){if(!cancel)simSearch(x.name)}}
 function trackGame(i,st,fmt){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),p=$("#tp")?$("#tp").value:(pf.includes(S.pref)?S.pref:(pf[0]||S.pref||""));
- const g={id,title:b.title,platform:p,platforms:pf,genre:(b.genres||[]).join(", "),format:fmt||"Digital",status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,dev:b.dev||"",critic:b.critic??null,run:1,challenge:"",versions:[],version:0,playAt:st==="playing"?Date.now():0,completions:[]};
+ const g={id,igdb:b.id||0,dlcs:(b.dlcs||[]).map(x=>({id:x.id,name:x.name,kind:x.kind,released:x.released,st:""})),title:b.title,platform:p,platforms:pf,genre:(b.genres||[]).join(", "),format:fmt||"Digital",status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,dev:b.dev||"",critic:b.critic??null,run:1,challenge:"",versions:[],version:0,playAt:st==="playing"?Date.now():0,completions:[]};
  if(st==="done"){g.doneDate=today();g.completions=[g.doneDate]}
  S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
@@ -283,14 +422,16 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ss=S.sessions.filter(s=>s.gameId===id).sort((a,b)=>b.date.localeCompare(a.date)),rd=g.doneDate||g.rating?.date,
  d3=(hl?[["main","Main story"],["extra","Main + extras"],["full","Completionist"]]:[["fast","Main story"],["main","Main + extras"],["full","Completionist"]]).map(([k,l])=>`<div><b>${t[k]?H(Math.round(t[k]*60)):"—"}</b><span>${l}</span></div>`).join("");
  sheet(`<div class="row sp"><button onclick="editGame('${id}')">✏️ Editar</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
- <div class="ag-top" style="margin-top:14px"><div class="ag-cv" style="width:96px">${g.cover?`<img src="${e(g.cover)}" alt="" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><div class="ag-info"><h1>${e(g.title)}</h1><div class="mu">${e([g.platform,g.genre].filter(Boolean).join(" · "))}${g.platform||g.genre?" · ":""}⏱ ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>${g.challenge?`<div><span class="tag">🎯 ${e(g.challenge)}</span></div>`:""}</div></div>
+ <div class="ag-top" style="margin-top:14px"><div class="ag-cv" style="width:96px">${g.cover?`<img ${oi(g.cover,300)} alt="" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><div class="ag-info"><h1>${e(g.title)}</h1><div class="mu">${e([g.platform,g.genre].filter(Boolean).join(" · "))}${g.platform||g.genre?" · ":""}⏱ ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>${g.challenge?`<div><span class="tag">🎯 ${e(g.challenge)}</span></div>`:""}</div></div>
  <h2>Estado</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button class="${g.status===k?"on":""}" ${g.status===k?"":`onclick="setStatus('${id}','${k}')"`}>${l}</button>`).join("")}</div>
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fd(rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
+ ${g.status==="done"?`<button class="pri" style="margin-top:8px;width:100%" onclick="storyGame('${id}')">📤 Compartir tarjeta Story</button>`:""}
  ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}
  ${compSec(g)}
+ ${dlcSec(g)}
  <h2>Duración</h2><div class="ag-dur">${d3}</div><div class="mu" style="margin-top:6px">${t.fast||t.main||t.extra||t.full?(hl?"Duración puesta por ti. ":"Estimación de IGDB. "):"Sin duración todavía. "}<a href="https://howlongtobeat.com/?q=${encodeURIComponent(g.title)}" target="_blank" rel="noopener" style="color:var(--ac2)">Ver en HowLongToBeat</a></div>
- <h2>Logros</h2><div class="card">${isPS(g)?`<label class="row" style="color:var(--tx);font-size:15px;margin:0 0 10px"><input type="checkbox" style="width:24px;min-height:24px" ${g.platinum?"checked":""} onchange="togPlat('${id}')">🏆 Platino conseguido${g.platinum&&g.platAt?" · "+fd(g.platAt):""}</label>`:""}${gl.length?`<div class="mu">🎖️ ${dn} de ${gl.length} logros conseguidos · Logros personalizados: no se verifican automáticamente.</div>`:`<div class="mu">Sin logros todavía.</div>`}
- ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${x.done?"🎖️ ":""}${e(x.name)}</span><button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
+ <h2>Logros</h2><div class="card">${isPS(g)?`<label class="row" style="color:var(--tx);font-size:15px;margin:0 0 10px"><input type="checkbox" style="width:24px;min-height:24px" ${g.platinum?"checked":""} onchange="togPlat('${id}')">🏆 Platino conseguido${g.platinum&&g.platAt?" · "+fd(g.platAt):""}${g.platinum?` <button style="margin-left:auto;min-height:32px;padding:2px 10px" onclick="event.preventDefault();storyPlat('${id}')">📤</button>`:""}</label>`:""}${gl.length?`<div class="mu">🎖️ ${dn} de ${gl.length} logros conseguidos · Logros personalizados: no se verifican automáticamente.</div>`:`<div class="mu">Sin logros todavía.</div>`}
+ ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${x.done?"🎖️ ":""}${e(x.name)}</span>${x.done?`<button style="min-height:32px;padding:2px 10px" onclick="storyGoal('${id}',${i})">📤</button>`:""}<button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
  <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo logro"><button onclick="addGoal('${id}')">Añadir</button></div></div>
  <h2>Notas</h2><textarea onchange="G('${id}').notes=this.value;save()">${e(g.notes)}</textarea>
  <h2>Sesiones (${ss.length})</h2><div class="card">${ss.map(s=>`<div class="mu" style="margin:2px 0">${comps(g).includes(s.date)?"⭐ ":""}${fd(s.date)} - ${fm(s.min)}${s.note?" - "+e(s.note):""}${s.run>1?" (Partida "+s.run+")":""}</div>`).join("")||`<div class="mu">Ninguna</div>`}</div>
@@ -349,8 +490,8 @@ function vDiary(){const{y,m,sel}=cal,dm=stats().dm,cd=new Set(S.games.flatMap(g=
  let c="";for(let i=0;i<f;i++)c+="<span></span>";
  for(let d=1;d<=n;d++){const k=ymd(new Date(y,m,d));c+=`<button class="${dm[k]?"dot":""} ${cd.has(k)?"gold":""} ${k===sel?"sel":""}" onclick="if(cal.sel==='${k}')openLog('${k}');else{cal.sel='${k}';R()}">${d}</button>`}
  const ss=S.sessions.filter(s=>s.date===sel),tot=ss.reduce((a,s)=>a+s.min,0);
- return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1 style="cursor:pointer;text-align:center" onclick="pickMonth()">${new Date(y,m,1).toLocaleDateString("es",{month:"long",year:"numeric"})} ▾</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
- <div class="cal mu" style="margin:8px 0">${["L","M","X","J","V","S","D"].map(d=>`<span>${d}</span>`).join("")}</div><div class="cal">${c}</div>
+ return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1 style="cursor:pointer;text-align:center" onclick="pickMonth()">${new Date(y,m,1).toLocaleDateString(LANG==="en"?"en-US":"es",{month:"long",year:"numeric"})} ▾</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
+ <div class="cal mu" style="margin:8px 0">${(LANG==="en"?["M","T","W","T","F","S","S"]:["L","M","X","J","V","S","D"]).map(d=>`<span>${d}</span>`).join("")}</div><div class="cal">${c}</div>
  <h2 style="margin:20px 0 10px">${sel.split("-").reverse().join("/")} · ${fm(tot)}</h2>
  ${S.games.filter(g=>comps(g).includes(sel)).map(g=>`<div class="card row" style="border-color:#f5c518">${th(g,40,54)}<b style="flex:1">🏁 Completaste ${e(g.title)}</b></div>`).join("")}${ss.map(s=>{const g=G(s.gameId);return`<div class="card row" style="cursor:pointer" onclick="editS('${s.id}')">${th(g,52,70)}<div style="min-width:0"><b>${g&&comps(g).includes(s.date)?"⭐ ":""}${e(g?.title||"?")}</b><div class="mu">${e(s.platform||"—")} · ${fm(s.min)}</div>${s.note?`<div class="mu">${e(s.note)}</div>`:""}</div></div>`}).join("")||`<div class="empty">Sin sesiones este día.</div>`}
  <button class="pri" style="width:100%" onclick="openLog(cal.sel)">+ Registrar sesión el ${sel.split("-").reverse().join("/")}</button>`}
@@ -374,6 +515,7 @@ function vProf(){const s=stats(),yr=String(new Date().getFullYear()),tot=S.sessi
  <div class="card" style="margin:0"><div class="row sp"><span class="mu">⏱ Horas</span><b>${H(tot)}</b></div><div class="row sp"><span class="mu">🎮 Sesiones</span><b>${S.sessions.length}</b></div><div class="row sp"><span class="mu">🏁 Completados</span><b>${S.games.filter(g=>g.status==="done").length}</b></div></div></div>
  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px">${tt}</div>
  <div class="card" style="cursor:pointer;margin-top:12px" onclick="logrosSheet()"><div class="row sp"><b>🎖️ Logros</b><span class="mu">${nAll?nDone+"/"+nAll+" · ":""}🏆 ${pls} platinos ›</span></div>${nAll?bar(nDone,nAll):""}</div>
+ ${levelsCard()}
  <div class="card"><b>🎞️ Recaps</b><div class="row" style="flex-wrap:wrap;margin-top:8px">${yrs.map(y=>`<button class="pri" onclick="recap('${y}')">${y}</button>`).join("")}</div></div>
  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${miniPie(gen,"gen","Géneros")}${miniPie(plt,"plt","Plataformas")}${miniPie(fmtc,"fmt","Físico / Digital")}</div>
  ${evo()}
@@ -396,7 +538,7 @@ function rcTap(ev){const o=window._rc;if(!o)return;const b=ev.currentTarget.getB
 function rcShow(){const{sl,i}=window._rc,[bg,h]=sl[i],o=$("#rc");o.style.display="flex";o.style.background="linear-gradient(160deg,"+bg+")";
  o.innerHTML=`<div class="rc-bars">${sl.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div><button class="rc-x" aria-label="Cerrar" onclick="event.stopPropagation();$('#rc').style.display='none'">✕</button><div class="rc-body">${h}</div><div class="rc-hint">${i<sl.length-1?"Toca para continuar ›":""}</div>`}
 function recap(y){const ss=S.sessions.filter(x=>x.date.startsWith(y)&&G(x.gameId)&&G(x.gameId).status!=="wish");if(!ss.length)return alert("No hay sesiones en "+y);
- const MN=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],DNp=["domingos","lunes","martes","miércoles","jueves","viernes","sábados"],nf=n=>n.toFixed(1).replace(".",",");
+ const MN=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],DNp=["domingos","lunes","martes","miércoles","jueves","viernes","sábados"],nf=n=>n.toFixed(1).replace(".",LANG==="en"?".":",");
  const tot=ss.reduce((a,x)=>a+x.min,0),days=new Set(ss.map(x=>x.date)),byG={},byD={},wd=Array(7).fill(0),mon=Array(12).fill(0),gen={},plt={};
  ss.forEach(x=>{byG[x.gameId]=(byG[x.gameId]||0)+x.min;byD[x.date]=(byD[x.date]||0)+x.min;wd[new Date(x.date+"T12:00").getDay()]+=x.min;mon[+x.date.slice(5,7)-1]+=x.min;const g=G(x.gameId);(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(z=>gen[z]=(gen[z]||0)+x.min);if(x.platform)plt[x.platform]=(plt[x.platform]||0)+x.min});
  const top=Object.entries(byG).map(([id,m])=>[G(id),m]).sort((a,b)=>b[1]-a[1]),fmt={};top.forEach(([g])=>{const k=g.format||"Digital";fmt[k]=(fmt[k]||0)+1});
@@ -416,8 +558,8 @@ function recap(y){const ss=S.sessions.filter(x=>x.date.startsWith(y)&&G(x.gameId
  const sl=[["#e60012,#ff8a4c",`<div style="font-size:64px">🎮</div>${sm("Tu año en Playlog")}${big(y)}${sm("Toca para empezar")}`],
  ["#00a5e0,#6a5cff",`${sm("Este año has jugado")}${big(H(tot))}${sm(days.size+" días con actividad · "+ss.length+" sesiones · "+top.length+" juegos")}`],
  ["#0ea5e9,#22c55e",`${sm("Tu equivalente en la vida real")}${eq.slice(0,3).map(t=>`<div style="font-size:20px;margin:16px 0">${t}</div>`).join("")}`],
- ["#2563eb,#22d3ee",`${sm("Tu mes estrella")}${big(MN[mi])}${sm("con "+H(mx)+" jugadas")}${bars(mon,mi,"EFMAMJJASOND")}`],
- ["#14b8a6,#3b82f6",`${sm("Sueles jugar más los")}${big(DNp[wi])}${sm(H(wm)+" acumuladas")}${bars([1,2,3,4,5,6,0].map(k=>wd[k]),[1,2,3,4,5,6,0].indexOf(wi),"LMXJVSD")}`],
+ ["#2563eb,#22d3ee",`${sm("Tu mes estrella")}${big(MN[mi])}${sm("con "+H(mx)+" jugadas")}${bars(mon,mi,ML())}`],
+ ["#14b8a6,#3b82f6",`${sm("Sueles jugar más los")}${big(DNp[wi])}${sm(H(wm)+" acumuladas")}${bars([1,2,3,4,5,6,0].map(k=>wd[k]),[1,2,3,4,5,6,0].indexOf(wi),(LANG==="en"?"MTWTFSS":"LMXJVSD"))}`],
  ["#f97316,#ef4444",`${sm("Tu día más maratoniano")}${big(fd(bd[0]))}${sm("Ese día rompiste tu récord: jugaste "+H(bd[1])+" en total")}${sm(dn)}`],
  ["#16a34a,#facc15",`${sm("Tu racha más larga")}${big(rec+(rec===1?" día":" días"))}${sm("Mantuviste la racha sin faltar a tu cita")}${sm("Juegos completados: "+done.length)}`],
  ["#8b5cf6,#f472b6",`${sm("Tu top 5 más jugados")}${top.slice(0,5).map((a,i)=>`<div class="row" style="margin-top:10px;text-align:left">${th(a[0],48,64)}<b style="flex:1">${i+1}. ${e(a[0].title)}</b><span>${H(a[1])}</span></div>`).join("")}`],
@@ -432,11 +574,11 @@ function bdg(){const B=badges(),col={"común":"#9ca3af","rara":"#38bdf8","épica
  return`<h2>Insignias (${u}/${B.length})</h2><div class="bgrid">${B.map(([ic,n,r,c,t])=>{const on=c>=t;return`<div class="bd ${on?"on":""}" style="--c:${col[r]}"><div style="font-size:26px">${ic}</div><b>${n}</b><span>${r}</span>${on?"":`<div class="bar" style="margin-top:6px"><i style="width:${Math.min(100,c/t*100)}%"></i></div><span>${+Math.min(c,t).toFixed(1)}/${t}</span>`}</div>`}).join("")}</div>`}
 function evoBar(o){const mx=Math.max(...o.map(a=>a[1]),1);return`<div style="display:flex;align-items:flex-end;gap:5px;height:120px;margin-top:10px">${o.map(([l,v])=>`<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%"><span style="font-size:9px;color:var(--mu)">${v?Math.round(v/60)+"h":""}</span><div style="width:100%;height:${Math.max(3,v/mx*80)}%;background:linear-gradient(var(--ac2),var(--ac));border-radius:5px"></div></div>`).join("")}</div><div style="display:flex;gap:5px;font-size:10px;color:var(--mu);text-align:center;margin-top:4px">${o.map(a=>`<span style="flex:1">${a[0]}</span>`).join("")}</div>`}
 function evo(){if(!S.sessions.length)return"";const yr=String(new Date().getFullYear()),mon=Array(12).fill(0),ys={};S.sessions.forEach(x=>{const y=x.date.slice(0,4);ys[y]=(ys[y]||0)+x.min;if(y===yr)mon[+x.date.slice(5,7)-1]+=x.min});window._evoY=ys;
- return`<div class="card" style="cursor:pointer;margin-top:12px" onclick="evoSheet()"><div class="row sp"><b>Evolución ${yr}</b><span class="mu">horas por mes · ver años ›</span></div>${evoBar("EFMAMJJASOND".split("").map((c,i)=>[c,mon[i]]))}</div>`}
+ return`<div class="card" style="cursor:pointer;margin-top:12px" onclick="evoSheet()"><div class="row sp"><b>Evolución ${yr}</b><span class="mu">horas por mes · ver años ›</span></div>${evoBar(ML().split("").map((c,i)=>[c,mon[i]]))}</div>`}
 function evoSheet(){const ys=window._evoY||{};sheet(`<div class="row sp"><h1>Horas por año</h1><button onclick="closeSheet()">✕</button></div><div class="card">${evoBar(Object.keys(ys).sort().map(y=>[y,ys[y]]))}</div>`)}
 function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
 async function shareRecap(){const d=window._rd;if(!d)return;const load=u=>new Promise(res=>{if(!u)return res(null);const i=new Image();i.crossOrigin="anonymous";i.onload=()=>res(i);i.onerror=()=>res(null);i.src=u});
- const draw=async useImg=>{const c=document.createElement("canvas");c.width=1080;c.height=1920;const x=c.getContext("2d"),gr=x.createLinearGradient(0,0,1080,1920);gr.addColorStop(0,"#7c3aed");gr.addColorStop(1,"#e60012");x.fillStyle=gr;x.fillRect(0,0,1080,1920);
+ const draw=async useImg=>{const c=document.createElement("canvas");c.width=1080;c.height=1920;const x=tctx(c.getContext("2d")),gr=x.createLinearGradient(0,0,1080,1920);gr.addColorStop(0,getComputedStyle(document.documentElement).getPropertyValue("--acd").trim()||"#7c3aed");gr.addColorStop(1,"#e60012");x.fillStyle=gr;x.fillRect(0,0,1080,1920);
   const av=d.avatar?await load(d.avatar):null;x.save();x.beginPath();x.arc(540,210,90,0,7);x.clip();if(av)x.drawImage(av,450,120,180,180);else{x.fillStyle="#ffffff33";x.fillRect(450,120,180,180)}x.restore();
   x.fillStyle="#fff";x.textAlign="center";if(!av){x.font="90px system-ui,sans-serif";x.fillText("🎮",540,240)}
   x.font="700 56px system-ui,sans-serif";x.fillText(d.name.slice(0,22),540,365);x.font="400 38px system-ui,sans-serif";x.fillText("Mi año en Playlog "+d.y,540,420);
@@ -534,13 +676,86 @@ function rankSheet(kind,keep){if(!keep)RK={kind,gen:"",all:0};const base=rankLis
 function rkSet(k,v){RK[k]=v;rankSheet(RK.kind,1)}
 function rankTile(kind,t){const l=rankList(kind,"",0).slice(0,3);return`<div class="card" style="margin:0;cursor:pointer;overflow:hidden;min-width:0" onclick="rankSheet('${kind}')"><div class="mu" style="font-size:12px;margin-bottom:8px;text-align:center">${t}</div>${l.length?`<div style="display:flex;gap:6px;justify-content:center">${l.map((g,i)=>`<div style="text-align:center;min-width:0"><div style="font-size:12px">${["🥇","🥈","🥉"][i]}</div>${th(g,46,62)}<div style="font-size:11px;margin-top:3px">${kind==="best"?"⭐ "+g.rating.score:Math.round(mYr(g.id,0)/60)+"h"}</div></div>`).join("")}</div>`:`<div class="mu" style="margin:14px 0;text-align:center">Sin datos</div>`}<div class="mu" style="margin-top:8px;font-size:11px;text-align:center">Ver más ›</div></div>`}
 function logrosSheet(){sheet(`<div class="row sp"><h1>Logros</h1><button onclick="closeSheet()">✕</button></div>${logros().replace("<h2>Logros</h2>","")}`)}
-function settingsSheet(){sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div><div class="card"><div class="mu">Tus datos se guardan solo en este navegador. Exporta de vez en cuando una copia.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div></div><button class="dng" style="width:100%" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar todos los datos</button><div class="mu" style="margin-top:14px">${APP_NAME} MVP · v${APP_VER} · Premium: estructura futura, sin cobros.</div>`)}
+// ===== Temas de color (Ajustes > Apariencia) =====
+const TDEF={bg:"#0b0b10",s1:"#15151d",s2:"#1e1e29",bd:"rgba(255,255,255,.07)",tx:"#f4f4f8",mu:"#9494a8",ac:"#8b5cf6",ac2:"#b69dff",acd:"#7c3aed",acl:"#9d6bff",acr:"124,58,237",glow:"#2d1b5e",hero1:"#2e1a69",hero2:"#171727",ring:"#1b1536",navbg:"rgba(21,21,29,.85)",sheet:"#121219",strip:"#13131b",onac:"#fff"};
+const THEMES={
+ playlog:{n:"Playlog",v:{}},
+ gameboy:{n:"Game Boy",v:{bg:"#0f1f0f",s1:"#162a16",s2:"#1f381f",bd:"rgba(155,188,15,.18)",tx:"#e8f3c8",mu:"#8fa86a",ac:"#9bbc0f",ac2:"#c7e03a",acd:"#6f8f0a",acl:"#9bbc0f",acr:"111,143,10",glow:"#1d3a12",hero1:"#27440f",hero2:"#142614",ring:"#122212",navbg:"rgba(22,42,22,.88)",sheet:"#132413",strip:"#162a16",onac:"#0f1f0f"}},
+ retro:{n:"Retro arcade",v:{bg:"#130b05",s1:"#1d120a",s2:"#2a1a0e",bd:"rgba(255,160,70,.14)",tx:"#fff1de",mu:"#b49a82",ac:"#ff8a1f",ac2:"#ffc266",acd:"#e8590c",acl:"#ff9f43",acr:"232,89,12",glow:"#4a2308",hero1:"#5a2a0a",hero2:"#1f1209",ring:"#1f1209",navbg:"rgba(29,18,10,.88)",sheet:"#170e07",strip:"#1d120a",onac:"#1a0d03"}},
+ cyber:{n:"Neón cyberpunk",v:{bg:"#07070f",s1:"#0f0f1e",s2:"#17172b",bd:"rgba(94,242,255,.14)",tx:"#f2f2ff",mu:"#8a8fb5",ac:"#ff2bd6",ac2:"#5ef2ff",acd:"#d11bb0",acl:"#ff5ae0",acr:"209,27,176",glow:"#3a0a45",hero1:"#3b0a4a",hero2:"#0d1030",ring:"#12102a",navbg:"rgba(15,15,30,.88)",sheet:"#0c0c1a",strip:"#0f0f1e",onac:"#fff"}}
+};
+const ACC=[["Morado","#8b5cf6"],["Azul","#3b82f6"],["Cian","#06b6d4"],["Verde","#10b981"],["Rosa","#ec4899"],["Naranja","#f97316"],["Rojo","#ef4444"]];
+const rgb3=h=>{h=h.replace("#","");if(h.length===3)h=h.split("").map(c=>c+c).join("");return[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))};
+const mixc=(a,b,t)=>{const x=rgb3(a),y=rgb3(b);return"#"+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,"0")).join("")};
+function applyTheme(){const t=S.theme||{},v=Object.assign({},TDEF,(THEMES[t.id]||THEMES.playlog).v);
+ if(/^#[0-9a-f]{6}$/i.test(t.accent||"")){const c=t.accent;v.ac=c;v.acd=mixc(c,"#000000",.2);v.acl=mixc(c,"#ffffff",.18);v.ac2=mixc(c,"#ffffff",.42);v.acr=rgb3(v.acd).join(",");v.glow=mixc(c,v.bg,.78);v.hero1=mixc(c,v.bg,.7);v.ring=mixc(c,v.bg,.88);
+  const q=rgb3(v.acd);v.onac=(.299*q[0]+.587*q[1]+.114*q[2])/255>.62?"#14141a":"#fff"}
+ const r=document.documentElement.style;Object.entries(v).forEach(([k,x])=>r.setProperty("--"+k,x));
+ if(typeof PC!=="undefined")PC[0]=v.ac;const m=document.querySelector('meta[name=theme-color]');if(m)m.content=v.strip}
+function setTheme(k){S.theme={id:k,accent:""};save();applyTheme();R();settingsSheet()}
+function setAccent(c){S.theme=Object.assign({id:"playlog"},S.theme,{accent:c});save();applyTheme();R();settingsSheet()}
+function themeCard(){const t=S.theme||{},cur=t.id||"playlog",acc=(t.accent||"").toLowerCase();
+ return`<div class="card"><b>🎨 Apariencia</b><div class="mu" style="margin-top:8px">Tema</div><div class="themes">${Object.entries(THEMES).map(([k,x])=>{const v=Object.assign({},TDEF,x.v);return`<button class="thm ${cur===k&&!acc?"on":""}" onclick="setTheme('${k}')"><span class="sw"><i style="background:${v.bg}"></i><i style="background:${v.ac}"></i><i style="background:${v.ac2}"></i></span>${x.n}</button>`}).join("")}</div>
+ <div class="mu">Color de acento</div><div class="accs">${ACC.map(([n,c])=>`<button class="acc ${acc===c?"on":""}" style="background:${c}" aria-label="${n}" onclick="setAccent('${c}')"></button>`).join("")}<input type="color" aria-label="Color personalizado" value="${/^#[0-9a-f]{6}$/i.test(acc)?acc:"#8b5cf6"}" onchange="setAccent(this.value)">${acc?`<button onclick="setAccent('')">Quitar</button>`:""}</div></div>`}
+// ===== Cuenta y sincronización en la nube (Supabase, a través de /.netlify/functions/account) =====
+try{ACCT=JSON.parse(localStorage.getItem("playlog_acct")||"null")}catch(_){}
+const accSave=()=>{try{if(ACCT)localStorage.setItem("playlog_acct",JSON.stringify(ACCT));else localStorage.removeItem("playlog_acct")}catch(_){}};
+async function accCall(action,body,tok){const r=await fetch("/.netlify/functions/account",{method:"POST",headers:{"content-type":"application/json",...(tok?{authorization:"Bearer "+tok}:{})},body:JSON.stringify({action,...body})});
+ let d={};try{d=await r.json()}catch(_){}if(!r.ok){const er=new Error(d.error||"Error de conexión");er.status=r.status;throw er}return d}
+async function accTok(){if(!ACCT)return null;if(ACCT.expires_at-Date.now()/1000>60)return ACCT.access_token;
+ try{const d=await accCall("refresh",{refresh_token:ACCT.refresh_token,username:ACCT.username});Object.assign(ACCT,d.session);accSave();return ACCT.access_token}catch(er){if(er.status===401){ACCT=null;accSave();alert("Tu sesión ha caducado. Vuelve a iniciar sesión.")}return null}}
+function queuePush(){if(!ACCT||window._noPush)return;clearTimeout(_pt);_pt=setTimeout(doPush,4000)}
+async function doPush(){if(!ACCT)return;const t=await accTok();if(!t)return;const u=S._u;
+ try{await accCall("push",{data:S},t);ACCT.last=u;ACCT.at=Date.now();accSave();accUi()}catch(_){}}
+function takeCloud(d){const keep=ACCT;window._noPush=true;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(_){}window._noPush=false;ACCT=keep;ACCT.last=S._u||0;ACCT.at=Date.now();accSave();if(typeof applyTheme==="function")applyTheme();R()}
+const hasData=()=>S.games.length>0||S.sessions.length>0;
+async function accSync(manual){if(!ACCT)return;const t=await accTok();if(!t)return;
+ try{const d=await accCall("pull",{},t),cl=d.data,cu=cl?._u||0,lu=S._u||0,last=ACCT.last;
+  if(!cl||(!(cl.games||[]).length&&!(cl.sessions||[]).length)){if(hasData())await doPush();else{ACCT.last=lu;accSave()}}
+  else if(last===undefined){if(!hasData())takeCloud(cl);else if(confirm("Ya tienes datos en la nube y en este dispositivo.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = subir los de este dispositivo (se reemplazan los de la nube).")) takeCloud(cl);else await doPush()}
+  else if(cu>last&&lu<=last)takeCloud(cl);
+  else if(cu>last&&lu>last){if(confirm("Hay cambios en la nube y en este dispositivo.\n\nAceptar = usar los de la nube.\nCancelar = quedarte con los de este dispositivo y subirlos."))takeCloud(cl);else await doPush()}
+  else if(lu>last)await doPush();
+  else{ACCT.at=Date.now();accSave()}
+  if(manual)alert("Sincronizado ✅")}catch(er){if(manual)alert("No se pudo sincronizar: "+er.message)}accUi()}
+function accUi(){const el=$("#acct");if(el)el.innerHTML=accCard(true)}
+function accCard(inner){const c=ACCT;const h=c?`<div class="row sp"><b>☁️ Cuenta</b><span class="chip" style="margin:0">${e(c.username)}</span></div><div class="mu" style="margin-top:6px">Tus datos se sincronizan con la nube.${c.at?" Última vez: "+new Date(c.at).toLocaleString():""}</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="accSync(true)">🔄 Sincronizar ahora</button><button onclick="accLogout()">Cerrar sesión</button></div>`:`<div class="row sp"><b>☁️ Cuenta</b></div><div class="mu" style="margin-top:6px">Crea una cuenta para guardar tu biblioteca en la nube y usarla en varios dispositivos.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="pri" onclick="authSheet('login')">Iniciar sesión</button><button onclick="authSheet('signup')">Crear cuenta</button></div>`;
+ return inner?h:`<div class="card" id="acct">${h}</div>`}
+function accLogout(){if(!confirm("¿Cerrar sesión? Tus datos seguirán en este dispositivo."))return;doPush().finally(()=>{ACCT=null;accSave();accUi()})}
+function authSheet(m){const L=m==="login",R_=m==="recover";
+ sheet(`<div class="row sp"><h1>${L?"Iniciar sesión":R_?"Recuperar contraseña":"Crear cuenta"}</h1><button onclick="settingsSheet()">✕</button></div>
+ <form onsubmit="authGo(event,'${m}')" autocomplete="on">
+ ${R_?`<label>Usuario o correo</label><input id="au" autocomplete="username" autocapitalize="none" required>`:`<label>Usuario</label><input id="au" autocomplete="username" autocapitalize="none" required placeholder="${L?"usuario o correo":"3-20 letras, números o _"}">`}
+ ${m==="signup"?`<label>Correo (para recuperar la contraseña)</label><input id="ae" type="email" autocomplete="email" required>`:""}
+ ${R_?"":`<label>Contraseña</label><input id="ap" type="password" autocomplete="${L?"current-password":"new-password"}" required minlength="${L?1:8}" placeholder="${L?"":"Mínimo 8 caracteres"}">`}
+ <div id="aerr" class="mu" style="color:var(--er);min-height:20px;margin-top:8px"></div>
+ <button class="pri" style="width:100%;margin-top:6px" id="abtn">${L?"Entrar":R_?"Enviar enlace":"Crear cuenta"}</button></form>
+ <div class="row" style="margin-top:12px;flex-wrap:wrap;justify-content:center">${L?`<button onclick="authSheet('signup')">Crear cuenta</button><button onclick="authSheet('recover')">Olvidé mi contraseña</button>`:`<button onclick="authSheet('login')">Ya tengo cuenta</button>`}</div>`)}
+async function authGo(ev,m){ev.preventDefault();const b=$("#abtn"),er=$("#aerr");er.textContent="";b.disabled=true;const v=i=>($(i)?.value||"").trim();
+ try{if(m==="recover"){await accCall("recover",{id:v("#au")});er.style.color="var(--ok,#22c55e)";er.textContent="Si la cuenta existe, te hemos enviado un correo con el enlace.";b.disabled=false;return}
+  const d=await accCall(m,{username:v("#au"),email:v("#ae"),password:$("#ap").value});ACCT={...d.session};accSave();closeSheet();await accSync(false);settingsSheet()}
+ catch(x){er.style.color="var(--er)";er.textContent=x.message;b.disabled=false}}
+function resetSheet(tok){sheet(`<h1>Nueva contraseña</h1><form onsubmit="resetGo(event)"><label>Escribe tu nueva contraseña</label><input id="rp" type="password" autocomplete="new-password" minlength="8" required placeholder="Mínimo 8 caracteres"><div id="aerr" class="mu" style="color:var(--er);min-height:20px;margin-top:8px"></div><button class="pri" style="width:100%" id="abtn">Guardar contraseña</button></form>`);window._rt=tok}
+async function resetGo(ev){ev.preventDefault();const b=$("#abtn");b.disabled=true;try{await accCall("reset",{token:window._rt,password:$("#rp").value});closeSheet();alert("Contraseña cambiada ✅ Ya puedes iniciar sesión.");authSheet("login")}catch(x){$("#aerr").textContent=x.message;b.disabled=false}}
+(function(){const h=location.hash||"";if(/type=recovery/.test(h)){const t=(h.match(/access_token=([^&]+)/)||[])[1];history.replaceState(null,"",location.pathname);if(t)setTimeout(()=>resetSheet(t),300)}
+ if(ACCT)setTimeout(()=>accSync(false),800)})();
+function settingsSheet(){sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div>${langCard()}${themeCard()}${accCard()}<div class="card"><div class="mu">Tus datos se guardan en este dispositivo (y en la nube si inicias sesión). Exporta de vez en cuando una copia.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div></div><button class="dng" style="width:100%" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar todos los datos</button><div class="mu" style="margin-top:14px">${APP_NAME} MVP · v${APP_VER} · Premium: estructura futura, sin cobros.</div>`)}
 function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
+// ===== Autocompletado: sugerencias mientras escribes (al tocar una se abre su ficha directamente) =====
+let _sgT=null,_sgN=0;const _sgC=new Map();
+function sgType(v){clearTimeout(_sgT);v=(v||"").trim();const box=$("#sg");if(!box)return;_sgN++;if(v.length<2){box.innerHTML="";return}
+ if($("#cr"))$("#cr").innerHTML="";_sgT=setTimeout(()=>sgGo(v),260)}
+async function sgGo(v){const n=++_sgN,k=v.toLowerCase();let items=_sgC.get(k);
+ if(!items){try{const r=await fetch("/.netlify/functions/igdb?suggest="+encodeURIComponent(v));if(!r.ok)throw 0;items=(await r.json()).items||[];_sgC.set(k,items)}catch(_){if(n===_sgN&&$("#sg"))$("#sg").innerHTML="";return}}
+ if(n!==_sgN||!$("#sg"))return;
+ $("#sg").innerHTML=items.length?`<div class="sgl">${items.map(x=>`<div class="sgi" onclick="sgPick(${x.id})">${th({cover:x.cover},36,48)}<div style="min-width:0;flex:1"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.title)}</b><div class="mu">${e([x.year,(x.platforms||[]).join(", ")].filter(Boolean).join(" · "))}</div></div><span class="mu">›</span></div>`).join("")}<div class="mu" style="text-align:center">Pulsa Buscar para ver todos los resultados</div></div>`:""}
+async function sgPick(id){window._lastQ=($("#cq")?.value||"").trim();CALL=[];window._agBack=[];const box=$("#sg");if(box)box.innerHTML=`<div class="empty">Cargando…</div>`;
+ try{const r=await fetch("/.netlify/functions/igdb?gid="+id);if(!r.ok)throw 0;const d=await r.json();if(!d.game)throw 0;agShow(d.game)}catch(_){if($("#sg"))$("#sg").innerHTML=`<div class="empty">No se pudo cargar. Prueba con Buscar.</div>`}}
 let CR=[];
 function catSearch(){
- sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
-async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
+ sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" oninput="sgType(this.value)" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="sg"></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
+async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;clearTimeout(_sgT);_sgN++;if($("#sg"))$("#sg").innerHTML="";$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
  const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("error "+r.status);return r.json()};
  try{let d;try{d=await get("/.netlify/functions/igdb?q="+encodeURIComponent(q))}catch(_){d=await get("/.netlify/functions/search?q="+encodeURIComponent(q))}
  CALL=(d.results||[]).map(g=>g.title?g:{title:g.name,released:g.released,cover:g.background_image,platforms:(g.platforms||[]).map(p=>p.platform.name),genres:(g.genres||[]).map(x=>x.name),tags:[],similar:[],summary:"",ttb:null,versions:[]}).sort((a,b)=>(b.released||"").localeCompare(a.released||""));catRender()}
@@ -572,5 +787,587 @@ async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window
   else{el.style.transition="transform .2s ease-out, opacity .2s";el.style.transform="";el.style.opacity="";setTimeout(()=>{el.style.transition=""},220)}},{passive:false});
  document.addEventListener("touchcancel",()=>{if(on&&eng){reset()}on=false;eng=false})})();
 document.addEventListener("keydown",ev=>{if(ev.key==="Escape"){closeSheet();$("#rc").style.display="none"}});
+// ===== Idiomas (Español / English) =====
+// Los textos de la app están en español; en inglés se traducen con este diccionario. "{}" captura valores variables.
+const EN_DICT={/*EN-START*/
+"Inicio":"Home",
+"Biblioteca":"Library",
+"Añadir":"Add",
+"Diario":"Diary",
+"Perfil":"Profile",
+"¡Hola, {}!":"Hi, {}!",
+"NIVEL":"LEVEL",
+"Faltan {} XP":"{} XP to go",
+"🔥 {} días de racha":"🔥 {} day streak",
+"🔥 {} días de racha ":"🔥 {} day streak",
+"🏆 récord {}":"🏆 best {}",
+"Jugando ahora":"Playing now",
+"📰 Noticias":"📰 News",
+"Cargando noticias…":"Loading news…",
+"🗓️ Próximos lanzamientos":"🗓️ Upcoming releases",
+"En tu lista de deseos":"On your wishlist",
+"Cargando lanzamientos…":"Loading releases…",
+"Más esperados":"Most anticipated",
+"En tu biblioteca":"In your library",
+"No se pudieron cargar las noticias ahora mismo.":"Couldn't load the news right now.",
+"No se pudieron cargar los lanzamientos.":"Couldn't load the releases.",
+"{} · hace {}":"{} · {} ago",
+"hace {}":"{} ago",
+"¡Sale hoy!":"Out today!",
+"Sale en {} días · {}":"Out in {} days · {}",
+"Sale en {} día · {}":"Out in {} day · {}",
+"en {} d":"in {} d",
+"Misiones activas":"Active missions",
+"Diaria: registra 1 sesión hoy":"Daily: log 1 session today",
+"Semanal: 3 días activos":"Weekly: 3 active days",
+"Mensual: 10 horas jugadas":"Monthly: play 10 hours",
+"🎉 Recuerdos":"🎉 Memories",
+"Hace {} años te pasaste":"{} years ago you beat",
+"Hace {} año te pasaste":"{} year ago you beat",
+"Hace 1 año te pasaste":"1 year ago you beat",
+"· ¡es hoy!":"· it's today!",
+"Aún no tienes juegos en curso.":"You have no games in progress.",
+"Ir a la biblioteca":"Go to library",
+"Los juegos de Deseados con fecha de salida futura aparecerán aquí.":"Wishlist games with a future release date will appear here.",
+"☑️ Elegir":"☑️ Select",
+"📋 Listas":"📋 Lists",
+"Buscar en mi biblioteca":"Search my library",
+"⚙️ Filtros":"⚙️ Filters",
+"Jugando":"Playing",
+"Completados":"Completed",
+"Backlog":"Backlog",
+"Deseados":"Wishlist",
+"Abandonados":"Dropped",
+"No hay juegos aquí todavía.":"No games here yet.",
+"🎲 Aleatorizar Backlog":"🎲 Random from Backlog",
+"Toca los juegos para elegirlos":"Tap games to select them",
+"Todos":"All",
+"🔄 Estado":"🔄 Status",
+"📋 Lista":"📋 List",
+"🗑 Borrar":"🗑 Delete",
+"{} seleccionado":"{} selected",
+"{} seleccionados":"{} selected",
+"Cambiar estado":"Change status",
+"{} juego seleccionado":"{} game selected",
+"{} juegos seleccionados":"{} games selected",
+"Filtros":"Filters",
+"Plataforma":"Platform",
+"Todas":"All",
+"Género":"Genre",
+"Formato":"Format",
+"Digital":"Digital",
+"Físico":"Physical",
+"Ordenar por":"Sort by",
+"Nombre":"Name",
+"Fecha de lanzamiento":"Release date",
+"Horas acumuladas":"Hours played",
+"Valoración":"Rating",
+"Quitar filtros":"Clear filters",
+"Aplicar":"Apply",
+"Cancelar":"Cancel",
+"Cerrar":"Close",
+"Volver":"Back",
+"‹ Volver":"‹ Back",
+"{} juego":"{} game",
+"{} juegos":"{} games",
+"{} juegos en tu backlog":"{} games in your backlog",
+"{} juego en tu backlog":"{} game in your backlog",
+"🎲 Aleatorizar":"🎲 Random pick",
+"🎲 Uno al azar":"🎲 Random one",
+"🧭 Ayúdame a elegir":"🧭 Help me choose",
+"¿Qué género te apetece?":"What genre are you in the mood for?",
+"Cualquiera":"Any",
+"¿Cuánto tiempo quieres dedicarle?":"How much time do you want to spend?",
+"Corto (menos de 10 h)":"Short (under 10 h)",
+"Medio (10–30 h)":"Medium (10–30 h)",
+"Largo (más de 30 h)":"Long (over 30 h)",
+"¿En qué plataforma?":"On which platform?",
+"¿Solo o acompañado?":"Solo or with others?",
+"Un jugador":"Single player",
+"Multijugador":"Multiplayer",
+"Buscar juego":"Find a game",
+"Sin resultados":"No results",
+"Te toca jugar…":"Time to play…",
+"Ningún juego de tu backlog cumple esas respuestas.":"No game in your backlog matches those answers.",
+"Los juegos sin duración, género o etiquetas conocidas no cuentan al filtrar por ellos.":"Games without a known duration, genre or tags are skipped when filtering by them.",
+"Cambiar respuestas":"Change answers",
+"Ver ficha":"View game",
+"▶ Empezar a jugar":"▶ Start playing",
+"🎲 Otro":"🎲 Another one",
+"Unas {} para completarlo":"About {} to finish it",
+"⏱ Unas {} para completarlo":"⏱ About {} to finish it",
+"Coincide con {} juegos de tu backlog":"Matches {} games in your backlog",
+"Coincide con {} juego de tu backlog":"Matches {} game in your backlog",
+"Mes anterior":"Previous month",
+"Mes siguiente":"Next month",
+"🏁 Completaste {}":"🏁 You completed {}",
+"+ Registrar sesión el {}":"+ Log a session on {}",
+"Registrar sesión":"Log session",
+"Juego":"Game",
+"Fecha":"Date",
+"Horas":"Hours",
+"Minutos":"Minutes",
+"Nota (opcional)":"Note (optional)",
+"Guardar sesión":"Save session",
+"Editar sesión":"Edit session",
+"Eliminar":"Delete",
+"📖 Registrar una sesión en el diario":"📖 Log a session in the diary",
+"🎮 Añadir un juego a mi biblioteca":"🎮 Add a game to my library",
+"¿Qué quieres hacer?":"What do you want to do?",
+"Elegir mes":"Pick a month",
+"Ene":"Jan",
+"Feb":"Feb",
+"Mar":"Mar",
+"Abr":"Apr",
+"May":"May",
+"Jun":"Jun",
+"Ago":"Aug",
+"Sep":"Sep",
+"Oct":"Oct",
+"Nov":"Nov",
+"Dic":"Dec",
+"Nivel {} · {}/{} XP":"Level {} · {}/{} XP",
+"Racha":"Streak",
+"récord {} d":"best {} d",
+"⏱ Horas":"⏱ Hours",
+"🎮 Sesiones":"🎮 Sessions",
+"🏁 Completados":"🏁 Completed",
+"Semana":"Week",
+"Mes":"Month",
+"Año":"Year",
+"{} sesiones":"{} sessions",
+"{} sesión":"{} session",
+"🎖️ Logros":"🎖️ Achievements",
+"{} platinos ›":"{} platinums ›",
+"🏆 {} platinos ›":"🏆 {} platinums ›",
+"🏅 Niveles por género y plataforma":"🏅 Levels by genre and platform",
+"ver todos ›":"see all ›",
+"{} · Nv {}":"{} · Lv {}",
+"Juega para subir de nivel en cada género y plataforma.":"Play to level up in each genre and platform.",
+"🎞️ Recaps":"🎞️ Recaps",
+"Géneros":"Genres",
+"Plataformas":"Platforms",
+"Físico / Digital":"Physical / Digital",
+"Evolución {}":"Progress {}",
+"horas por mes · ver años ›":"hours per month · see years ›",
+"Horas por año":"Hours per year",
+"Mejor valorados {}":"Top rated {}",
+"Ver más ›":"See more ›",
+"Más jugados {}":"Most played {}",
+"⚙️ Ajustes":"⚙️ Settings",
+"Insignias ({}/{})":"Badges ({}/{})",
+"Primera sesión":"First session",
+"común":"common",
+"rara":"rare",
+"épica":"epic",
+"legendaria":"legendary",
+"10 sesiones":"10 sessions",
+"50 sesiones":"50 sessions",
+"10 horas":"10 hours",
+"100 horas":"100 hours",
+"500 horas":"500 hours",
+"Racha de 7 días":"7-day streak",
+"Racha de 30 días":"30-day streak",
+"Primer juego completado":"First game completed",
+"10 completados":"10 completed",
+"3 géneros distintos":"3 different genres",
+"3 plataformas":"3 platforms",
+"5 valoraciones":"5 ratings",
+"Un 10 de nota":"A 10 rating",
+"30 días con actividad":"30 days of activity",
+"Playlog MVP · v{} · Premium: estructura futura, sin cobros.":"Playlog MVP · v{} · Premium: future structure, no charges.",
+"Playlog · v{}":"Playlog · v{}",
+"🏅 Niveles":"🏅 Levels",
+"Cada hora jugada suma 1 punto y cada juego completado 3 puntos al género y a la plataforma.":"Each hour played adds 1 point and each completed game adds 3 points to its genre and platform.",
+"Por género":"By genre",
+"Por plataforma":"By platform",
+"Novato":"Novice",
+"Aprendiz":"Apprentice",
+"Jugón":"Gamer",
+"Veterano":"Veteran",
+"Experto":"Expert",
+"Maestro":"Master",
+"Leyenda":"Legend",
+"Aún no hay datos. Registra sesiones y se irán subiendo los niveles.":"No data yet. Log sessions and your levels will go up.",
+"{} · {} completado · {} pts para Nv {}":"{} · {} completed · {} pts to Lv {}",
+"{} · {} completados · {} pts para Nv {}":"{} · {} completed · {} pts to Lv {}",
+"Nv {}":"Lv {}",
+"{} completado":"{} completed",
+"{} completados":"{} completed",
+"🍂 Desafíos de Otoño":"🍂 Autumn challenges",
+"❄️ Desafíos de Invierno":"❄️ Winter challenges",
+"🌸 Desafíos de Primavera":"🌸 Spring challenges",
+"☀️ Desafíos de Verano":"☀️ Summer challenges",
+"{}/{} · quedan {} d ›":"{}/{} · {} d left ›",
+"Otoño {}":"Autumn {}",
+"Invierno {}":"Winter {}",
+"Primavera {}":"Spring {}",
+"Verano {}":"Summer {}",
+"🍂 Otoño {}":"🍂 Autumn {}",
+"❄️ Invierno {}":"❄️ Winter {}",
+"🌸 Primavera {}":"🌸 Spring {}",
+"☀️ Verano {}":"☀️ Summer {}",
+"Del {} al {} · quedan {} días. Completa los 7 desafíos para llevarte el trofeo de la temporada.":"From {} to {} · {} days left. Complete all 7 challenges to win the season trophy.",
+"🏁 Completa 2 juegos":"🏁 Complete 2 games",
+"⏱ Juega 30 horas":"⏱ Play 30 hours",
+"🎨 Prueba 3 géneros distintos":"🎨 Try 3 different genres",
+"🎮 Juega en 2 plataformas":"🎮 Play on 2 platforms",
+"🎖️ Consigue 5 logros":"🎖️ Earn 5 achievements",
+"🔥 Racha de 5 días seguidos":"🔥 5-day streak",
+"📅 Juega en 20 días distintos":"📅 Play on 20 different days",
+"¡Trofeo de {} conseguido!":"{} trophy earned!",
+"Temporadas anteriores":"Previous seasons",
+"Logros":"Achievements",
+"🎖️ {} de {} conseguidos":"🎖️ {} of {} earned",
+"🏆 Platinos: {}":"🏆 Platinums: {}",
+"Son logros personalizados: no se verifican automáticamente.":"These are custom achievements: they aren't verified automatically.",
+"Platinos":"Platinums",
+"Últimos conseguidos":"Latest earned",
+"Por juego":"By game",
+"🎖️ {}/{} logros":"🎖️ {}/{} achievements",
+"✏️ Editar":"✏️ Edit",
+"Estado":"Status",
+"Nota":"Rating",
+"Completado el":"Completed on",
+"Editar valoración":"Edit rating",
+"📤 Compartir tarjeta Story":"📤 Share Story card",
+"🔁 Rejugar":"🔁 Replay",
+"🏁 Veces completado: {}":"🏁 Times completed: {}",
+"Añadir partida":"Add playthrough",
+"➕ DLCs y expansiones ({}/{})":"➕ DLCs and expansions ({}/{})",
+"➕ DLCs y expansiones":"➕ DLCs and expansions",
+"DLCs y expansiones":"DLCs and expansions",
+"✅ Completado":"✅ Completed",
+"🎮 Jugando":"🎮 Playing",
+"⬜ Pendiente":"⬜ Pending",
+"Expansión":"Expansion",
+"DLC":"DLC",
+"Añadir DLC o expansión a mano":"Add a DLC or expansion manually",
+"Sin DLCs todavía.":"No DLCs yet.",
+"Buscando DLCs en IGDB…":"Looking for DLCs on IGDB…",
+"y {} más…":"and {} more…",
+"Duración":"Duration",
+"Estimación de IGDB.":"IGDB estimate.",
+"Duración puesta por ti.":"Duration set by you.",
+"Sin duración todavía.":"No duration yet.",
+"Ver en HowLongToBeat":"View on HowLongToBeat",
+"🏆 Platino conseguido · {}":"🏆 Platinum earned · {}",
+"🏆 Platino conseguido":"🏆 Platinum earned",
+"¿Qué día lo conseguiste?":"What day did you get it?",
+"🎖️ {} de {} logros conseguidos · Logros personalizados: no se verifican automáticamente.":"🎖️ {} of {} achievements earned · Custom achievements: not verified automatically.",
+"🎖️ {} de {} logros conseguidos":"🎖️ {} of {} achievements earned",
+"Nuevo logro":"New achievement",
+"Notas":"Notes",
+"Sesiones ({})":"Sessions ({})",
+"Eliminar juego":"Delete game",
+"Sin logros todavía.":"No achievements yet.",
+"Ninguna":"None",
+"Editar juego":"Edit game",
+"🖼 Portada":"🖼 Cover",
+"Historia principal · Principal + extras · Completista. Ahora se usa la estimación de IGDB; si rellenas esto, la sustituye.":"Main story · Main + extras · Completionist. IGDB's estimate is used now; if you fill this in, it replaces it.",
+"Historia principal · Principal + extras · Completista":"Main story · Main + extras · Completionist",
+"Reto o modo":"Challenge or mode",
+"Reto o modo (opcional)":"Challenge or mode (optional)",
+"Nuzlocke, Randomizer…":"Nuzlocke, Randomizer…",
+"Guardar cambios":"Save changes",
+"Guardar":"Save",
+"Fecha de finalización":"Completion date",
+"Tiempo de juego total (horas, opcional)":"Total play time (hours, optional)",
+"Valoración (opcional)":"Rating (optional)",
+"Nota (1-10)":"Rating (1-10)",
+"Reseña":"Review",
+"Omitir nota":"Skip rating",
+"📋 Mis listas":"📋 My lists",
+"{} juegos ›":"{} games ›",
+"{} juego ›":"{} game ›",
+"Nueva lista":"New list",
+"Crear":"Create",
+"✏️ Renombrar":"✏️ Rename",
+"Eliminar lista":"Delete list",
+"{} juegos · añade juegos desde su ficha con 📋 Listas":"{} games · add games from their page with 📋 Lists",
+"{} juego · añade juegos desde su ficha con 📋 Listas":"{} game · add games from their page with 📋 Lists",
+"Añadir a lista":"Add to list",
+"Crear y añadir":"Create and add",
+"Mejor valorados":"Top rated",
+"Todos los géneros":"All genres",
+"Este año":"This year",
+"Siempre":"All time",
+"Ordenados por nota, de más alta a más baja":"Sorted by rating, highest to lowest",
+"Más jugados":"Most played",
+"Ordenados por horas jugadas este año":"Sorted by hours played this year",
+"Toca el gráfico o una fila para ver los juegos.":"Tap the chart or a row to see the games.",
+"Tu año en Playlog":"Your year in Playlog",
+"Toca para empezar":"Tap to start",
+"Toca para continuar ›":"Tap to continue ›",
+"Partida {}":"Playthrough {}",
+"Buscar juegos":"Search games",
+"Ej: Pokémon":"E.g. Pokémon",
+"Buscar":"Search",
+"Pulsa Buscar para ver todos los resultados":"Press Search to see all results",
+"¿No encuentras tu juego (por ejemplo un fangame)?":"Can't find your game (for example a fangame)?",
+"✍️ Crear ficha manual":"✍️ Create entry manually",
+"Datos:":"Data:",
+"Añadir juego":"Add game",
+"Título":"Title",
+"Portada (enlace a una imagen, opcional)":"Cover (image link, optional)",
+"Duración como en HowLongToBeat (horas, opcional)":"Duration as on HowLongToBeat (hours, optional)",
+"Historia":"Story",
+"+ Extras":"+ Extras",
+"Completista":"Completionist",
+"¿Dónde lo añadimos?":"Where should we add it?",
+"Otra":"Other",
+"Consola Android":"Android console",
+"Playlog score":"Playlog score",
+"nota de usuarios":"user rating",
+"Critic score":"Critic score",
+"media de {} críticas":"average of {} reviews",
+"sin críticas":"no reviews",
+"Track this game":"Track this game",
+"Toca una opción para añadirlo a tu biblioteca 👇":"Tap an option to add it to your library 👇",
+"Cargando capturas y juegos similares…":"Loading screenshots and similar games…",
+"Juegos similares":"Similar games",
+"Un último paso para añadirlo":"One last step to add it",
+"¿En qué consola o plataforma lo juegas?":"Which console or platform do you play it on?",
+"¿Lo tienes en físico o en digital?":"Do you own it physically or digitally?",
+"💿 Físico":"💿 Physical",
+"☁️ Digital":"☁️ Digital",
+"Desarrolladora desconocida":"Unknown developer",
+"Sin descripción.":"No description.",
+"Ver más":"See more",
+"Ver menos":"See less",
+"Ya lo terminé":"I finished it",
+"Pendiente":"Pending",
+"Lo quiero":"I want it",
+"Lo dejé":"I dropped it",
+"Cargando…":"Loading…",
+"Cargando {}…":"Loading {}…",
+"No se pudo cargar. Prueba con Buscar.":"Couldn't load it. Try Search.",
+"Usuario":"Username",
+"¿Dónde lo juegas?":"Where do you play it?",
+"Siguiente":"Next",
+"🌐 Idioma":"🌐 Language",
+"🎨 Apariencia":"🎨 Appearance",
+"Tema":"Theme",
+"Retro arcade":"Retro arcade",
+"Neón cyberpunk":"Neon cyberpunk",
+"Color de acento":"Accent color",
+"Morado":"Purple",
+"Azul":"Blue",
+"Cian":"Cyan",
+"Verde":"Green",
+"Rosa":"Pink",
+"Naranja":"Orange",
+"Rojo":"Red",
+"Color personalizado":"Custom color",
+"Quitar":"Remove",
+"☁️ Cuenta":"☁️ Account",
+"Crea una cuenta para guardar tu biblioteca en la nube y usarla en varios dispositivos.":"Create an account to save your library in the cloud and use it on several devices.",
+"Iniciar sesión":"Log in",
+"Crear cuenta":"Create account",
+"Tus datos se sincronizan con la nube.":"Your data syncs with the cloud.",
+"Última vez: {}":"Last sync: {}",
+"Tus datos se sincronizan con la nube. Última vez: {}":"Your data syncs with the cloud. Last sync: {}",
+"🔄 Sincronizar ahora":"🔄 Sync now",
+"Cerrar sesión":"Log out",
+"Tus datos se guardan en este dispositivo (y en la nube si inicias sesión). Exporta de vez en cuando una copia.":"Your data is saved on this device (and in the cloud if you log in). Export a backup from time to time.",
+"Exportar JSON":"Export JSON",
+"Importar JSON":"Import JSON",
+"CSV de juegos":"Games CSV",
+"CSV de sesiones":"Sessions CSV",
+"Importar CSV":"Import CSV",
+"Borrar todos los datos":"Delete all data",
+"Entrar":"Log in",
+"Contraseña":"Password",
+"usuario o correo":"username or email",
+"Olvidé mi contraseña":"I forgot my password",
+"3-20 letras, números o _":"3-20 letters, numbers or _",
+"Correo (para recuperar la contraseña)":"Email (to recover your password)",
+"Mínimo 8 caracteres":"At least 8 characters",
+"Ya tengo cuenta":"I already have an account",
+"Recuperar contraseña":"Recover password",
+"Usuario o correo":"Username or email",
+"Enviar enlace":"Send link",
+"Nueva contraseña":"New password",
+"Escribe tu nueva contraseña":"Type your new password",
+"Guardar contraseña":"Save password",
+"Si la cuenta existe, te hemos enviado un correo con el enlace.":"If the account exists, we've emailed you the link.",
+"📤 Tarjeta Story":"📤 Story card",
+"Creando tarjeta…":"Creating card…",
+"📤 Compartir (Instagram / TikTok)":"📤 Share (Instagram / TikTok)",
+"Si tu móvil no permite compartir, se descargará la imagen.":"If your phone can't share, the image will be downloaded.",
+"JUEGO COMPLETADO":"GAME COMPLETED",
+"LOGRO DESBLOQUEADO":"ACHIEVEMENT UNLOCKED",
+"PLATINO CONSEGUIDO":"PLATINUM EARNED",
+"nota":"rating",
+"jugadas":"played",
+"completado":"completed",
+"fecha":"date",
+"tiempo":"time",
+"días":"days",
+"Jugador":"Player",
+"Contraseña cambiada ✅ Ya puedes iniciar sesión.":"Password changed ✅ You can log in now.",
+"Duración no válida":"Invalid duration",
+"El archivo no es un JSON válido de Playlog.":"The file isn't a valid Playlog JSON.",
+"El nombre no puede estar vacío":"The name can't be empty",
+"Elige una fecha":"Pick a date",
+"Escribe un título":"Enter a title",
+"Tu backlog está vacío.":"Your backlog is empty.",
+"No hay sesiones en {}":"No sessions in {}",
+"No se pudo cargar el juego. Inténtalo de nuevo.":"Couldn't load the game. Please try again.",
+"No se pudo sincronizar: {}":"Couldn't sync: {}",
+"Sincronizado ✅":"Synced ✅",
+"Tu sesión ha caducado. Vuelve a iniciar sesión.":"Your session has expired. Please log in again.",
+"¿Cerrar sesión? Tus datos seguirán en este dispositivo.":"Log out? Your data will stay on this device.",
+"¿Eliminar el juego y sus sesiones?":"Delete the game and its sessions?",
+"¿Eliminar esta lista? Los juegos no se borran.":"Delete this list? The games aren't deleted.",
+"¿Eliminar esta sesión? XP y horas se recalcularán.":"Delete this session? XP and hours will be recalculated.",
+"¿Borrar todos los datos?":"Delete all data?",
+"Nuevo nombre de la lista:":"New list name:",
+"Importados {} juegos":"Imported {} games",
+"Indica una duración válida (por ejemplo 2 h y 30 min)":"Enter a valid duration (for example 2 h 30 min)",
+"Hay cambios en la nube y en este dispositivo.\n\nAceptar = usar los de la nube.\nCancelar = quedarte con los de este dispositivo y subirlos.":"There are changes in the cloud and on this device.\n\nOK = use the cloud ones.\nCancel = keep this device's data and upload it.",
+"Ya tienes datos en la nube y en este dispositivo.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = subir los de este dispositivo (se reemplazan los de la nube).":"You have data in the cloud and on this device.\n\nOK = use the cloud data (replaces this device's data).\nCancel = upload this device's data (replaces the cloud data).",
+"Este año has jugado":"This year you played",
+"Tu equivalente en la vida real":"Your real-life equivalent",
+"Tu mes estrella":"Your star month",
+"con {} jugadas":"with {} played",
+"Sueles jugar más los":"You usually play most on",
+"{} acumuladas":"{} total",
+"Tu día más maratoniano":"Your most marathon day",
+"Ese día rompiste tu récord: jugaste {} en total":"That day you set your record: you played {} in total",
+"Tu racha más larga":"Your longest streak",
+"1 día":"1 day",
+"{} días":"{} days",
+"Mantuviste la racha sin faltar a tu cita":"You kept the streak going without missing a day",
+"Juegos completados: {}":"Games completed: {}",
+"Tu top 5 más jugados":"Your top 5 most played",
+"Elige tu GOTY de {}":"Pick your {} GOTY",
+"Toca un juego para elegirlo":"Tap a game to pick it",
+"Tu GOTY:":"Your GOTY:",
+"No te pasaste ningún juego en {}. Completa alguno para elegir tu GOTY.":"You didn't finish any game in {}. Complete one to pick your GOTY.",
+"Tu personalidad de jugador":"Your gamer personality",
+"Tus géneros de {}":"Your genres of {}",
+"Tus plataformas de {}":"Your platforms of {}",
+"Físico y digital (juegos)":"Physical and digital (games)",
+"Tu tarjeta final":"Your final card",
+"🏆 Mi GOTY {}":"🏆 My GOTY {}",
+"Más jugado de {}":"Most played of {}",
+"{} días con actividad · {} sesiones · {} juegos":"{} days active · {} sessions · {} games",
+"enero":"January",
+"febrero":"February",
+"marzo":"March",
+"abril":"April",
+"mayo":"May",
+"junio":"June",
+"julio":"July",
+"agosto":"August",
+"septiembre":"September",
+"octubre":"October",
+"noviembre":"November",
+"diciembre":"December",
+"domingos":"Sundays",
+"lunes":"Mondays",
+"martes":"Tuesdays",
+"miércoles":"Wednesdays",
+"jueves":"Thursdays",
+"viernes":"Fridays",
+"sábados":"Saturdays",
+"El Leal":"The Loyal One",
+"Dedicaste el {}% de tu tiempo a {}":"You spent {}% of your time on {}",
+"El Cazador de Logros":"The Achievement Hunter",
+"Completaste al 100% {} juegos este año":"You 100%'d {} games this year",
+"El Finalizador":"The Finisher",
+"Te pasaste {} juegos en {}":"You beat {} games in {}",
+"El Maratoniano":"The Marathoner",
+"Tu mejor día fueron {} en un solo día":"Your best day was {} in a single day",
+"El Constante":"The Consistent One",
+"Una racha de {} días sin faltar a la cita":"A {}-day streak without missing a day",
+"El Explorador":"The Explorer",
+"Probaste {} juegos distintos":"You tried {} different games",
+"El Nostálgico":"The Nostalgic",
+"Tus favoritos son clásicos de hace años":"Your favorites are classics from years ago",
+"El Jugador de Fin de Semana":"The Weekend Gamer",
+"El {}% de tu tiempo fue en sábado y domingo":"{}% of your time was on Saturday and Sunday",
+"El Coleccionista":"The Collector",
+"La mitad de tus juegos son físicos":"Half of your games are physical",
+"El Jugador Equilibrado":"The Balanced Player",
+"Un poco de todo, a tu ritmo":"A bit of everything, at your own pace",
+"Estuviste":"You spent",
+"{} días enteros":"{} whole days",
+"jugando":"playing",
+"Como ver la trilogía de":"Like watching the trilogy of",
+"El Señor de los Anillos {} veces":"The Lord of the Rings {} times",
+"(versión cine)":"(theatrical cut)",
+"O ver":"Or watching",
+"Titanic {} veces":"Titanic {} times",
+"O hacer":"Or taking",
+"{} vuelos":"{} flights",
+"Madrid–Nueva York":"Madrid–New York",
+"Como ver el":"Like watching",
+"de Titanic":"of Titanic",
+"Buscando…":"Searching…",
+"Oficiales ({})":"Official ({})",
+"No oficiales ({})":"Unofficial ({})",
+"No oficiales":"Unofficial",
+"Todos ({})":"All ({})",
+"Oficial = juego con editora registrada en IGDB.":"Official = game with a publisher registered on IGDB.",
+"No encontramos ese juego.":"We couldn't find that game.",
+"Sin resultados oficiales.":"No official results.",
+"Ver también no oficiales ({})":"Also show unofficial ({})",
+"Sin resultados con este filtro.":"No results with this filter.",
+"No se pudo buscar ({}). Revisa tu conexión.":"Couldn't search ({}). Check your connection.",
+"Reintentar":"Retry",
+"Crear ficha manual":"Create entry manually",
+"también: {}":"also: {}",
+"s/f":"n/a",
+"{} · Partida {}":"{} · Playthrough {}",
+"completados":"completed",
+"días jugados":"days played",
+"juegos":"games",
+"Mi año en Playlog {}":"My year in Playlog {}",
+"Mi año en Playlog":"My year in Playlog",
+"🛡️ El Leal":"🛡️ The Loyal One",
+"🏆 El Cazador de Logros":"🏆 The Achievement Hunter",
+"🏁 El Finalizador":"🏁 The Finisher",
+"⏱️ El Maratoniano":"⏱️ The Marathoner",
+"🔥 El Constante":"🔥 The Consistent One",
+"🧭 El Explorador":"🧭 The Explorer",
+"📼 El Nostálgico":"📼 The Nostalgic",
+"🛋️ El Jugador de Fin de Semana":"🛋️ The Weekend Gamer",
+"📀 El Coleccionista":"📀 The Collector",
+"🎮 El Jugador Equilibrado":"🎮 The Balanced Player",
+"¿Eliminar {} juego y sus sesiones?":"Delete {} game and its sessions?",
+"¿Eliminar {} juegos y sus sesiones?":"Delete {} games and their sessions?",
+"Se reemplazarán tus datos actuales por los del archivo ({} juegos, {} sesiones). ¿Continuar?":"Your current data will be replaced by the file's ({} games, {} sessions). Continue?",
+"Pega el enlace (URL) de la imagen de portada:":"Paste the link (URL) of the cover image:",
+"Indica una duración válida (por ejemplo 2 h y 30 min).":"Enter a valid duration (for example 2 h 30 min).",
+"Importados {} juegos ({} ya existían).":"Imported {} games ({} already existed).",
+"Importados {} juegos.":"Imported {} games.",
+"El archivo no parece un CSV válido (necesita una columna Title).":"The file doesn't look like a valid CSV (it needs a Title column).",
+"Cargando":"Loading",
+"{} · playlog":"{} · playlog",
+"{} · ¡es hoy!":"{} · it's today!",
+"🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
+"Más jugado de {}: {}":"Most played of {}: {}",
+"{}: sin datos":"{}: no data"
+/*EN-END*/};
+const ENm=new Map(),ENx=[];
+for(const[k,v]of Object.entries(EN_DICT)){if(k.includes("{}")){ENx.push([new RegExp("^"+k.split("{}").map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("([\\s\\S]+?)")+"$"),v,k.replace(/\{\}/g,"").length])}else ENm.set(k,v)}
+ENx.sort((a,b)=>b[2]-a[2]);
+function tr(s){if(LANG!=="en"||!s)return s;s=String(s);const t=s.trim();if(!t)return s;let r=ENm.get(t);
+ if(r===undefined){for(const[re,v]of ENx){const m=t.match(re);if(m){let i=0;r=v.replace(/\{\}/g,()=>tr(m[++i]));break}}}
+ if(r===undefined){if(window._miss&&/[a-záéíóúñ¿¡]{3}/i.test(t))window._miss.add(t);return s}
+ return s.replace(t,()=>r)}
+if(LANG==="en"){["alert","confirm","prompt"].forEach(f=>{const o=window[f].bind(window);window[f]=(m,...a)=>o(tr(m),...a)});
+ const walk=n=>{if(n.nodeType===3){if(n._t===n.nodeValue)return;const v=tr(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;n._t=n.nodeValue}else if(n.nodeType===1){if(n.tagName==="SCRIPT"||n.tagName==="STYLE")return;
+  ["placeholder","title","aria-label"].forEach(a=>{if(n.hasAttribute&&n.hasAttribute(a)){const v=tr(n.getAttribute(a));if(v!==n.getAttribute(a))n.setAttribute(a,v)}});
+  if(n.tagName==="OPTION"||(n.tagName==="INPUT"&&(n.type==="button"||n.type==="submit"))){}
+  n.childNodes.forEach(walk)}};
+ new MutationObserver(ms=>{ms.forEach(m=>{if(m.type==="characterData")walk(m.target);else m.addedNodes.forEach(walk)})}).observe(document.body,{childList:true,subtree:true,characterData:true});
+ document.title=tr(document.title);walk(document.body)}
+function tctx(x){if(LANG==='en'){const f=x.fillText.bind(x);x.fillText=(t,...a)=>f(tr(String(t)),...a)}return x}
+function setLang(l){S.lang=l;save();location.reload()}
+function langCard(){return`<div class="card"><div class="row sp"><b>🌐 Idioma</b><select style="width:auto" onchange="setLang(this.value)"><option value="es" ${LANG==="es"?"selected":""}>Español</option><option value="en" ${LANG==="en"?"selected":""}>English</option></select></div></div>`}
+applyTheme();
 R();
 </script></body></html>
