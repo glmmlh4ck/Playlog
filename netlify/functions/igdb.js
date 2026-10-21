@@ -63,16 +63,17 @@ async function oneGame(id) {
   } catch (e) { /* la duración es opcional */ }
   return { game: shape(g, ttb, "") };
 }
-// Sugerencias rápidas mientras se escribe (8 resultados, sin agrupar ni duraciones)
-const sgc = new Map(), sgh = new Map();
-let upc = { t: 0, b: "" };
-async function suggest(q) {
-  const r = await igdb("games", `search "${q}"; fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name; where version_parent = null; limit 8;`);
-  return { items: r.map(g => ({
-    id: g.id, title: g.name, year: g.first_release_date ? new Date(g.first_release_date * 1000).getFullYear() : "",
-    cover: g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_small/${g.cover.image_id}.jpg` : "",
-    platforms: (g.platforms || []).slice(0, 3).map(p => p.abbreviation || p.name)
-  })) };
+// Utilidades para DLCs: encontrar el id de IGDB por título y buscar DLCs/expansiones por nombre
+const fgc = new Map(), dqc = new Map(), mh = new Map();
+const cleanQ = v => String(v || "").trim().slice(0, 60).replace(/["\\*]/g, "");
+async function findId(t) {
+  const r = await igdb("games", `search "${t}"; fields name; where version_parent = null & parent_game = null; limit 1;`);
+  return { id: r[0]?.id || 0 };
+}
+async function dlcSearch(q, parent) {
+  const w = ["parent_game != null"]; if (parent) w.push(`parent_game = ${parent}`);
+  const r = await igdb("games", `${q ? `search "${q}"; ` : ""}fields name,first_release_date,cover.image_id,parent_game.name; where ${w.join(" & ")}; limit 30;`);
+  return { items: r.map(g => ({ id: g.id, name: g.name, kind: /expansi/i.test(g.name) ? "Expansión" : "DLC", released: g.first_release_date ? new Date(g.first_release_date * 1000).toISOString().slice(0, 10) : "", parent: g.parent_game?.name || "" })) };
 }
 const dcache = new Map(), dhits = new Map();
 async function detail(id) {
@@ -116,19 +117,19 @@ exports.handler = async (event) => {
       return out(200, body);
     } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
   }
-  if (event.queryStringParameters && event.queryStringParameters.suggest !== undefined) {
-    const sq = String(event.queryStringParameters.suggest).trim().slice(0, 60).replace(/["\\*]/g, "");
-    if (sq.length < 2) return out(400, { error: "Escribe al menos 2 letras" });
-    const sip = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", sn = Date.now();
-    const sr = (sgh.get(sip) || []).filter(t => sn - t < 60000);
-    if (sr.length >= 90) return out(429, { error: "Demasiadas peticiones, espera un momento" });
-    sr.push(sn); sgh.set(sip, sr); if (sgh.size > 2000) sgh.clear();
-    const sk = "s1:" + sq.toLowerCase(), sc = sgc.get(sk);
-    if (sc && sn - sc.t < 36e5) return out(200, sc.b);
+  const qp = event.queryStringParameters || {};
+  if (qp.findid !== undefined || qp.dlcq !== undefined) {
+    const mip = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", mn = Date.now();
+    const mr = (mh.get(mip) || []).filter(t => mn - t < 60000);
+    if (mr.length >= 40) return out(429, { error: "Demasiadas peticiones, espera un momento" });
+    mr.push(mn); mh.set(mip, mr); if (mh.size > 2000) mh.clear();
+    const isF = qp.findid !== undefined, cq = cleanQ(isF ? qp.findid : qp.dlcq), par = /^\d{1,9}$/.test(qp.parent || "") ? qp.parent : "";
+    if (cq.length < 2 && !(par && !isF)) return out(400, { error: "Escribe al menos 2 letras" });
+    const ck = (isF ? "f1:" : "q1:") + cq.toLowerCase() + ":" + par, mc = (isF ? fgc : dqc).get(ck);
+    if (mc && mn - mc.t < 864e5) return out(200, mc.b);
     try {
-      const body = JSON.stringify(await suggest(sq));
-      sgc.set(sk, { t: sn, b: body });
-      if (sgc.size > 1000) sgc.delete(sgc.keys().next().value);
+      const body = JSON.stringify(isF ? await findId(cq) : await dlcSearch(cq, par));
+      const m = isF ? fgc : dqc; m.set(ck, { t: mn, b: body }); if (m.size > 800) m.delete(m.keys().next().value);
       return out(200, body);
     } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
   }

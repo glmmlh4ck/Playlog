@@ -78,7 +78,7 @@ summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 .poster.picked .cv:after{content:"";position:absolute;inset:0;background:rgba(var(--acr),.28)}
 .selbar{position:sticky;bottom:6px;z-index:5;background:var(--sheet);border:1px solid rgba(var(--acr),.55);border-radius:18px;padding:10px 12px;box-shadow:0 10px 30px #000a;margin-top:14px}
 .selact{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.selact button{width:100%}
-.sgl{margin-top:10px}.sgi{display:flex;gap:12px;align-items:center;padding:8px;border:1px solid var(--bd);border-radius:14px;background:var(--s1);margin-bottom:8px;cursor:pointer}.sgi:hover{border-color:rgba(var(--acr),.5)}
+
 /* ===== Pantalla Añadir juego ===== */
 .trk{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
 .trk button{grid-column:span 2;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:12px 4px;min-height:88px;border-radius:16px;text-align:center;background:linear-gradient(160deg,rgba(var(--c),.34),rgba(var(--c),.08));border:1px solid rgba(var(--c),.6);box-shadow:0 4px 14px rgba(var(--c),.18)}
@@ -220,15 +220,36 @@ async function homeLoad(){
 async function upGo(id){sheet(`<div class="row sp"><span></span><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="empty" style="margin-top:30px">Cargando…</div>`);
  try{const r=await fetch("/.netlify/functions/igdb?gid="+id);if(!r.ok)throw 0;const d=await r.json();if(!d.game)throw 0;window._agBack=[];CALL=[];agShow(d.game)}catch(_){closeSheet();alert("No se pudo cargar el juego. Inténtalo de nuevo.")}}
 
+// ===== Backlog: juegos completados que quieres volver a jugar =====
+const dnDate=g=>g.doneDate||g.rating?.date||lastS(g)||"";
+const rjList=()=>S.games.filter(g=>g.status==="done"&&g.again).sort((a,b)=>dnDate(b).localeCompare(dnDate(a)));
+function rjSec(){const a=rjList();
+ return`<div id="rjs" class="row sp" style="margin-top:18px"><h2 style="margin:0">🔁 Para rejugar${a.length?` (${a.length})`:""}</h2><button onclick="rjPick()">➕ Añadir juego</button></div>${a.length?`<div class="grid" style="margin-top:10px">${a.map(g=>`<div>${gg(g)}<button style="width:100%;margin-top:4px;font-size:12px;min-height:32px" onclick="togAgain('${g.id}')">✕ Quitar</button></div>`).join("")}</div>`:`<div class="empty" style="margin-top:10px">Aquí van los juegos que ya te pasaste y quieres volver a jugar.</div>`}`}
+function togAgain(id){const g=G(id);if(!g)return;g.again=!g.again;save();if($("#sheet").style.display==="flex"&&window._rjOpen)rjPick();else if(window._og===id&&$("#sheet").style.display==="flex")openGame(id);R()}
+function rjPick(){window._rjOpen=1;const a=S.games.filter(g=>g.status==="done").sort((x,y)=>dnDate(y).localeCompare(dnDate(x)));
+ sheet(`<div class="row sp"><h1>🔁 Añadir a rejugar</h1><button onclick="window._rjOpen=0;closeSheet()">✕</button></div><div class="mu">Tus juegos completados, del más reciente al más antiguo. Toca uno para añadirlo o quitarlo.</div>${a.length?a.map(g=>`<div class="card row" style="cursor:pointer;${g.again?"border-color:var(--ac)":""}" onclick="togAgain('${g.id}')">${th(g,44,58)}<div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(g.title)}</b><div class="mu">${dnDate(g)?"Completado el "+fd(dnDate(g)):"Sin fecha"}${comps(g).length>1?" · 🏁×"+comps(g).length:""}</div></div><b style="font-size:20px">${g.again?"✅":"➕"}</b></div>`).join(""):`<div class="empty">Aún no tienes juegos completados.</div>`}<button class="pri" style="width:100%;margin-top:8px" onclick="window._rjOpen=0;closeSheet()">Listo</button>`)}
 // ===== DLCs y expansiones dentro de la ficha del juego =====
 const DST=[["","Pendiente","⬜"],["playing","Jugando","🎮"],["done","Completado","✅"]];
-function dlcSec(g){const a=g.dlcs||[];window._dlT=window._dlT||{};if(g.igdb&&!window._dlT[g.id]){window._dlT[g.id]=1;dlcFetch(g.id)}
+function dlcSec(g){const a=g.dlcs||[];window._dlT=window._dlT||{};if(!window._dlT[g.id]){window._dlT[g.id]=1;dlcFetch(g.id)}
  const done=a.filter(x=>x.st==="done").length;
- return`<h2>➕ DLCs y expansiones${a.length?` (${done}/${a.length})`:""}</h2><div class="card" id="dlcs">${a.length?a.map((x,i)=>{const s=DST.find(z=>z[0]===(x.st||""))||DST[0];return`<div class="lvr"><div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.name)}</b><div class="mu">${e(x.kind||"DLC")}${x.released?" · "+fd(x.released):""}</div></div><button onclick="dlcCycle('${g.id}',${i})">${s[2]} ${s[1]}</button><b style="cursor:pointer;color:var(--er);padding:0 6px" onclick="dlcDel('${g.id}',${i})">✕</b></div>`}).join(""):`<div class="mu">${g.igdb?"Buscando DLCs en IGDB…":"Sin DLCs todavía."}</div>`}<div class="row" style="margin-top:8px"><input id="dlcn" placeholder="Añadir DLC o expansión a mano"><button onclick="dlcAdd('${g.id}')">Añadir</button></div></div>`}
-async function dlcFetch(id){const g=G(id);if(!g||!g.igdb)return;
+ return`<h2>➕ DLCs y expansiones${a.length?` (${done}/${a.length})`:""}</h2><div class="card" id="dlcs">${a.length?a.map((x,i)=>{const s=DST.find(z=>z[0]===(x.st||""))||DST[0];return`<div class="lvr"><div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.name)}</b><div class="mu">${e(x.kind||"DLC")}${x.released?" · "+fd(x.released):""}</div></div><button onclick="dlcCycle('${g.id}',${i})">${s[2]} ${s[1]}</button><b style="cursor:pointer;color:var(--er);padding:0 6px" onclick="dlcDel('${g.id}',${i})">✕</b></div>`}).join(""):`<div class="mu">${window._dlT[g.id]===1?"Buscando DLCs…":"Sin DLCs todavía."}</div>`}<div class="row" style="margin-top:8px"><input id="dlcn" placeholder="Buscar o añadir DLC o expansión" onkeydown="if(event.key==='Enter')dlcFind('${g.id}')"><button onclick="dlcFind('${g.id}')">🔎 Buscar</button></div><div class="mu" style="margin:6px 0 0">Busca en IGDB y RAWG. Si no aparece, escribe el nombre y pulsa <a href="#" style="color:var(--ac2)" onclick="dlcAdd('${g.id}');return false">añadir a mano</a>.</div><div id="dlcr"></div></div>`}
+async function dlcFetch(id){const g=G(id);if(!g)return;
+ if(!g.igdb){try{const r=await fetch("/.netlify/functions/igdb?findid="+encodeURIComponent(g.title));if(r.ok){const d=await r.json();if(d.id)g.igdb=d.id;save()}}catch(_){}}
+ if(!g.igdb){window._dlT[id]=2;if($("#dlcs")&&window._og===id)openGame(id);return}
  try{const r=await fetch("/.netlify/functions/igdb?id="+g.igdb);if(!r.ok)throw 0;const d=await r.json();const have=new Set((g.dlcs||[]).map(x=>x.id));g.dlcs=g.dlcs||[];
   (d.dlcs||[]).forEach(x=>{if(!have.has(x.id))g.dlcs.push({id:x.id,name:x.name,kind:x.kind,released:x.released,st:""})});save()}catch(_){}
+ window._dlT[id]=2;
  if($("#dlcs")&&window._og===id)openGame(id)}
+const nrm=t=>String(t||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+async function dlcFind(id){const g=G(id),q=($("#dlcn")?.value||"").trim(),box=$("#dlcr");if(!g||!box)return;
+ if(q.length<2&&!g.igdb)return alert("Escribe al menos 2 letras");box.innerHTML=`<div class="mu" style="margin-top:8px">Buscando en IGDB y RAWG…</div>`;
+ const get=async u=>{try{const r=await fetch(u);if(!r.ok)return[];return(await r.json()).items||[]}catch(_){return[]}};
+ const [a,b]=await Promise.all([get("/.netlify/functions/igdb?dlcq="+encodeURIComponent(q)+(g.igdb?"&parent="+g.igdb:"")),get("/.netlify/functions/search?dlcfor="+encodeURIComponent(g.title)+"&q="+encodeURIComponent(q))]);
+ const have=new Set((g.dlcs||[]).map(x=>nrm(x.name))),seen=new Set(),res=[];
+ [...a.map(x=>({...x,src:"IGDB"})),...b.map(x=>({...x,src:"RAWG"}))].forEach(x=>{const k=nrm(x.name);if(!k||have.has(k)||seen.has(k))return;seen.add(k);res.push(x)});
+ window._dlcRes=res;if(!$("#dlcr"))return;
+ $("#dlcr").innerHTML=res.length?res.slice(0,12).map((x,i)=>`<div class="lvr"><div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.name)}</b><div class="mu">${e(x.kind||"DLC")}${x.released?" · "+fd(x.released):""}${x.parent?" · "+e(x.parent):""} · ${x.src}</div></div><button class="pri" onclick="dlcPick('${id}',${i})">Añadir</button></div>`).join(""):`<div class="mu" style="margin-top:8px">No se ha encontrado nada${q?" para «"+e(q)+"»":""}. Puedes añadirlo a mano.</div>`}
+function dlcPick(id,i){const g=G(id),x=(window._dlcRes||[])[i];if(!g||!x)return;g.dlcs=g.dlcs||[];g.dlcs.push({id:x.id,name:x.name,kind:x.kind||"DLC",released:x.released||"",st:""});save();openGame(id)}
 function dlcCycle(id,i){const x=G(id).dlcs[i],o=DST.map(z=>z[0]),n=o[(o.indexOf(x.st||"")+1)%o.length];x.st=n;if(n==="done")x.at=today();save();openGame(id)}
 function dlcDel(id,i){G(id).dlcs.splice(i,1);save();openGame(id)}
 function dlcAdd(id){const v=$("#dlcn").value.trim().slice(0,100);if(!v)return;const g=G(id);g.dlcs=g.dlcs||[];g.dlcs.push({id:"m"+uid(),name:v,kind:/expansi/i.test(v)?"Expansión":"DLC",released:"",st:""});save();openGame(id)}
@@ -317,7 +338,7 @@ function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" sty
 function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><div class="row"><button onclick="selOn()">☑️ Elegir</button><button onclick="listsSheet()">📋 Listas</button></div></div>
  <div class="row" style="margin-top:8px"><input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()"><button onclick="filt()" style="white-space:nowrap">⚙️ Filtros${Object.values(lib.f).filter((v,i)=>i<3&&v).length?" ("+Object.values(lib.f).filter((v,i)=>i<3&&v).length+")":""}</button></div>
  <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.sel=null;lib.st='${k}';R()">${v}</button>`).join("")}
- </div>${lib.st==="backlog"?`<button style="width:100%;margin-bottom:12px" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button>`:""}<div id="list"></div><div id="selbar"></div>`}
+ </div>${lib.st==="backlog"?`<div class="row" style="margin-bottom:12px"><button style="flex:1" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button><button style="flex:1" onclick="$('#rjs').scrollIntoView({behavior:'smooth',block:'start'})">🔁 Para rejugar${rjList().length?" ("+rjList().length+")":""}</button></div>`:""}<div id="list"></div>${lib.st==="backlog"?rjSec():""}<div id="selbar"></div>`}
 function comps(g){if(!g.completions)g.completions=g.doneDate?[g.doneDate]:[];return g.completions}
 function gg(g){const rt=g.rating?.score,n=comps(g).length,on=lib.sel&&lib.sel.has(g.id);return`<div class="poster${on?" picked":""}" onclick="pTap('${g.id}')" onpointerdown="pDown(event,'${g.id}')" oncontextmenu="return false"><div class="cv">${g.cover?`<img ${oi(g.cover,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}${lib.sel?`<span class="ck">${on?"✓":""}</span>`:""}</div><b>${e(g.title)}</b><span>⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}${n>1?" · 🏁×"+n:""}</span></div>`}
 function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q)&&(!F.pl||g.platform===F.pl)&&(!F.gen||(g.genre||"").split(",").map(z=>z.trim()).includes(F.gen))&&(!F.fmt||g.format===F.fmt));lib._vis=a.map(g=>g.id);
@@ -357,7 +378,7 @@ function rbGo(){let m=rbMatch();const n=m.length;if(n>1)m=m.filter(g=>g.id!==win
  <button style="width:100%;margin-top:10px" onclick="rbAsk()">Cambiar respuestas</button>`)}
 function sheet(h){const d=$("#sc"),k=t=>(/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(t)||[])[1]||"",was=$("#sheet").style.display==="flex",same=was&&k(h)===window._shk;
  window._shk=k(h);d.innerHTML=h;$("#sheet").style.display="flex";if(!same)d.scrollTop=0}
-function closeSheet(){$("#sheet").style.display="none";clearInterval(window._ti)}
+function closeSheet(){window._rjOpen=0;$("#sheet").style.display="none";clearInterval(window._ti)}
 function addGame(){manualSheet(-1)}
 function pl(g){return g?.platforms||[]}
 function platOpts(list,sel){const k=[...new Set([sel,...list].filter(Boolean))],o=a=>a.map(p=>`<option ${p===sel?"selected":""}>${e(p)}</option>`).join(""),rest=PLAT.filter(p=>!k.includes(p));return k.length?`<optgroup label="Plataformas del juego">${o(k)}</optgroup><optgroup label="Otras plataformas">${o(rest)}</optgroup>`:o(PLAT)}
@@ -401,7 +422,7 @@ function trackPick(i,st){if(!["done","backlog","playing"].includes(st))return tr
  <label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
 function agClamp(){const run=()=>{const el=$("#ag-sum"),m=$("#ag-more");if(el&&m&&!el.classList.contains("open"))m.style.display=el.scrollHeight>el.clientHeight+1?"block":"none"};requestAnimationFrame(run);setTimeout(run,300)}
 function agMore(){const el=$("#ag-sum"),m=$("#ag-more");m.textContent=el.classList.toggle("open")?"Ver menos":"Ver más"}
-function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender();else if(window._lastQ)sgType(window._lastQ)}
+function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender();}
 function agShow(b){CR=[b];addSheet(0)}
 function simSearch(n){catSearch();$("#cq").value=n;catGo()}
 async function simGo(k){const cur=window._agB,x=(cur?.simG||[])[k];if(!x)return;if(!x.id)return simSearch(x.name);
@@ -426,7 +447,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  <h2>Estado</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button class="${g.status===k?"on":""}" ${g.status===k?"":`onclick="setStatus('${id}','${k}')"`}>${l}</button>`).join("")}</div>
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fd(rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
  ${g.status==="done"?`<button class="pri" style="margin-top:8px;width:100%" onclick="storyGame('${id}')">📤 Compartir tarjeta Story</button>`:""}
- ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}
+ ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}${g.status==="done"?` <button style="margin-top:8px" onclick="togAgain('${id}')">${g.again?"✓ En «Para rejugar»":"➕ Para rejugar"}</button>`:""}
  ${compSec(g)}
  ${dlcSec(g)}
  <h2>Duración</h2><div class="ag-dur">${d3}</div><div class="mu" style="margin-top:6px">${t.fast||t.main||t.extra||t.full?(hl?"Duración puesta por ti. ":"Estimación de IGDB. "):"Sin duración todavía. "}<a href="https://howlongtobeat.com/?q=${encodeURIComponent(g.title)}" target="_blank" rel="noopener" style="color:var(--ac2)">Ver en HowLongToBeat</a></div>
@@ -448,7 +469,7 @@ async function getBanner(id){const g=G(id);if(!g||g.banner||g.bannerTried)return
  try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>x.background_image&&nz(x.name)===nz(g.title));
  if(m){g.banner=m.background_image;save();if(window._og===id)openGame(id)}}catch(_){}}
 function imp(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.games)||!Array.isArray(d.sessions))throw 0;if(!confirm("Se reemplazarán tus datos actuales por los del archivo ("+d.games.length+" juegos, "+d.sessions.length+" sesiones). ¿Continuar?"))return;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);save();R()}catch(x){alert("El archivo no es un JSON válido de Playlog.")}};rd.readAsText(f);inp.value=""}
-function replay(id){const g=G(id);g.run=(g.run||1)+1;g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
+function replay(id){const g=G(id);g.again=false;g.run=(g.run||1)+1;g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
 function setCover(id){const u=prompt("Pega el enlace (URL) de la imagen de portada:");if(u&&/^https?:\/\//.test(u.trim())){G(id).cover=u.trim();save();openGame(id);R()}}
 function setStatus(id,v){const g=G(id),was=g.status;g.status=v;if(v==="playing")g.playAt=Date.now();if(v==="done"&&was!=="done"){g.doneDate=lastS(g)||today();const c=comps(g);if(!c.includes(g.doneDate))c.push(g.doneDate);c.sort();save();rate(id)}else{save();openGame(id);R()}}
 function rate(id){const r=G(id).rating||{};sheet(`<h1>Valoración (opcional)</h1><label>Fecha de finalización</label><input type="date" id="rd" value="${G(id).doneDate||r.date||lastS(G(id))||today()}">
@@ -515,7 +536,7 @@ function vProf(){const s=stats(),yr=String(new Date().getFullYear()),tot=S.sessi
  <div class="card" style="margin:0"><div class="row sp"><span class="mu">⏱ Horas</span><b>${H(tot)}</b></div><div class="row sp"><span class="mu">🎮 Sesiones</span><b>${S.sessions.length}</b></div><div class="row sp"><span class="mu">🏁 Completados</span><b>${S.games.filter(g=>g.status==="done").length}</b></div></div></div>
  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px">${tt}</div>
  <div class="card" style="cursor:pointer;margin-top:12px" onclick="logrosSheet()"><div class="row sp"><b>🎖️ Logros</b><span class="mu">${nAll?nDone+"/"+nAll+" · ":""}🏆 ${pls} platinos ›</span></div>${nAll?bar(nDone,nAll):""}</div>
- ${levelsCard()}
+ ${levelsCard()}${usersCard()}
  <div class="card"><b>🎞️ Recaps</b><div class="row" style="flex-wrap:wrap;margin-top:8px">${yrs.map(y=>`<button class="pri" onclick="recap('${y}')">${y}</button>`).join("")}</div></div>
  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${miniPie(gen,"gen","Géneros")}${miniPie(plt,"plt","Plataformas")}${miniPie(fmtc,"fmt","Físico / Digital")}</div>
  ${evo()}
@@ -697,6 +718,28 @@ function setAccent(c){S.theme=Object.assign({id:"playlog"},S.theme,{accent:c});s
 function themeCard(){const t=S.theme||{},cur=t.id||"playlog",acc=(t.accent||"").toLowerCase();
  return`<div class="card"><b>🎨 Apariencia</b><div class="mu" style="margin-top:8px">Tema</div><div class="themes">${Object.entries(THEMES).map(([k,x])=>{const v=Object.assign({},TDEF,x.v);return`<button class="thm ${cur===k&&!acc?"on":""}" onclick="setTheme('${k}')"><span class="sw"><i style="background:${v.bg}"></i><i style="background:${v.ac}"></i><i style="background:${v.ac2}"></i></span>${x.n}</button>`}).join("")}</div>
  <div class="mu">Color de acento</div><div class="accs">${ACC.map(([n,c])=>`<button class="acc ${acc===c?"on":""}" style="background:${c}" aria-label="${n}" onclick="setAccent('${c}')"></button>`).join("")}<input type="color" aria-label="Color personalizado" value="${/^#[0-9a-f]{6}$/i.test(acc)?acc:"#8b5cf6"}" onchange="setAccent(this.value)">${acc?`<button onclick="setAccent('')">Quitar</button>`:""}</div></div>`}
+// ===== Buscar usuarios y ver sus perfiles públicos =====
+function usersCard(){return`<div class="card" style="cursor:pointer;margin-top:12px" onclick="usersSheet()"><div class="row sp"><b>🔎 Buscar usuarios</b><span class="mu">ver perfiles ›</span></div><div class="mu" style="margin-top:4px">Mira el nivel, las estadísticas y los juegos de otros jugadores.</div></div>`}
+function usersSheet(){
+ if(!ACCT)return sheet(`<div class="row sp"><h1>🔎 Buscar usuarios</h1><button onclick="closeSheet()">✕</button></div><div class="empty">Inicia sesión para buscar a otros usuarios.<br><button class="pri" style="margin-top:10px" onclick="authSheet('login')">Iniciar sesión</button></div>`);
+ sheet(`<div class="row sp"><h1>🔎 Buscar usuarios</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="uq" type="search" autocapitalize="none" autocomplete="off" placeholder="Nombre de usuario" value="${e(window._uQ||"")}" onkeydown="if(event.key==='Enter')usersGo()"><button class="pri" onclick="usersGo()">Buscar</button></div><div id="ur">${window._uQ?"":`<div class="mu" style="margin-top:12px">Escribe el nombre de usuario (o el principio) y pulsa Buscar. Solo aparecen quienes tienen el perfil público.</div>`}</div>`);
+ if(window._uQ)usersGo()}
+async function usersGo(){const q=($("#uq")?.value||"").trim().toLowerCase();if(q.replace(/[^a-z0-9_]/g,"").length<2)return alert("Escribe al menos 2 letras");window._uQ=q;$("#ur").innerHTML=`<div class="empty">Buscando…</div>`;
+ const t=await accTok();if(!t)return;
+ try{const d=await accCall("search",{q},t);if(!$("#ur"))return;$("#ur").innerHTML=d.items.length?d.items.map(x=>`<div class="card row" style="cursor:pointer" onclick="userProfile('${e(x.username)}')"><div class="lvb">Nv ${x.lv}</div><div style="flex:1;min-width:0"><b>${e(x.username)}${ACCT&&x.username===ACCT.username?" (tú)":""}</b><div class="mu">${H(x.hours*60)} · ${x.done} completado${x.done===1?"":"s"}</div></div><span class="mu">›</span></div>`).join(""):`<div class="empty">No hay ningún usuario público que empiece por «${e(q)}».</div>`}
+ catch(er){if($("#ur"))$("#ur").innerHTML=`<div class="empty">${e(er.message)}</div>`}}
+async function userProfile(name){sheet(`<div class="row sp"><button onclick="usersSheet()">‹ Volver</button><button onclick="closeSheet()">✕</button></div><div class="empty" style="margin-top:20px">Cargando perfil…</div>`);
+ const t=await accTok();if(!t)return;
+ try{const d=await accCall("profile",{username:name},t);window._up=d;window._upSt="done";upShow()}
+ catch(er){sheet(`<div class="row sp"><button onclick="usersSheet()">‹ Volver</button><button onclick="closeSheet()">✕</button></div><div class="empty" style="margin-top:20px">${e(er.message)}</div>`)}}
+function upShow(){const d=window._up,st=window._upSt,lo=50*(d.lv-1)**2,hi=50*d.lv**2,L=(d.list||[]).filter(g=>g.s===st).sort((a,b)=>(b.r||0)-(a.r||0)||b.h-a.h),cnt=k=>(d.list||[]).filter(g=>g.s===k).length;
+ sheet(`<div class="row sp"><button onclick="usersSheet()">‹ Volver</button><button onclick="closeSheet()">✕</button></div>
+ <div class="hero" style="margin-top:12px"><div class="ring" style="--p:${Math.round((d.xp-lo)/(hi-lo)*100)}"><b>${d.lv}</b><small>NIVEL</small></div><div style="flex:1;min-width:0"><b style="font-size:20px">${e(d.username)}</b>${d.name&&d.name!==d.username?`<div class="mu">${e(d.name)}</div>`:""}<div class="mu">${d.xp} XP</div></div></div>
+ <div class="stats"><div><b>${d.hours}h</b><span>jugadas</span></div><div><b>${d.sessions}</b><span>sesiones</span></div><div><b>${d.done}</b><span>completados</span></div><div><b>${d.rec}</b><span>racha récord</span></div></div>
+ ${d.genres.length?`<h2>Géneros favoritos</h2><div>${d.genres.map(x=>`<span class="chip">${e(x.k)} · ${H(x.h*60)}</span>`).join("")}</div>`:""}
+ ${d.platforms.length?`<h2>Plataformas</h2><div>${d.platforms.map(x=>`<span class="chip">${e(x.k)} · ${H(x.h*60)}</span>`).join("")}</div>`:""}
+ <h2>Juegos (${d.games})</h2><div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${st===k?"on":""}" onclick="window._upSt='${k}';upShow()">${v} (${cnt(k)})</button>`).join("")}</div>
+ ${L.length?`<div class="grid">${L.map(g=>`<div class="poster"><div class="cv">${g.c?`<img ${oi(g.c,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.t)}</b><span>${g.h?"⏱ "+H(g.h*60):""}${g.r?(g.h?" · ":"")+"⭐ "+g.r:""}</span></div>`).join("")}</div>`:`<div class="empty">Ningún juego aquí.</div>`}`)}
 // ===== Cuenta y sincronización en la nube (Supabase, a través de /.netlify/functions/account) =====
 try{ACCT=JSON.parse(localStorage.getItem("playlog_acct")||"null")}catch(_){}
 const accSave=()=>{try{if(ACCT)localStorage.setItem("playlog_acct",JSON.stringify(ACCT));else localStorage.removeItem("playlog_acct")}catch(_){}};
@@ -704,36 +747,65 @@ async function accCall(action,body,tok){const r=await fetch("/.netlify/functions
  let d={};try{d=await r.json()}catch(_){}if(!r.ok){const er=new Error(d.error||"Error de conexión");er.status=r.status;throw er}return d}
 async function accTok(){if(!ACCT)return null;if(ACCT.expires_at-Date.now()/1000>60)return ACCT.access_token;
  try{const d=await accCall("refresh",{refresh_token:ACCT.refresh_token,username:ACCT.username});Object.assign(ACCT,d.session);accSave();return ACCT.access_token}catch(er){if(er.status===401){ACCT=null;accSave();alert("Tu sesión ha caducado. Vuelve a iniciar sesión.")}return null}}
-function queuePush(){if(!ACCT||window._noPush)return;clearTimeout(_pt);_pt=setTimeout(doPush,4000)}
+function queuePush(){if(!ACCT||ACCT.hold||window._noPush)return;clearTimeout(_pt);_pt=setTimeout(doPush,4000)}
 async function doPush(){if(!ACCT)return;const t=await accTok();if(!t)return;const u=S._u;
  try{await accCall("push",{data:S},t);ACCT.last=u;ACCT.at=Date.now();accSave();accUi()}catch(_){}}
 function takeCloud(d){const keep=ACCT;window._noPush=true;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(_){}window._noPush=false;ACCT=keep;ACCT.last=S._u||0;ACCT.at=Date.now();accSave();if(typeof applyTheme==="function")applyTheme();R()}
 const hasData=()=>S.games.length>0||S.sessions.length>0;
-async function accSync(manual){if(!ACCT)return;const t=await accTok();if(!t)return;
- try{const d=await accCall("pull",{},t),cl=d.data,cu=cl?._u||0,lu=S._u||0,last=ACCT.last;
-  if(!cl||(!(cl.games||[]).length&&!(cl.sessions||[]).length)){if(hasData())await doPush();else{ACCT.last=lu;accSave()}}
-  else if(last===undefined){if(!hasData())takeCloud(cl);else if(confirm("Ya tienes datos en la nube y en este dispositivo.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = subir los de este dispositivo (se reemplazan los de la nube).")) takeCloud(cl);else await doPush()}
+const NODEF=()=>({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""});
+function holdSync(){ACCT.hold=true;accSave();accUi()}
+async function accSync(manual){if(!ACCT)return;if(ACCT.hold&&!manual)return;const t=await accTok();if(!t)return;
+ try{const d=await accCall("pull",{},t);ACCT.pub=d.is_public!==false;const cl=d.data,cu=cl?._u||0,lu=S._u||0,last=ACCT.last,cHas=cl&&((cl.games||[]).length||(cl.sessions||[]).length);
+  if(ACCT.hold){if(manual)alert("La sincronización está en pausa. Elige una opción en Ajustes > Cuenta: combinar, usar la nube o subir este dispositivo.");accUi();return}
+  if(!cHas){if(hasData())await doPush();else{ACCT.last=lu;accSave()}}
+  else if(last===undefined){
+   if(!hasData())takeCloud(cl);
+   else if(confirm("Esta cuenta ya tiene datos en la nube y este dispositivo también tiene datos.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = no cambiar nada ahora (en Ajustes > Cuenta podrás combinarlos o elegir)."))takeCloud(cl);
+   else holdSync()}
   else if(cu>last&&lu<=last)takeCloud(cl);
-  else if(cu>last&&lu>last){if(confirm("Hay cambios en la nube y en este dispositivo.\n\nAceptar = usar los de la nube.\nCancelar = quedarte con los de este dispositivo y subirlos."))takeCloud(cl);else await doPush()}
+  else if(cu>last&&lu>last){if(confirm("Hay cambios en la nube y también en este dispositivo.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = no cambiar nada ahora (en Ajustes > Cuenta podrás combinarlos o elegir)."))takeCloud(cl);else holdSync()}
   else if(lu>last)await doPush();
   else{ACCT.at=Date.now();accSave()}
-  if(manual)alert("Sincronizado ✅")}catch(er){if(manual)alert("No se pudo sincronizar: "+er.message)}accUi()}
+  if(manual&&!ACCT.hold)alert("Sincronizado ✅")}catch(er){if(manual)alert("No se pudo sincronizar: "+er.message)}accUi()}
+// Opciones manuales (Ajustes > Cuenta): nunca se ejecutan solas
+async function syncUseCloud(){if(!confirm("Se reemplazarán los datos de este dispositivo por los de la nube. ¿Continuar?"))return;const t=await accTok();if(!t)return;
+ try{const d=await accCall("pull",{},t);if(!d.data)return alert("No hay datos en la nube.");ACCT.hold=false;takeCloud(d.data);accUi()}catch(er){alert("No se pudo sincronizar: "+er.message)}}
+async function syncUseLocal(){if(!confirm("Se reemplazarán los datos de la nube por los de este dispositivo. ¿Continuar?"))return;ACCT.hold=false;accSave();await doPush();accUi()}
+function mergeData(l,c){const o=JSON.parse(JSON.stringify(c));o.games=o.games||[];o.sessions=o.sessions||[];o.lists=o.lists||[];
+ const key=g=>g.igdb?"i"+g.igdb:"t"+(g.title||"").toLowerCase().trim()+"|"+(g.platform||""),byId=new Map(o.games.map(g=>[g.id,g])),byKey=new Map(o.games.map(g=>[key(g),g])),remap={};
+ (l.games||[]).forEach(g=>{if(byId.has(g.id))return;const k=byKey.get(key(g));if(k){remap[g.id]=k.id;return}o.games.push(g);byId.set(g.id,g);byKey.set(key(g),g)});
+ const sk=x=>x.id||x.gameId+"|"+x.date+"|"+x.min,seen=new Set(o.sessions.map(sk));
+ (l.sessions||[]).forEach(x=>{const y=remap[x.gameId]?{...x,gameId:remap[x.gameId]}:x;if(!seen.has(sk(y))){seen.add(sk(y));o.sessions.push(y)}});
+ const lid=new Set(o.lists.map(x=>x.id));(l.lists||[]).forEach(x=>{const ids=(x.ids||[]).map(i=>remap[i]||i);if(lid.has(x.id)){const t=o.lists.find(z=>z.id===x.id);t.ids=[...new Set([...(t.ids||[]),...ids])]}else o.lists.push({...x,ids})});
+ return o}
+async function syncMerge(){if(!confirm("Se combinarán los datos de este dispositivo con los de la nube (no se borra nada). ¿Continuar?"))return;const t=await accTok();if(!t)return;
+ try{const d=await accCall("pull",{},t),m=d.data?mergeData(S,d.data):S;window._noPush=true;S=Object.assign(NODEF(),m);S._u=Date.now();try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(_){}window._noPush=false;
+  ACCT.hold=false;accSave();await doPush();R();accUi();alert("Datos combinados ✅")}catch(er){alert("No se pudo combinar: "+er.message)}}
 function accUi(){const el=$("#acct");if(el)el.innerHTML=accCard(true)}
-function accCard(inner){const c=ACCT;const h=c?`<div class="row sp"><b>☁️ Cuenta</b><span class="chip" style="margin:0">${e(c.username)}</span></div><div class="mu" style="margin-top:6px">Tus datos se sincronizan con la nube.${c.at?" Última vez: "+new Date(c.at).toLocaleString():""}</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="accSync(true)">🔄 Sincronizar ahora</button><button onclick="accLogout()">Cerrar sesión</button></div>`:`<div class="row sp"><b>☁️ Cuenta</b></div><div class="mu" style="margin-top:6px">Crea una cuenta para guardar tu biblioteca en la nube y usarla en varios dispositivos.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="pri" onclick="authSheet('login')">Iniciar sesión</button><button onclick="authSheet('signup')">Crear cuenta</button></div>`;
+function accCard(inner){const c=ACCT;
+ const h=c?`<div class="row sp"><b>☁️ Cuenta</b><span class="chip" style="margin:0">${e(c.username)}</span></div>
+ ${c.hold?`<div class="card" style="margin:10px 0 0;border-color:var(--er)"><b>⏸ Sincronización en pausa</b><div class="mu" style="margin-top:4px">Este dispositivo y la nube tienen datos distintos. No se ha cambiado nada. Elige qué hacer:</div></div>`:`<div class="mu" style="margin-top:6px">Tus datos se sincronizan con la nube.${c.at?" Última vez: "+new Date(c.at).toLocaleString():""}</div>`}
+ <div class="row" style="margin-top:10px;flex-wrap:wrap">${c.hold?"":`<button onclick="accSync(true)">🔄 Sincronizar ahora</button>`}<button class="${c.hold?"pri":""}" onclick="syncMerge()">🔀 Combinar ambos</button></div>
+ <div class="row" style="margin-top:8px;flex-wrap:wrap"><button onclick="syncUseCloud()">⬇️ Usar los datos de la nube</button><button onclick="syncUseLocal()">⬆️ Subir los de este dispositivo</button></div>
+ <label class="row" style="margin-top:12px;color:var(--tx);font-size:14px"><input type="checkbox" style="width:22px;min-height:22px" ${c.pub!==false?"checked":""} onchange="setPublic(this.checked)"><span>Perfil público: otros usuarios pueden buscarme y ver mi nivel, estadísticas y juegos (no mis notas ni reseñas)</span></label>
+ <div class="row" style="margin-top:10px"><button onclick="accLogout()">Cerrar sesión</button></div>`
+ :`<div class="row sp"><b>☁️ Cuenta</b></div><div class="mu" style="margin-top:6px">Crea una cuenta para guardar tu biblioteca en la nube y usarla en varios dispositivos.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="pri" onclick="authSheet('login')">Iniciar sesión</button><button onclick="authSheet('signup')">Crear cuenta</button></div>`;
  return inner?h:`<div class="card" id="acct">${h}</div>`}
-function accLogout(){if(!confirm("¿Cerrar sesión? Tus datos seguirán en este dispositivo."))return;doPush().finally(()=>{ACCT=null;accSave();accUi()})}
+async function setPublic(v){const t=await accTok();if(!t)return;try{await accCall("setpublic",{public:v},t);ACCT.pub=v;accSave()}catch(er){alert("No se pudo cambiar: "+er.message);accUi()}}
+function accLogout(){if(!confirm("¿Cerrar sesión? Tus datos seguirán en este dispositivo."))return;(ACCT.hold?Promise.resolve():doPush()).finally(()=>{ACCT=null;accSave();accUi()})}
 function authSheet(m){const L=m==="login",R_=m==="recover";
  sheet(`<div class="row sp"><h1>${L?"Iniciar sesión":R_?"Recuperar contraseña":"Crear cuenta"}</h1><button onclick="settingsSheet()">✕</button></div>
  <form onsubmit="authGo(event,'${m}')" autocomplete="on">
  ${R_?`<label>Usuario o correo</label><input id="au" autocomplete="username" autocapitalize="none" required>`:`<label>Usuario</label><input id="au" autocomplete="username" autocapitalize="none" required placeholder="${L?"usuario o correo":"3-20 letras, números o _"}">`}
  ${m==="signup"?`<label>Correo (para recuperar la contraseña)</label><input id="ae" type="email" autocomplete="email" required>`:""}
  ${R_?"":`<label>Contraseña</label><input id="ap" type="password" autocomplete="${L?"current-password":"new-password"}" required minlength="${L?1:8}" placeholder="${L?"":"Mínimo 8 caracteres"}">`}
+ ${m==="signup"?`<label class="row" style="margin:12px 0 0;color:var(--tx);font-size:14px"><input type="checkbox" id="apub" checked style="width:22px;min-height:22px"><span>Perfil público: otros usuarios pueden buscarme y ver mi nivel, estadísticas y juegos (no mis notas ni reseñas). Puedes cambiarlo cuando quieras.</span></label>`:""}
  <div id="aerr" class="mu" style="color:var(--er);min-height:20px;margin-top:8px"></div>
  <button class="pri" style="width:100%;margin-top:6px" id="abtn">${L?"Entrar":R_?"Enviar enlace":"Crear cuenta"}</button></form>
  <div class="row" style="margin-top:12px;flex-wrap:wrap;justify-content:center">${L?`<button onclick="authSheet('signup')">Crear cuenta</button><button onclick="authSheet('recover')">Olvidé mi contraseña</button>`:`<button onclick="authSheet('login')">Ya tengo cuenta</button>`}</div>`)}
 async function authGo(ev,m){ev.preventDefault();const b=$("#abtn"),er=$("#aerr");er.textContent="";b.disabled=true;const v=i=>($(i)?.value||"").trim();
  try{if(m==="recover"){await accCall("recover",{id:v("#au")});er.style.color="var(--ok,#22c55e)";er.textContent="Si la cuenta existe, te hemos enviado un correo con el enlace.";b.disabled=false;return}
-  const d=await accCall(m,{username:v("#au"),email:v("#ae"),password:$("#ap").value});ACCT={...d.session};accSave();closeSheet();await accSync(false);settingsSheet()}
+  const d=await accCall(m,{username:v("#au"),email:v("#ae"),password:$("#ap").value,public:m==="signup"?!!$("#apub")?.checked:undefined});ACCT={...d.session,pub:m==="signup"?!!$("#apub")?.checked:undefined};accSave();closeSheet();await accSync(false);settingsSheet()}
  catch(x){er.style.color="var(--er)";er.textContent=x.message;b.disabled=false}}
 function resetSheet(tok){sheet(`<h1>Nueva contraseña</h1><form onsubmit="resetGo(event)"><label>Escribe tu nueva contraseña</label><input id="rp" type="password" autocomplete="new-password" minlength="8" required placeholder="Mínimo 8 caracteres"><div id="aerr" class="mu" style="color:var(--er);min-height:20px;margin-top:8px"></div><button class="pri" style="width:100%" id="abtn">Guardar contraseña</button></form>`);window._rt=tok}
 async function resetGo(ev){ev.preventDefault();const b=$("#abtn");b.disabled=true;try{await accCall("reset",{token:window._rt,password:$("#rp").value});closeSheet();alert("Contraseña cambiada ✅ Ya puedes iniciar sesión.");authSheet("login")}catch(x){$("#aerr").textContent=x.message;b.disabled=false}}
@@ -742,20 +814,10 @@ async function resetGo(ev){ev.preventDefault();const b=$("#abtn");b.disabled=tru
 function settingsSheet(){sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div>${langCard()}${themeCard()}${accCard()}<div class="card"><div class="mu">Tus datos se guardan en este dispositivo (y en la nube si inicias sesión). Exporta de vez en cuando una copia.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div></div><button class="dng" style="width:100%" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar todos los datos</button><div class="mu" style="margin-top:14px">${APP_NAME} MVP · v${APP_VER} · Premium: estructura futura, sin cobros.</div>`)}
 function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
-// ===== Autocompletado: sugerencias mientras escribes (al tocar una se abre su ficha directamente) =====
-let _sgT=null,_sgN=0;const _sgC=new Map();
-function sgType(v){clearTimeout(_sgT);v=(v||"").trim();const box=$("#sg");if(!box)return;_sgN++;if(v.length<2){box.innerHTML="";return}
- if($("#cr"))$("#cr").innerHTML="";_sgT=setTimeout(()=>sgGo(v),260)}
-async function sgGo(v){const n=++_sgN,k=v.toLowerCase();let items=_sgC.get(k);
- if(!items){try{const r=await fetch("/.netlify/functions/igdb?suggest="+encodeURIComponent(v));if(!r.ok)throw 0;items=(await r.json()).items||[];_sgC.set(k,items)}catch(_){if(n===_sgN&&$("#sg"))$("#sg").innerHTML="";return}}
- if(n!==_sgN||!$("#sg"))return;
- $("#sg").innerHTML=items.length?`<div class="sgl">${items.map(x=>`<div class="sgi" onclick="sgPick(${x.id})">${th({cover:x.cover},36,48)}<div style="min-width:0;flex:1"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(x.title)}</b><div class="mu">${e([x.year,(x.platforms||[]).join(", ")].filter(Boolean).join(" · "))}</div></div><span class="mu">›</span></div>`).join("")}<div class="mu" style="text-align:center">Pulsa Buscar para ver todos los resultados</div></div>`:""}
-async function sgPick(id){window._lastQ=($("#cq")?.value||"").trim();CALL=[];window._agBack=[];const box=$("#sg");if(box)box.innerHTML=`<div class="empty">Cargando…</div>`;
- try{const r=await fetch("/.netlify/functions/igdb?gid="+id);if(!r.ok)throw 0;const d=await r.json();if(!d.game)throw 0;agShow(d.game)}catch(_){if($("#sg"))$("#sg").innerHTML=`<div class="empty">No se pudo cargar. Prueba con Buscar.</div>`}}
 let CR=[];
 function catSearch(){
- sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" oninput="sgType(this.value)" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="sg"></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
-async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;clearTimeout(_sgT);_sgN++;if($("#sg"))$("#sg").innerHTML="";$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
+ sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
+async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
  const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("error "+r.status);return r.json()};
  try{let d;try{d=await get("/.netlify/functions/igdb?q="+encodeURIComponent(q))}catch(_){d=await get("/.netlify/functions/search?q="+encodeURIComponent(q))}
  CALL=(d.results||[]).map(g=>g.title?g:{title:g.name,released:g.released,cover:g.background_image,platforms:(g.platforms||[]).map(p=>p.platform.name),genres:(g.genres||[]).map(x=>x.name),tags:[],similar:[],summary:"",ttb:null,versions:[]}).sort((a,b)=>(b.released||"").localeCompare(a.released||""));catRender()}
@@ -1346,6 +1408,87 @@ const EN_DICT={/*EN-START*/
 "El archivo no parece un CSV válido (necesita una columna Title).":"The file doesn't look like a valid CSV (it needs a Title column).",
 "Cargando":"Loading",
 "{} · playlog":"{} · playlog",
+"🔎 Buscar usuarios":"🔎 Search users",
+"ver perfiles ›":"view profiles ›",
+"Mira el nivel, las estadísticas y los juegos de otros jugadores.":"See other players' level, stats and games.",
+"Inicia sesión para buscar a otros usuarios.":"Log in to search for other users.",
+"Nombre de usuario":"Username",
+"Escribe el nombre de usuario (o el principio) y pulsa Buscar. Solo aparecen quienes tienen el perfil público.":"Type the username (or the beginning of it) and press Search. Only users with a public profile appear.",
+"No hay ningún usuario público que empiece por «{}».":"No public user starts with “{}”.",
+"{} (tú)":"{} (you)",
+"{} · {} completado":"{} · {} completed",
+"{} · {} completados":"{} · {} completed",
+"Cargando perfil…":"Loading profile…",
+"sesiones":"sessions",
+"racha récord":"best streak",
+"Géneros favoritos":"Favorite genres",
+"Juegos ({})":"Games ({})",
+"Ningún juego aquí.":"No games here.",
+"Jugando ({})":"Playing ({})",
+"Completados ({})":"Completed ({})",
+"Backlog ({})":"Backlog ({})",
+"Deseados ({})":"Wishlist ({})",
+"Abandonados ({})":"Dropped ({})",
+"Buscar o añadir DLC o expansión":"Search or add a DLC or expansion",
+"🔎 Buscar":"🔎 Search",
+"Busca en IGDB y RAWG. Si no aparece, escribe el nombre y pulsa":"Search IGDB and RAWG. If it doesn't show up, type the name and tap",
+"añadir a mano":"add manually",
+"Buscando en IGDB y RAWG…":"Searching IGDB and RAWG…",
+"Buscando DLCs…":"Looking for DLCs…",
+"No se ha encontrado nada para «{}». Puedes añadirlo a mano.":"Nothing found for “{}”. You can add it manually.",
+"No se ha encontrado nada. Puedes añadirlo a mano.":"Nothing found. You can add it manually.",
+"⏸ Sincronización en pausa":"⏸ Sync paused",
+"Este dispositivo y la nube tienen datos distintos. No se ha cambiado nada. Elige qué hacer:":"This device and the cloud have different data. Nothing has been changed. Choose what to do:",
+"🔀 Combinar ambos":"🔀 Merge both",
+"⬇️ Usar los datos de la nube":"⬇️ Use the cloud data",
+"⬆️ Subir los de este dispositivo":"⬆️ Upload this device's data",
+"Perfil público: otros usuarios pueden buscarme y ver mi nivel, estadísticas y juegos (no mis notas ni reseñas)":"Public profile: other users can find me and see my level, stats and games (not my notes or reviews)",
+"Perfil público: otros usuarios pueden buscarme y ver mi nivel, estadísticas y juegos (no mis notas ni reseñas). Puedes cambiarlo cuando quieras.":"Public profile: other users can find me and see my level, stats and games (not my notes or reviews). You can change it any time.",
+"Esta cuenta ya tiene datos en la nube y este dispositivo también tiene datos.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = no cambiar nada ahora (en Ajustes > Cuenta podrás combinarlos o elegir).":"This account already has data in the cloud and this device also has data.\n\nOK = use the cloud data (replaces this device's data).\nCancel = change nothing for now (in Settings > Account you can merge them or choose).",
+"Hay cambios en la nube y también en este dispositivo.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = no cambiar nada ahora (en Ajustes > Cuenta podrás combinarlos o elegir).":"There are changes in the cloud and also on this device.\n\nOK = use the cloud data (replaces this device's data).\nCancel = change nothing for now (in Settings > Account you can merge them or choose).",
+"La sincronización está en pausa. Elige una opción en Ajustes > Cuenta: combinar, usar la nube o subir este dispositivo.":"Sync is paused. Choose an option in Settings > Account: merge, use the cloud or upload this device.",
+"Se reemplazarán los datos de este dispositivo por los de la nube. ¿Continuar?":"This device's data will be replaced by the cloud data. Continue?",
+"No hay datos en la nube.":"There's no data in the cloud.",
+"Se reemplazarán los datos de la nube por los de este dispositivo. ¿Continuar?":"The cloud data will be replaced by this device's data. Continue?",
+"Se combinarán los datos de este dispositivo con los de la nube (no se borra nada). ¿Continuar?":"This device's data will be merged with the cloud data (nothing is deleted). Continue?",
+"Datos combinados ✅":"Data merged ✅",
+"No se pudo combinar: {}":"Couldn't merge: {}",
+"No se pudo cambiar: {}":"Couldn't change it: {}",
+"🔁 Para rejugar ({})":"🔁 To replay ({})",
+"🔁 Para rejugar":"🔁 To replay",
+"➕ Añadir juego":"➕ Add game",
+"✕ Quitar":"✕ Remove",
+"Aquí van los juegos que ya te pasaste y quieres volver a jugar.":"Games you've already beaten and want to play again go here.",
+"🔁 Añadir a rejugar":"🔁 Add to replay",
+"Tus juegos completados, del más reciente al más antiguo. Toca uno para añadirlo o quitarlo.":"Your completed games, from newest to oldest. Tap one to add or remove it.",
+"Completado el {}":"Completed on {}",
+"Sin fecha":"No date",
+"Aún no tienes juegos completados.":"You don't have any completed games yet.",
+"Listo":"Done",
+"➕ Para rejugar":"➕ To replay",
+"✓ En «Para rejugar»":"✓ In “To replay”",
+"Usuario o contraseña incorrectos":"Wrong username or password",
+"Ese nombre de usuario ya está cogido":"That username is already taken",
+"Ese correo ya tiene una cuenta":"That email already has an account",
+"El usuario debe tener 3-20 letras, números o _":"The username must be 3-20 letters, numbers or _",
+"Correo no válido":"Invalid email",
+"La contraseña debe tener entre 8 y 72 caracteres":"The password must be 8-72 characters",
+"No se pudo crear la cuenta":"Couldn't create the account",
+"Cuenta creada, pero no se pudo iniciar sesión. Prueba a entrar.":"Account created, but couldn't log in. Try logging in.",
+"Escribe usuario y contraseña":"Enter username and password",
+"Sesión caducada":"Session expired",
+"El enlace ha caducado. Pide otro desde 'Olvidé mi contraseña'.":"The link has expired. Request another from 'I forgot my password'.",
+"Demasiados intentos, espera un minuto.":"Too many attempts, wait a minute.",
+"Este perfil no existe o es privado":"This profile doesn't exist or is private",
+"Este usuario aún no tiene datos":"This user has no data yet",
+"Usuario no encontrado":"User not found",
+"Error de conexión":"Connection error",
+"No se pudo contactar con el servidor de cuentas":"Couldn't reach the accounts server",
+"Las cuentas aún no están configuradas en el servidor (faltan variables de Supabase).":"Accounts aren't set up on the server yet (Supabase variables missing).",
+"No se pudo guardar en la nube":"Couldn't save to the cloud",
+"Demasiados datos":"Too much data",
+"Datos no válidos":"Invalid data",
+"Petición no válida":"Invalid request",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
