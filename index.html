@@ -40,6 +40,7 @@ input,select,textarea{font-size:16px}h1{font-size:24px}.tabs button{min-height:4
 .cv .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;background:linear-gradient(135deg,var(--glow),#1a1a26)}
 .poster b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.25;margin-top:8px;font-weight:500}
 .poster span{font-size:11px;color:var(--mu)}
+#gate{position:fixed;inset:0;z-index:8;background:var(--bg);overflow-y:auto;display:none;padding:calc(30px + env(safe-area-inset-top,0px)) 20px 40px;-webkit-user-select:auto;user-select:auto}#gate>div{max-width:420px;margin:0 auto}
 #sheet{position:fixed;inset:0;background:#000b;backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:9}
 #sheet>div{background:var(--sheet);border:1px solid var(--bd);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 #sheet>div:before{content:"";display:block;width:42px;height:4px;background:#ffffff33;border-radius:9px;margin:0 auto 14px}
@@ -140,6 +141,8 @@ h1{font-size:30px}
 .lvr{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--s2)}.lvr:first-child{border-top:0}
 .lvb{flex:none;min-width:46px;text-align:center;border-radius:12px;padding:6px 4px;background:linear-gradient(135deg,var(--acd),var(--acr));color:var(--onac);font-weight:800;font-size:13px}
 .hs{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}.hs::-webkit-scrollbar{display:none}
+.onbg .grid,#onbg .grid{margin-top:6px}.srcrow{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;border:2px solid var(--bd);border-radius:14px;background:var(--s1);cursor:pointer}.srcrow b{display:block;font-size:15px}.srcrow span{display:block;font-size:12px;color:var(--mu);line-height:1.3;margin-top:2px}.srcrow i{font-style:normal;width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:var(--s2);color:transparent;font-size:14px}.srcrow.on{border-color:var(--ac)}.srcrow.on i{background:var(--ac);color:var(--onac)}
+.onbi{position:relative;border:3px solid transparent;border-radius:14px;overflow:hidden;cursor:pointer;background:var(--s1)}.onbi img,.onbi .ph{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--s2)}.onbi b{display:block;font-size:11px;line-height:1.2;padding:5px 6px;min-height:34px}.onbi .ck{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:#0008;color:transparent;display:flex;align-items:center;justify-content:center;font-size:14px}.onbi.on{border-color:var(--ac)}.onbi.on .ck{background:var(--ac);color:var(--onac)}.onbbar{position:sticky;bottom:0;display:flex;gap:8px;padding:12px 0 6px;background:linear-gradient(transparent,var(--bg) 30%);margin-top:10px}
 .nw{flex:0 0 220px;scroll-snap-align:start;background:var(--s1,var(--card));border-radius:16px;overflow:hidden;color:var(--tx);text-decoration:none;display:flex;flex-direction:column;border:1px solid var(--s2)}
 .nw img,.nw .ph{width:100%;height:110px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--s2)}.nw b{font-size:14px;line-height:1.25;padding:10px 12px 4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.nw span{font-size:11px;color:var(--mu);padding:0 12px 10px;margin-top:auto}
 .up{flex:0 0 118px;scroll-snap-align:start;cursor:pointer;display:flex;flex-direction:column;gap:4px}.up img,.up .ph{width:118px;height:158px;border-radius:12px;object-fit:cover;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:28px}.up b{font-size:12.5px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.up span{font-size:11px;color:var(--mu)}
@@ -148,7 +151,7 @@ h1{font-size:30px}
 .stp{width:100%;border-radius:18px;display:block;margin:10px 0}
 </style></head><body>
 <div id="app"><div id="main"></div>
-<nav id="nav"></nav></div><div id="rc" onclick="rcTap(event)"></div><div id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sc"></div></div>
+<nav id="nav"></nav></div><div id="rc" onclick="rcTap(event)"></div><div id="gate"></div><div id="sheet" onclick="if(event.target===this)closeSheet()"><div id="sc"></div></div>
 <script>
 var LANG="es";const ML=()=>LANG==="en"?"JFMAMJJASOND":"EFMAMJJASOND";const APP_NAME="Playlog",SLOGAN="Your gaming story";document.title=APP_NAME;
 const ST={playing:"Jugando",done:"Completados",backlog:"Backlog",wish:"Deseados",drop:"Abandonados"};
@@ -157,18 +160,19 @@ const XP={session:10,perHour:20,maxMinPerDay:600,completed:100};
 var ACCT=null,_pt=null;
 let S={games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""};
 try{const r=localStorage.getItem("playlog_v1");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
-LANG=S.lang||((navigator.language||"es").toLowerCase().startsWith("es")?"es":"en");document.documentElement.lang=LANG;
+LANG=S.lang||(()=>{try{return localStorage.getItem("playlog_lang")}catch(_){return""}})()||((navigator.language||"es").toLowerCase().startsWith("es")?"es":"en");document.documentElement.lang=LANG;
 const save=()=>{S._u=Date.now();try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(e){}if(typeof queuePush==="function")queuePush()};
 const $=s=>document.querySelector(s),e=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const ymd=d=>{d=new Date(d);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const today=()=>ymd(new Date()),H=m=>{m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?h+"h "+r+"min":h+"h"):r+"min"},fm=H;
-const gm=id=>S.sessions.filter(s=>s.gameId===id).reduce((a,s)=>a+s.min,0);
+const unkMin=id=>((S.games.find(g=>g.id===id)||{}).unk||[]).reduce((a,u)=>a+(u.min||0),0),gm=id=>S.sessions.filter(s=>s.gameId===id).reduce((a,s)=>a+s.min,0)+unkMin(id);
 const G=id=>S.games.find(g=>g.id===id);
 const PLAT=["PC","PlayStation 5","PlayStation 4","PlayStation 3","PlayStation 2","PlayStation","PS Vita","PSP","Xbox Series X|S","Xbox One","Xbox 360","Xbox","Nintendo Switch","Nintendo Switch 2","Wii U","Wii","GameCube","Nintendo 64","SNES","NES","Nintendo 3DS","Nintendo DS","Game Boy Advance","Game Boy","Steam Deck","Mac","Linux","iOS","Android","Consola Android","Game Boy Color","Sega Master System","Sega Mega Drive","Sega Saturn","Dreamcast","Neo Geo","PC Engine","Atari 2600","Anbernic","Retroid Pocket","Miyoo Mini","Powkiddy","Ayn Odin","Ayaneo","ROG Ally","Lenovo Legion Go","MSI Claw","Analogue Pocket","Playdate","Meta Quest","Steam Machine","Otra"];
 const GEN=["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
 const APP_VER="2026-10-17";
 const fd=d=>d?d.split("-").reverse().join("/"):"";
+const fdA=(g,d)=>{const a=g&&g.compA&&g.compA[d];if(a==="y")return d.slice(0,4);if(a==="m")return d.slice(5,7)+"/"+d.slice(0,4);return fd(d)};
 let tab="home",lib={st:"playing",q:"",f:{pl:"",gen:"",fmt:"",sort:"name"}},cal={y:new Date().getFullYear(),m:new Date().getMonth(),sel:today()};
 function stats(){
  const dm={};S.sessions.forEach(s=>dm[s.date]=(dm[s.date]||0)+s.min);
@@ -201,21 +205,68 @@ function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing"),up=S
  const mem=[];S.games.forEach(g=>comps(g).forEach(d=>{const n=new Date(),t=new Date(d+"T12:00"),a=new Date(n.getFullYear(),t.getMonth(),t.getDate(),12),df=Math.round((n-a)/864e5),y=n.getFullYear()-t.getFullYear();if(y>0&&Math.abs(df)<=3)mem.push({g,y,d,df})}));
  return`<h1>¡Hola, ${e(S.user.name)}!</h1><div class="mu">${APP_NAME} · ${SLOGAN}</div>
  <div class="hero"><div class="ring" style="--p:${Math.round((s.xp-s.lo)/(s.hi-s.lo)*100)}"><b>${s.lv}</b><small>NIVEL</small></div><div style="flex:1"><div class="mu">${s.xp} XP</div><b style="font-size:17px">Faltan ${s.hi-s.xp} XP</b><div><span class="chip">🔥 ${s.cur} días de racha</span><span class="chip">🏆 récord ${s.rec}</span></div></div></div>
- ${soon.map(g=>`<div class="card alert row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,40,54)}<div style="flex:1;min-width:0"><b>🔔 ${e(g.title)}</b><div class="mu">${dleft(g.released)<=0?"¡Sale hoy!":"Sale en "+dleft(g.released)+" día"+(dleft(g.released)===1?"":"s")} · ${fd(g.released)}</div></div></div>`).join("")}
+ ${ACCT?"":guestCard()}${soon.map(g=>`<div class="card alert row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,40,54)}<div style="flex:1;min-width:0"><b>🔔 ${e(g.title)}</b><div class="mu">${dleft(g.released)<=0?"¡Sale hoy!":"Sale en "+dleft(g.released)+" día"+(dleft(g.released)===1?"":"s")} · ${fd(g.released)}</div></div></div>`).join("")}
  ${pl.length?`<h2>Jugando ahora</h2>${pl.map(gc).join("")}`:""}
  <h2>📰 Noticias</h2><div id="news" class="hs"><div class="mu">Cargando noticias…</div></div>
+ ${hasTaste()?`<div><h2>🎯 Recomendado para ti</h2><div id="rec" class="hs"><div class="mu">Buscando recomendaciones…</div></div></div>`:""}
  <h2>🗓️ Próximos lanzamientos</h2>${up.length?`<div class="mu" style="margin:-4px 0 8px">En tu lista de deseos</div>${up.map(g=>`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<b style="flex:1">${e(g.title)}</b><span class="mu">📅 ${fd(g.released)}<br>en ${dleft(g.released)} d</span></div>`).join("")}`:""}<div class="mu" style="margin:6px 0 8px">Más esperados</div><div id="upc" class="hs"><div class="mu">Cargando lanzamientos…</div></div>
  ${seasonCard()}<h2>Misiones activas</h2>${missions().map(m=>`<div class="card"><div class="row sp"><span>${m.n}</span><span class="mu">${Math.min(m.v,m.t)}/${m.t}${m.v>=m.t?" ✅":""}</span></div>${bar(m.v,m.t)}</div>`).join("")}
  ${mem.length?`<h2>🎉 Recuerdos</h2>${mem.map(m=>`<div class="card row" style="cursor:pointer" onclick="openGame('${m.g.id}')">${th(m.g,44,58)}<div>Hace ${m.y} ${m.y===1?"año":"años"} te pasaste <b>${e(m.g.title)}</b><div class="mu">${fd(m.d)}${m.df===0?" · ¡es hoy!":""}</div></div></div>`).join("")}`:""}`}
+// ===== Gustos y editoriales: se eligen la primera vez y sirven para personalizar noticias y recomendaciones =====
+const NEWS_SRC=["Eurogamer","IGN España","Vidaextra","Area Jugones","Nintenderos","GeneraciónXbox","Vandal","HobbyConsolas"];
+const GKW={"Role-playing (RPG)":["rol","rpg","jrpg"],"Shooter":["shooter","fps","battle royale"],"Adventure":["aventura","adventure"],"Platform":["plataformas","platformer"],"Racing":["carreras","racing"],"Sport":["fútbol","fifa","ea sports","baloncesto","nba"],"Fighting":["lucha","tekken","street fighter"],"Strategy":["estrategia"],"Simulator":["simulador","simulación"],"Puzzle":["puzle","puzzle"],"Indie":["indie"],"Music":["musical","ritmo"],"Visual Novel":["novela visual"],"Real Time Strategy (RTS)":["rts","estrategia en tiempo real"],"Turn-based strategy (TBS)":["estrategia por turnos"],"Tactical":["táctico","tactics"],"Hack and slash/Beat 'em up":["hack and slash","beat 'em up"],"Arcade":["arcade"],"MOBA":["moba","league of legends","dota"]};
+const NEWS_INFO={"Eurogamer":"Noticias, análisis y reportajes de todas las plataformas.","IGN España":"Noticias, análisis, guías y tráilers de todo tipo de juegos.","Vidaextra":"Noticias y artículos de actualidad, cultura y curiosidades gamer.","Area Jugones":"Noticias de actualidad de todas las plataformas.","Nintenderos":"Solo Nintendo: Switch, juegos, anuncios y rumores.","GeneraciónXbox":"Solo Xbox y Game Pass: juegos, anuncios y novedades.","Vandal":"Noticias, análisis, guías y trucos de todas las plataformas.","HobbyConsolas":"Noticias, análisis, guías y mucho contenido retro."};
+const srcRow=(x,on)=>`<div class="srcrow ${on?"on":""}" data-v="${e(x)}" onclick="SRCFN(this)"><div style="flex:1;min-width:0"><b>${e(x)}</b><span>${e(NEWS_INFO[x]||"")}</span></div><i>✓</i></div>`;
+const STOPW=new Set(["the","of","and","for","with","super","edition","game","remastered","definitive","complete","collection","part"]);
+const hsh=t=>{let h=5381;for(const c of String(t))h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(36)};
+const newsSel=()=>{const a=(S.prefs?.news||[]).filter(x=>NEWS_SRC.includes(x));return a.length&&a.length<NEWS_SRC.length?a:[]};
+const genreList=g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean);
+function tasteW(){const w={};(S.taste?.games||[]).forEach(g=>(g.g||[]).forEach(k=>w[k]=(w[k]||0)+2));
+ S.games.forEach(g=>{if(g.status==="wish"||g.status==="drop")return;const n=(g.status==="done"?2:1)+(g.rating?.score>=8?1:0);genreList(g).forEach(k=>w[k]=(w[k]||0)+n)});return w}
+const tasteTop=n=>Object.entries(tasteW()).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0]);
+const tasteLikes=()=>[...new Set([...(S.taste?.games||[]).map(g=>g.id),...S.games.filter(g=>g.igdb&&(g.status==="done"||g.rating?.score>=8)).map(g=>g.igdb)])].slice(0,10);
+const tasteEx=()=>[...new Set([...(S.taste?.games||[]).map(g=>g.id),...S.games.map(g=>g.igdb).filter(Boolean)])];
+function tasteKw(){const k=new Set();(S.taste?.games||[]).forEach(g=>{const t=String(g.t||"").toLowerCase();if(t.length>=5)k.add(t);t.split(/[^a-záéíóúñ0-9]+/).forEach(w=>{if(w.length>=5&&!STOPW.has(w))k.add(w)})});
+ tasteTop(3).forEach(x=>(GKW[x]||[]).forEach(w=>k.add(w)));return[...k]}
+const hasTaste=()=>tasteTop(1).length>0||tasteLikes().length>0;
+// --- primera vez: editoriales y juegos favoritos
+function onbMaybe(){if(ACCT&&!S.onb&&!(window._onb))onbShow(1)}
+function onbShow(step,again){const g=$("#gate");closeSheet();g.style.display="block";window._onb=window._onb||{src:new Set(newsSel().length?newsSel():NEWS_SRC),pick:new Map((S.taste?.games||[]).map(x=>[x.id,x])),again:!!again};const o=window._onb;
+ if(step===1){g.innerHTML=`<div><div style="text-align:center;margin:18px 0 4px"><div style="font-size:54px">🎮</div><h1 style="margin:4px 0">¡Bienvenido a Playlog!</h1><div class="mu">Vamos a personalizar tu experiencia en 2 pasos.</div></div>
+  <h2>📰 Paso 1 de 2 · Editoriales</h2><div class="mu" style="margin-bottom:10px">¿De qué editoriales quieres leer las noticias? Podrás cambiarlo en Ajustes.</div>
+  <div id="onbs">${NEWS_SRC.map(x=>srcRow(x,o.src.has(x)).replace("SRCFN","onbSrc")).join("")}</div>
+  <button class="pri" style="width:100%;margin-top:20px" onclick="onbShow(2)">Siguiente</button><button style="width:100%;margin-top:8px" onclick="onbFinish(true)">Saltar</button></div>`;return}
+ g.innerHTML=`<div><div style="text-align:center;margin:10px 0"><h1 style="margin:4px 0">🎯 Paso 2 de 2 · Tus gustos</h1><div class="mu">Toca los juegos que te gusten (los que quieras). Así te recomendaremos juegos y noticias a tu medida.</div></div><div id="onbg"><div class="empty">Cargando juegos…</div></div>
+  <div class="onbbar"><button onclick="onbShow(1)">‹ Atrás</button><button class="pri" style="flex:1" id="onbok" onclick="onbFinish(false)">Listo</button></div></div>`;onbLoad()}
+function onbSrc(el){const o=window._onb,v=el.dataset.v;if(o.src.has(v))o.src.delete(v);else o.src.add(v);el.classList.toggle("on",o.src.has(v))}
+async function onbLoad(){const a=await cached("playlog_pop","/.netlify/functions/igdb?popular=1",864e5);const box=$("#onbg");if(!box)return;
+ if(!a||!a.length){box.innerHTML=`<div class="empty">No se pudieron cargar los juegos.<br><button style="margin-top:8px" onclick="onbShow(2)">Reintentar</button></div>`;return}
+ window._onb.items=a;box.innerHTML=`<div class="grid">${a.map((g,i)=>`<div class="onbi ${window._onb.pick.has(g.id)?"on":""}" onclick="onbPick(${i},this)">${g.cover?`<img ${oi(g.cover,220)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}<span class="ck">✓</span><b>${e(g.title)}</b></div>`).join("")}</div>`;onbCount()}
+function onbPick(i,el){const o=window._onb,g=o.items[i];if(o.pick.has(g.id))o.pick.delete(g.id);else o.pick.set(g.id,{id:g.id,t:g.title,g:g.genres||[]});el.classList.toggle("on",o.pick.has(g.id));onbCount()}
+function onbCount(){const b=$("#onbok");if(b)b.textContent=window._onb.pick.size?"Listo ("+window._onb.pick.size+")":"Listo"}
+function onbFinish(skip){const o=window._onb||{src:new Set(),pick:new Map()};
+ if(!skip||!S.onb){S.prefs=Object.assign({},S.prefs,{news:[...o.src].length===NEWS_SRC.length?[]:[...o.src]});if(!skip||o.pick.size)S.taste={games:[...o.pick.values()],at:Date.now()}}
+ S.onb=1;save();window._onb=null;gateHide();R()}
+// --- Ajustes: editoriales y gustos
+function prefsCard(){const sel=newsSel(),all=!sel.length;
+ return`<div class="card"><b>📰 Noticias y gustos</b><div class="mu" style="margin:8px 0">Editoriales de las noticias</div><div>${NEWS_SRC.map(x=>srcRow(x,all||sel.includes(x)).replace("SRCFN","prefSrc")).join("")}</div>
+ <div class="mu" style="margin:12px 0 6px">${S.taste?.games?.length?`Has elegido ${S.taste.games.length} juego${S.taste.games.length===1?"":"s"} favorito${S.taste.games.length===1?"":"s"}.`:"Todavía no has elegido tus juegos favoritos."}</div><div class="row" style="flex-wrap:wrap"><button onclick="window._onb=null;onbShow(2,true)">🎮 Elegir mis juegos favoritos</button>${S.taste?.games?.length?`<button onclick="if(confirm('¿Borrar tus gustos? Las recomendaciones usarán solo tu biblioteca.')){S.taste=null;save();settingsSheet()}">Borrar gustos</button>`:""}</div></div>`}
+function prefSrc(el){const sel=new Set(newsSel().length?newsSel():NEWS_SRC),v=el.dataset.v;if(sel.has(v)){if(sel.size===1)return;sel.delete(v)}else sel.add(v);S.prefs=Object.assign({},S.prefs,{news:sel.size===NEWS_SRC.length?[]:[...sel]});save();el.classList.toggle("on",sel.has(v))}
 // Datos de Inicio: se guardan un rato en el dispositivo para que cargue al instante
 async function cached(key,url,ttl){let c=null;try{c=JSON.parse(localStorage.getItem(key)||"null")}catch(_){}
  if(c&&Date.now()-c.t<ttl)return c.items;
  try{const r=await fetch(url);if(!r.ok)throw 0;const d=await r.json();if(d.items&&d.items.length){try{localStorage.setItem(key,JSON.stringify({t:Date.now(),items:d.items}))}catch(_){}return d.items}}catch(_){}
  return c?c.items:null}
 async function homeLoad(){
- cached("playlog_news","/.netlify/functions/news",20*6e4).then(a=>{const el=$("#news");if(!el||tab!=="home")return;
-  el.innerHTML=a&&a.length?a.slice(0,12).map(n=>`<a class="nw" href="${e(n.link)}" target="_blank" rel="noopener">${n.img?`<img src="${e(n.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:`<div class="ph">📰</div>`}<b>${e(n.title)}</b><span>${e(n.src)}${n.t?" · "+ago(n.t):""}</span></a>`).join(""):`<div class="empty" style="width:100%">No se pudieron cargar las noticias ahora mismo.</div>`});
- cached("playlog_upc","/.netlify/functions/igdb?upcoming=1",6*36e5).then(a=>{const el=$("#upc");if(!el||tab!=="home")return;const mine=new Set(S.games.map(g=>g.igdb));
+ const ns=newsSel(),kw=tasteKw(),rel=n=>{const t=String(n.title||"").toLowerCase();return kw.filter(k=>t.includes(k)).length};
+ cached("playlog_news_"+hsh(ns.join("|")),"/.netlify/functions/news"+(ns.length?"?src="+encodeURIComponent(ns.join("|")):""),20*6e4).then(a=>{const el=$("#news");if(!el||tab!=="home")return;
+  if(a&&kw.length)a=a.map((n,i)=>({n,i,r:rel(n)})).sort((x,y)=>(y.r>0)-(x.r>0)||x.i-y.i).map(x=>({...x.n,fav:x.r>0}));
+  el.innerHTML=a&&a.length?a.slice(0,12).map(n=>`<a class="nw" href="${e(n.link)}" target="_blank" rel="noopener">${n.img?`<img src="${e(n.img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:`<div class="ph">📰</div>`}<b>${e(n.title)}</b><span>${n.fav?"⭐ Para ti · ":""}${e(n.src)}${n.t?" · "+ago(n.t):""}</span></a>`).join(""):`<div class="empty" style="width:100%">No se pudieron cargar las noticias ahora mismo.</div>`});
+ const tg=new Set(tasteTop(3));
+ if(hasTaste()){const u="/.netlify/functions/igdb?rec=1&like="+tasteLikes().join(",")+"&gn="+encodeURIComponent(tasteTop(3).join("|"))+"&ex="+tasteEx().slice(0,50).join(",");
+  cached("playlog_rec_"+hsh(u),u,12*36e5).then(a=>{const el=$("#rec");if(!el||tab!=="home")return;if(!a||!a.length){el.parentNode.style.display="none";return}
+   el.innerHTML=a.map(g=>`<div class="up" onclick="upGo(${g.id})">${g.cover?`<img ${oi(g.cover,220)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}<b>${e(g.title)}</b><span>${e((g.genres||[])[0]||"")}${g.released?" · "+g.released.slice(0,4):""}</span></div>`).join("")})}
+ cached("playlog_upc","/.netlify/functions/igdb?upcoming=1",6*36e5).then(a=>{const el=$("#upc");if(!el||tab!=="home")return;const mine=new Set(S.games.map(g=>g.igdb));if(a&&tg.size)a=a.map((g,i)=>({g,i,r:(g.genres||[]).filter(x=>tg.has(x)).length})).sort((x,y)=>(y.r>0)-(x.r>0)||x.i-y.i).map(x=>x.g);
   el.innerHTML=a&&a.length?a.map(g=>`<div class="up" onclick="upGo(${g.id})">${g.cover?`<img ${oi(g.cover,220)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}<b>${e(g.title)}</b><span>📅 ${fd(g.released)}</span>${mine.has(g.id)?`<span class="chip" style="margin:0">En tu biblioteca</span>`:""}</div>`).join(""):`<div class="empty" style="width:100%">No se pudieron cargar los lanzamientos.</div>`})}
 async function upGo(id){sheet(`<div class="row sp"><span></span><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="empty" style="margin-top:30px">Cargando…</div>`);
  try{const r=await fetch("/.netlify/functions/igdb?gid="+id);if(!r.ok)throw 0;const d=await r.json();if(!d.game)throw 0;window._agBack=[];CALL=[];agShow(d.game)}catch(_){closeSheet();alert("No se pudo cargar el juego. Inténtalo de nuevo.")}}
@@ -455,7 +506,9 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${x.done?"🎖️ ":""}${e(x.name)}</span>${x.done?`<button style="min-height:32px;padding:2px 10px" onclick="storyGoal('${id}',${i})">📤</button>`:""}<button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
  <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo logro"><button onclick="addGoal('${id}')">Añadir</button></div></div>
  <h2>Notas</h2><textarea onchange="G('${id}').notes=this.value;save()">${e(g.notes)}</textarea>
- <h2>Sesiones (${ss.length})</h2><div class="card">${ss.map(s=>`<div class="mu" style="margin:2px 0">${comps(g).includes(s.date)?"⭐ ":""}${fd(s.date)} - ${fm(s.min)}${s.note?" - "+e(s.note):""}${s.run>1?" (Partida "+s.run+")":""}</div>`).join("")||`<div class="mu">Ninguna</div>`}</div>
+ <h2>Sesiones (${ss.length})</h2><div class="card">${(()=>{const rn=runsOf(g),line=x=>`<div class="mu" style="margin:2px 0">${comps(g).includes(x.date)?"⭐ ":""}${fdA(g,x.date)} - ${fm(x.min)}${x.note?" - "+e(x.note):""}</div>`;
+  if(!ss.length&&!rn.length)return`<div class="mu">Ninguna</div>`;if(rn.length<2)return ss.map(line).join("");
+  return`<div class="row sp"><b>⏱ Total: ${H(gm(g.id))}</b><span class="mu">${rn.length} partidas</span></div>`+rn.map(r=>`<div style="margin:12px 0 4px"><b>Partida ${r.n}${r.unk?" · fecha desconocida":r.end?" · completada el "+fdA(g,r.end):" · en curso"}</b><span class="mu"> · ${H(r.min)}</span></div>${r.ss.map(line).join("")||(r.unk?"":`<div class="mu" style="margin:2px 0">Sin sesiones registradas</div>`)}`).join("")})()}</div>
  <button class="dng" style="margin-top:16px" onclick="delGame('${id}')">Eliminar juego</button>`)}
 function editGame(id){const g=G(id);sheet(`<div class="row sp"><h1>Editar juego</h1><button onclick="openGame('${id}')" aria-label="Volver">✕</button></div>
  <div class="row" style="flex-wrap:wrap;margin-top:8px"><button onclick="addToList('${id}')">📋 Listas</button><button onclick="setCover('${id}')">🖼 Portada</button></div>
@@ -613,8 +666,13 @@ async function shareRecap(){const d=window._rd;if(!d)return;const load=u=>new Pr
  const blob=c=>new Promise((res,rej)=>{try{c.toBlob(res)}catch(e){rej(e)}});let b;try{b=await blob(await draw(true))}catch(_){b=await blob(await draw(false))}
  const f=new File([b],"playlog-"+d.y+".png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:"Mi año en Playlog"})}catch(_){}return}
  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=f.name;a.click()}
-function compSec(g){const c=comps(g);if(g.status!=="done"&&!c.length)return"";return`<h2>🏁 Veces completado: ${c.length}</h2>${c.map((d,i)=>`<span class="tag">${fd(d)} <b style="cursor:pointer;color:var(--er)" onclick="delComp('${g.id}',${i})">✕</b></span>`).join("")}<div class="row" style="margin-top:8px"><input type="date" id="cdn" value="${lastS(g)||today()}"><button onclick="addComp('${g.id}')">Añadir partida</button></div>`}
-function addComp(id){const g=G(id),d=$("#cdn").value;if(!d)return;const c=comps(g);if(!c.includes(d))c.push(d);c.sort();g.doneDate=c[c.length-1];save();openGame(id);R()}
+// Partidas: cada vez que completas un juego es una partida; las sesiones se reparten por fecha (hasta cada finalización).
+function runsOf(g){const u=(g.unk||[]).map((x,i)=>({n:i+1,end:null,unk:1,ss:[],min:x.min||0})),c=[...comps(g)].sort(),ss=S.sessions.filter(x=>x.gameId===g.id).sort((a,b)=>a.date.localeCompare(b.date)),Rn=[...u,...c.map((d,i)=>({n:u.length+i+1,end:d,ss:[],min:0}))];let cur=null;
+ ss.forEach(x=>{let r=Rn.find(q=>x.date<=q.end);if(!r){cur=cur||{n:Rn.length+1,end:null,ss:[],min:0};r=cur}r.ss.push(x);r.min+=x.min});return cur?[...Rn,cur]:Rn}
+function compSec(g){const c=comps(g);if(g.status!=="done"&&!c.length)return"";return`<h2>🏁 Veces completado: ${c.length+(g.unk||[]).length}</h2>${(g.unk||[]).map((u,i)=>`<span class="tag">Fecha desconocida${u.min?" · "+fm(u.min):""} <b style="cursor:pointer;color:var(--er)" onclick="delUnk('${g.id}',${i})">✕</b></span>`).join("")}${c.map((d,i)=>`<span class="tag">${fdA(g,d)} <b style="cursor:pointer;color:var(--er)" onclick="delComp('${g.id}',${i})">✕</b></span>`).join("")}<div class="row" style="margin-top:8px"><input type="date" id="cdn" value="${lastS(g)||today()}"><input type="month" id="cdm" style="display:none" max="${today().slice(0,7)}"><input type="number" id="cdy" min="1970" max="${today().slice(0,4)}" placeholder="Año" style="display:none;max-width:90px"><input type="number" id="cdh" min="0" step="0.5" inputmode="decimal" placeholder="Horas (opcional)" style="max-width:130px"><button onclick="addComp('${g.id}')">Añadir partida</button></div><label>¿Cuánto recuerdas de la fecha?</label><select id="cdp" onchange="cdPrec()"><option value="e">Fecha exacta</option><option value="m">Solo mes y año</option><option value="y">Solo el año</option><option value="u">No la recuerdo</option></select><div class="mu" style="margin-top:6px">Para una partida de otro año, pon la fecha en que la terminaste y las horas que le dedicaste: se suman al total del juego y quedan como una sesión de esa partida.</div>`}
+function cdPrec(){const v=$("#cdp").value;$("#cdn").style.display=v==="e"?"":"none";$("#cdm").style.display=v==="m"?"":"none";$("#cdy").style.display=v==="y"?"":"none"}
+function addComp(id){const g=G(id),pr=$("#cdp")?.value||"e";if(pr==="u"){const h=parseFloat($("#cdh")?.value);g.unk=g.unk||[];g.unk.push({id:uid(),min:h>0&&h<=5000?Math.round(h*60):0});save();openGame(id);R();return}let d=$("#cdn").value;if(pr==="m"){const m=$("#cdm").value;if(!m)return alert("Elige el mes y el año");d=m+"-15"}else if(pr==="y"){const y=parseInt($("#cdy").value);if(!(y>=1970&&y<=+today().slice(0,4)))return alert("Escribe un año válido");d=y+"-07-01"}if(!d)return;if(pr!=="e"){g.compA=g.compA||{};g.compA[d]=pr}else if(g.compA)delete g.compA[d];const c=comps(g);if(!c.includes(d))c.push(d);c.sort();g.doneDate=c[c.length-1];const h=parseFloat($("#cdh")?.value);if(h>0&&h<=5000)S.sessions.push({id:uid(),gameId:id,date:d,platform:g.platform||"",min:Math.round(h*60),note:"Partida completada",run:c.indexOf(d)+1});save();openGame(id);R()}
+function delUnk(id,i){const g=G(id);g.unk.splice(i,1);save();openGame(id);R()}
 function delComp(id,i){const g=G(id),c=comps(g);c.splice(i,1);g.doneDate=c.length?c[c.length-1]:"";save();openGame(id);R()}
 let CALL=[];
 function catEmpty(msg){const q=($("#cq")?.value||"").trim(),w=q.split(" ")[0],sg=[...new Set([w,"Zelda","Pokémon","Mario","Final Fantasy","Sonic"].filter(x=>x&&x.toLowerCase()!==q.toLowerCase()))].slice(0,5);
@@ -683,7 +741,7 @@ function pieSheet(kind){const p=window._pie&&window._pie[kind];if(!p)return;cons
  sheet(`<div class="row sp"><h1>${p.t}</h1><button onclick="closeSheet()">✕</button></div><div style="display:flex;justify-content:center;margin:16px 0"><div class="pie" style="width:190px;height:190px;background:conic-gradient(${p.g});cursor:pointer" onclick="pieClick(event,'${kind}')"></div></div>${p.e.map(([k,v],i)=>`<div class="card row sp" style="cursor:pointer" onclick="pieShow('${kind}',${i})"><span class="row"><i style="width:10px;height:10px;border-radius:50%;background:${PC[i]};flex:none"></i>${e(k)}</span><span class="mu">${Math.round(v/sum*100)}% · ${kind==="fmt"?v+" juegos":H(v)}</span></div>`).join("")}<div class="mu">Toca el gráfico o una fila para ver los juegos.</div>`)}
 let RK={kind:"best",gen:"",all:0};
 function rkMin(g,all){if(all)return gm(g.id);const yr=String(new Date().getFullYear());return S.sessions.filter(x=>x.gameId===g.id&&x.date.startsWith(yr)).reduce((n,x)=>n+x.min,0)}
-function mYr(id,all){const yr=String(new Date().getFullYear());return S.sessions.filter(x=>x.gameId===id&&(all||x.date.startsWith(yr))).reduce((a,x)=>a+x.min,0)}
+function mYr(id,all){const yr=String(new Date().getFullYear());return S.sessions.filter(x=>x.gameId===id&&(all||x.date.startsWith(yr))).reduce((a,x)=>a+x.min,0)+(all?unkMin(id):0)}
 function rankList(kind,gen,all){const yr=String(new Date().getFullYear()),inYr=g=>{const c=comps(g);return c.length?c.some(d=>d.startsWith(yr)):(g.doneDate||g.rating?.date||"").startsWith(yr)};
  let a=S.games.filter(g=>g.status!=="wish");a=kind==="best"?a.filter(g=>g.rating?.score&&(all||inYr(g))):a.filter(g=>mYr(g.id,all)>0);
  if(gen)a=a.filter(g=>(g.genre||"").split(",").map(z=>z.trim()).includes(gen));
@@ -746,15 +804,16 @@ const accSave=()=>{try{if(ACCT)localStorage.setItem("playlog_acct",JSON.stringif
 async function accCall(action,body,tok){const r=await fetch("/.netlify/functions/account",{method:"POST",headers:{"content-type":"application/json",...(tok?{authorization:"Bearer "+tok}:{})},body:JSON.stringify({action,...body})});
  let d={};try{d=await r.json()}catch(_){}if(!r.ok){const er=new Error(d.error||"Error de conexión");er.status=r.status;throw er}return d}
 async function accTok(){if(!ACCT)return null;if(ACCT.expires_at-Date.now()/1000>60)return ACCT.access_token;
- try{const d=await accCall("refresh",{refresh_token:ACCT.refresh_token,username:ACCT.username});Object.assign(ACCT,d.session);accSave();return ACCT.access_token}catch(er){if(er.status===401){ACCT=null;accSave();alert("Tu sesión ha caducado. Vuelve a iniciar sesión.")}return null}}
+ try{const d=await accCall("refresh",{refresh_token:ACCT.refresh_token,username:ACCT.username});Object.assign(ACCT,d.session);accSave();return ACCT.access_token}catch(er){if(er.status===401){ACCT=null;accSave();alert("Tu sesión ha caducado. Vuelve a iniciar sesión.");gateShow("login")}return null}}
 function queuePush(){if(!ACCT||ACCT.hold||window._noPush)return;clearTimeout(_pt);_pt=setTimeout(doPush,4000)}
-async function doPush(){if(!ACCT)return;const t=await accTok();if(!t)return;const u=S._u;
- try{await accCall("push",{data:S},t);ACCT.last=u;ACCT.at=Date.now();accSave();accUi()}catch(_){}}
+async function doPush(){if(!ACCT)return false;const t=await accTok();if(!t)return false;const u=S._u;
+ try{await accCall("push",{data:S},t);ACCT.last=u;ACCT.at=Date.now();accSave();accUi();return true}catch(_){return false}}
 function takeCloud(d){const keep=ACCT;window._noPush=true;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(_){}window._noPush=false;ACCT=keep;ACCT.last=S._u||0;ACCT.at=Date.now();accSave();if(typeof applyTheme==="function")applyTheme();R()}
 const hasData=()=>S.games.length>0||S.sessions.length>0;
 const NODEF=()=>({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""});
 function holdSync(){ACCT.hold=true;accSave();accUi()}
-async function accSync(manual){if(!ACCT)return;if(ACCT.hold&&!manual)return;const t=await accTok();if(!t)return;
+const own=()=>{if(!ACCT||S._owner===ACCT.username)return;S._owner=ACCT.username;try{localStorage.setItem("playlog_v1",JSON.stringify(S))}catch(_){}};
+async function accSync(manual){if(!ACCT)return;if(S._owner&&S._owner!==ACCT.username){window._noPush=true;S=NODEF();try{localStorage.removeItem("playlog_v1")}catch(_){}window._noPush=false}if(ACCT.hold&&!manual)return;const t=await accTok();if(!t)return;
  try{const d=await accCall("pull",{},t);ACCT.pub=d.is_public!==false;const cl=d.data,cu=cl?._u||0,lu=S._u||0,last=ACCT.last,cHas=cl&&((cl.games||[]).length||(cl.sessions||[]).length);
   if(ACCT.hold){if(manual)alert("La sincronización está en pausa. Elige una opción en Ajustes > Cuenta: combinar, usar la nube o subir este dispositivo.");accUi();return}
   if(!cHas){if(hasData())await doPush();else{ACCT.last=lu;accSave()}}
@@ -766,7 +825,8 @@ async function accSync(manual){if(!ACCT)return;if(ACCT.hold&&!manual)return;cons
   else if(cu>last&&lu>last){if(confirm("Hay cambios en la nube y también en este dispositivo.\n\nAceptar = usar los de la nube (se reemplazan los de este dispositivo).\nCancelar = no cambiar nada ahora (en Ajustes > Cuenta podrás combinarlos o elegir)."))takeCloud(cl);else holdSync()}
   else if(lu>last)await doPush();
   else{ACCT.at=Date.now();accSave()}
-  if(manual&&!ACCT.hold)alert("Sincronizado ✅")}catch(er){if(manual)alert("No se pudo sincronizar: "+er.message)}accUi()}
+  if(!ACCT.hold)own();
+  if(manual&&!ACCT.hold)alert("Sincronizado ✅")}catch(er){if(manual)alert("No se pudo sincronizar: "+er.message)}accUi();onbMaybe()}
 // Opciones manuales (Ajustes > Cuenta): nunca se ejecutan solas
 async function syncUseCloud(){if(!confirm("Se reemplazarán los datos de este dispositivo por los de la nube. ¿Continuar?"))return;const t=await accTok();if(!t)return;
  try{const d=await accCall("pull",{},t);if(!d.data)return alert("No hay datos en la nube.");ACCT.hold=false;takeCloud(d.data);accUi()}catch(er){alert("No se pudo sincronizar: "+er.message)}}
@@ -792,9 +852,17 @@ function accCard(inner){const c=ACCT;
  :`<div class="row sp"><b>☁️ Cuenta</b></div><div class="mu" style="margin-top:6px">Crea una cuenta para guardar tu biblioteca en la nube y usarla en varios dispositivos.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="pri" onclick="authSheet('login')">Iniciar sesión</button><button onclick="authSheet('signup')">Crear cuenta</button></div>`;
  return inner?h:`<div class="card" id="acct">${h}</div>`}
 async function setPublic(v){const t=await accTok();if(!t)return;try{await accCall("setpublic",{public:v},t);ACCT.pub=v;accSave()}catch(er){alert("No se pudo cambiar: "+er.message);accUi()}}
-function accLogout(){if(!confirm("¿Cerrar sesión? Tus datos seguirán en este dispositivo."))return;(ACCT.hold?Promise.resolve():doPush()).finally(()=>{ACCT=null;accSave();accUi()})}
-function authSheet(m){const L=m==="login",R_=m==="recover";
- sheet(`<div class="row sp"><h1>${L?"Iniciar sesión":R_?"Recuperar contraseña":"Crear cuenta"}</h1><button onclick="settingsSheet()">✕</button></div>
+async function accLogout(){if(!ACCT)return;
+ if(ACCT.hold){if(!confirm("Tienes datos en este dispositivo que no se han subido a la nube y se perderán al cerrar sesión. ¿Cerrar sesión igualmente?"))return}
+ else{clearTimeout(_pt);if(!confirm("¿Cerrar sesión? Se guardará todo en la nube y se borrarán los datos de este dispositivo."))return;
+  const ok=await doPush();if(!ok&&!confirm("No se ha podido guardar en la nube antes de cerrar sesión (¿sin conexión?). Los cambios recientes de este dispositivo se perderán. ¿Cerrar sesión igualmente?"))return}
+ window._noPush=true;try{["playlog_v1","playlog_news","playlog_upc","playlog_acct"].forEach(k=>localStorage.removeItem(k))}catch(_){}ACCT=null;location.reload()}
+function authSheet(m){gateShow(m)}
+function gateHide(){$("#gate").style.display="none";$("#gate").innerHTML=""}
+function gateShow(m){m=m||"login";closeSheet();const L=m==="login",R_=m==="recover",g=$("#gate");g.style.display="block";
+ g.innerHTML=`<div><div style="text-align:center;margin:18px 0 4px"><div style="font-size:54px">🎮</div><h1 style="margin:4px 0">${APP_NAME}</h1><div class="mu">${SLOGAN}</div></div>
+ <div class="mu" style="text-align:center;margin:10px 0 14px">Inicia sesión o crea una cuenta para usar Playlog.</div>
+ <h2 style="text-align:center;margin:10px 0">${L?"Iniciar sesión":R_?"Recuperar contraseña":"Crear cuenta"}</h2>
  <form onsubmit="authGo(event,'${m}')" autocomplete="on">
  ${R_?`<label>Usuario o correo</label><input id="au" autocomplete="username" autocapitalize="none" required>`:`<label>Usuario</label><input id="au" autocomplete="username" autocapitalize="none" required placeholder="${L?"usuario o correo":"3-20 letras, números o _"}">`}
  ${m==="signup"?`<label>Correo (para recuperar la contraseña)</label><input id="ae" type="email" autocomplete="email" required>`:""}
@@ -802,16 +870,16 @@ function authSheet(m){const L=m==="login",R_=m==="recover";
  ${m==="signup"?`<label class="row" style="margin:12px 0 0;color:var(--tx);font-size:14px"><input type="checkbox" id="apub" checked style="width:22px;min-height:22px"><span>Perfil público: otros usuarios pueden buscarme y ver mi nivel, estadísticas y juegos (no mis notas ni reseñas). Puedes cambiarlo cuando quieras.</span></label>`:""}
  <div id="aerr" class="mu" style="color:var(--er);min-height:20px;margin-top:8px"></div>
  <button class="pri" style="width:100%;margin-top:6px" id="abtn">${L?"Entrar":R_?"Enviar enlace":"Crear cuenta"}</button></form>
- <div class="row" style="margin-top:12px;flex-wrap:wrap;justify-content:center">${L?`<button onclick="authSheet('signup')">Crear cuenta</button><button onclick="authSheet('recover')">Olvidé mi contraseña</button>`:`<button onclick="authSheet('login')">Ya tengo cuenta</button>`}</div>`)}
+ <div class="row" style="margin-top:12px;flex-wrap:wrap;justify-content:center">${L?`<button onclick="gateShow('signup')">Crear cuenta</button><button onclick="gateShow('recover')">Olvidé mi contraseña</button>`:`<button onclick="gateShow('login')">Ya tengo cuenta</button>`}</div><div style="text-align:center;margin-top:18px"><button onclick="gateHide()">‹ Seguir como invitado</button></div></div>`}
 async function authGo(ev,m){ev.preventDefault();const b=$("#abtn"),er=$("#aerr");er.textContent="";b.disabled=true;const v=i=>($(i)?.value||"").trim();
  try{if(m==="recover"){await accCall("recover",{id:v("#au")});er.style.color="var(--ok,#22c55e)";er.textContent="Si la cuenta existe, te hemos enviado un correo con el enlace.";b.disabled=false;return}
-  const d=await accCall(m,{username:v("#au"),email:v("#ae"),password:$("#ap").value,public:m==="signup"?!!$("#apub")?.checked:undefined});ACCT={...d.session,pub:m==="signup"?!!$("#apub")?.checked:undefined};accSave();closeSheet();await accSync(false);settingsSheet()}
+  const d=await accCall(m,{username:v("#au"),email:v("#ae"),password:$("#ap").value,public:m==="signup"?!!$("#apub")?.checked:undefined});ACCT={...d.session,pub:m==="signup"?!!$("#apub")?.checked:undefined};accSave();gateHide();closeSheet();await accSync(false);R();onbMaybe()}
  catch(x){er.style.color="var(--er)";er.textContent=x.message;b.disabled=false}}
 function resetSheet(tok){sheet(`<h1>Nueva contraseña</h1><form onsubmit="resetGo(event)"><label>Escribe tu nueva contraseña</label><input id="rp" type="password" autocomplete="new-password" minlength="8" required placeholder="Mínimo 8 caracteres"><div id="aerr" class="mu" style="color:var(--er);min-height:20px;margin-top:8px"></div><button class="pri" style="width:100%" id="abtn">Guardar contraseña</button></form>`);window._rt=tok}
 async function resetGo(ev){ev.preventDefault();const b=$("#abtn");b.disabled=true;try{await accCall("reset",{token:window._rt,password:$("#rp").value});closeSheet();alert("Contraseña cambiada ✅ Ya puedes iniciar sesión.");authSheet("login")}catch(x){$("#aerr").textContent=x.message;b.disabled=false}}
 (function(){const h=location.hash||"";if(/type=recovery/.test(h)){const t=(h.match(/access_token=([^&]+)/)||[])[1];history.replaceState(null,"",location.pathname);if(t)setTimeout(()=>resetSheet(t),300)}
  if(ACCT)setTimeout(()=>accSync(false),800)})();
-function settingsSheet(){sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div>${langCard()}${themeCard()}${accCard()}<div class="card"><div class="mu">Tus datos se guardan en este dispositivo (y en la nube si inicias sesión). Exporta de vez en cuando una copia.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div></div><button class="dng" style="width:100%" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar todos los datos</button><div class="mu" style="margin-top:14px">${APP_NAME} MVP · v${APP_VER} · Premium: estructura futura, sin cobros.</div>`)}
+function settingsSheet(){sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div>${langCard()}${themeCard()}${prefsCard()}${accCard()}<div class="card"><div class="mu">Tus datos se guardan en este dispositivo (y en la nube si inicias sesión). Exporta de vez en cuando una copia.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div></div><button class="dng" style="width:100%" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar todos los datos</button><div class="mu" style="margin-top:14px">${APP_NAME} MVP · v${APP_VER} · Premium: estructura futura, sin cobros.</div>`)}
 function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];
@@ -1489,6 +1557,67 @@ const EN_DICT={/*EN-START*/
 "Demasiados datos":"Too much data",
 "Datos no válidos":"Invalid data",
 "Petición no válida":"Invalid request",
+"Inicia sesión o crea una cuenta para usar Playlog.":"Log in or create an account to use Playlog.",
+"¿Cerrar sesión? Se guardará todo en la nube y se borrarán los datos de este dispositivo.":"Log out? Everything will be saved to the cloud and this device's data will be deleted.",
+"Tienes datos en este dispositivo que no se han subido a la nube y se perderán al cerrar sesión. ¿Cerrar sesión igualmente?":"This device has data that hasn't been uploaded to the cloud and it will be lost when you log out. Log out anyway?",
+"No se ha podido guardar en la nube antes de cerrar sesión (¿sin conexión?). Los cambios recientes de este dispositivo se perderán. ¿Cerrar sesión igualmente?":"Couldn't save to the cloud before logging out (offline?). Recent changes on this device will be lost. Log out anyway?",
+"🔒 Necesitas una cuenta":"🔒 You need an account",
+"Necesitas una cuenta":"You need an account",
+"Crea una cuenta gratis para añadir juegos, registrar sesiones y guardar tu biblioteca en la nube.":"Create a free account to add games, log sessions and save your library in the cloud.",
+"Ahora no":"Not now",
+"👋 Estás explorando como invitado":"👋 You're exploring as a guest",
+"Puedes mirar la app, pero para añadir juegos y guardar tu progreso necesitas una cuenta gratuita.":"You can look around the app, but to add games and save your progress you need a free account.",
+"‹ Seguir como invitado":"‹ Continue as guest",
+"¡Bienvenido a Playlog!":"Welcome to Playlog!",
+"Vamos a personalizar tu experiencia en 2 pasos.":"Let's personalize your experience in 2 steps.",
+"📰 Paso 1 de 2 · Editoriales":"📰 Step 1 of 2 · Publications",
+"¿De qué editoriales quieres leer las noticias? Podrás cambiarlo en Ajustes.":"Which publications do you want to read news from? You can change it in Settings.",
+"Saltar":"Skip",
+"🎯 Paso 2 de 2 · Tus gustos":"🎯 Step 2 of 2 · Your tastes",
+"Toca los juegos que te gusten (los que quieras). Así te recomendaremos juegos y noticias a tu medida.":"Tap the games you like (as many as you want). That way we'll recommend games and news tailored to you.",
+"Cargando juegos…":"Loading games…",
+"‹ Atrás":"‹ Back",
+"Listo ({})":"Done ({})",
+"No se pudieron cargar los juegos.":"Couldn't load the games.",
+"📰 Noticias y gustos":"📰 News and tastes",
+"Editoriales de las noticias":"News publications",
+"Has elegido {} juegos favoritos.":"You've picked {} favorite games.",
+"Has elegido {} juego favorito.":"You've picked {} favorite game.",
+"Todavía no has elegido tus juegos favoritos.":"You haven't picked your favorite games yet.",
+"🎮 Elegir mis juegos favoritos":"🎮 Pick my favorite games",
+"Borrar gustos":"Clear tastes",
+"¿Borrar tus gustos? Las recomendaciones usarán solo tu biblioteca.":"Clear your tastes? Recommendations will use only your library.",
+"🎯 Recomendado para ti":"🎯 Recommended for you",
+"Buscando recomendaciones…":"Looking for recommendations…",
+"⭐ Para ti · {} · hace {}":"⭐ For you · {} · {} ago",
+"⭐ Para ti · {}":"⭐ For you · {}",
+"Noticias, análisis y reportajes de todas las plataformas.":"News, reviews and features from all platforms.",
+"Noticias, análisis, guías y tráilers de todo tipo de juegos.":"News, reviews, guides and trailers for all kinds of games.",
+"Noticias y artículos de actualidad, cultura y curiosidades gamer.":"News and articles on current events, culture and gamer curiosities.",
+"Noticias de actualidad de todas las plataformas.":"Current news from all platforms.",
+"Solo Nintendo: Switch, juegos, anuncios y rumores.":"Nintendo only: Switch, games, announcements and rumors.",
+"Solo Xbox y Game Pass: juegos, anuncios y novedades.":"Xbox and Game Pass only: games, announcements and news.",
+"Noticias, análisis, guías y trucos de todas las plataformas.":"News, reviews, guides and cheats for all platforms.",
+"Noticias, análisis, guías y mucho contenido retro.":"News, reviews, guides and lots of retro content.",
+"Horas (opcional)":"Hours (optional)",
+"Para una partida de otro año, pon la fecha en que la terminaste y las horas que le dedicaste: se suman al total del juego y quedan como una sesión de esa partida.":"For a playthrough from another year, enter the date you finished it and the hours you spent: they're added to the game's total and saved as a session of that playthrough.",
+"Partida completada":"Completed playthrough",
+"⏱ Total: {}":"⏱ Total: {}",
+"{} partidas":"{} playthroughs",
+"Partida {} · completada el {}":"Playthrough {} · completed on {}",
+"Partida {} · en curso":"Playthrough {} · in progress",
+"Sin sesiones registradas":"No sessions logged",
+"No recuerdo la fecha":"I don't remember the date",
+"Fecha desconocida":"Unknown date",
+"Fecha desconocida · {}":"Unknown date · {}",
+"Partida {} · fecha desconocida":"Playthrough {} · unknown date",
+"¿Cuánto recuerdas de la fecha?":"How much of the date do you remember?",
+"Fecha exacta":"Exact date",
+"Solo mes y año":"Month and year only",
+"Solo el año":"Year only",
+"No la recuerdo":"I don't remember",
+"Elige el mes y el año":"Pick the month and year",
+"Escribe un año válido":"Enter a valid year",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
@@ -1509,8 +1638,15 @@ if(LANG==="en"){["alert","confirm","prompt"].forEach(f=>{const o=window[f].bind(
  new MutationObserver(ms=>{ms.forEach(m=>{if(m.type==="characterData")walk(m.target);else m.addedNodes.forEach(walk)})}).observe(document.body,{childList:true,subtree:true,characterData:true});
  document.title=tr(document.title);walk(document.body)}
 function tctx(x){if(LANG==='en'){const f=x.fillText.bind(x);x.fillText=(t,...a)=>f(tr(String(t)),...a)}return x}
-function setLang(l){S.lang=l;save();location.reload()}
+function setLang(l){S.lang=l;try{localStorage.setItem("playlog_lang",l)}catch(_){}save();location.reload()}
 function langCard(){return`<div class="card"><div class="row sp"><b>🌐 Idioma</b><select style="width:auto" onchange="setLang(this.value)"><option value="es" ${LANG==="es"?"selected":""}>Español</option><option value="en" ${LANG==="en"?"selected":""}>English</option></select></div></div>`}
+// ===== Modo invitado: se puede mirar la app, pero para usar sus servicios hace falta cuenta =====
+const GUEST_BLOCK=/\b(trackGame|trackPick|saveSession|openLog|saveGame|addGame|setStatus|rate|saveRate|goal|delGoal|addGoal|delGame|replay|togAgain|rjPick|dlcCycle|dlcDel|dlcAdd|dlcPick|dlcFind|addComp|delComp|togPlat|savePlat|saveEdit|editGame|setCover|setVersion|selOn|pDown|selStatus|selToList|selNewList|selDel|selSetStatus|selList|newList|renList|delList|addToList|togList|newListFor|setAvatar|imp|impCsv|setGoty|editS|updS|delS)\(|#imp/;
+function needAcct(){sheet(`<div class="row sp"><span></span><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div style="text-align:center;margin:10px 0 18px"><div style="font-size:52px">🔒</div><h1>Necesitas una cuenta</h1><div class="mu" style="margin-top:8px">Crea una cuenta gratis para añadir juegos, registrar sesiones y guardar tu biblioteca en la nube.</div></div><button class="pri" style="width:100%" onclick="gateShow('signup')">Crear cuenta</button><button style="width:100%;margin-top:8px" onclick="gateShow('login')">Iniciar sesión</button><button style="width:100%;margin-top:8px" onclick="closeSheet()">Ahora no</button>`)}
+function guestGuard(ev){if(ACCT)return;let n=ev.target;
+ while(n&&n.nodeType===1&&n!==document.body){for(const a of["onclick","onchange","onpointerdown","onsubmit","onkeydown"]){const v=n.getAttribute&&n.getAttribute(a);if(v&&GUEST_BLOCK.test(v)){ev.preventDefault();ev.stopImmediatePropagation();if(ev.type!=="pointerdown"&&ev.type!=="keydown"||ev.key==="Enter")needAcct();return}}n=n.parentNode}}
+["click","change","pointerdown","submit","keydown"].forEach(t=>document.addEventListener(t,guestGuard,true));
+function guestCard(){return`<div class="card alert"><b>👋 Estás explorando como invitado</b><div class="mu" style="margin:4px 0 10px">Puedes mirar la app, pero para añadir juegos y guardar tu progreso necesitas una cuenta gratuita.</div><div class="row" style="flex-wrap:wrap"><button class="pri" onclick="gateShow('signup')">Crear cuenta</button><button onclick="gateShow('login')">Iniciar sesión</button></div></div>`}
 applyTheme();
 R();
 </script></body></html>

@@ -75,6 +75,28 @@ async function dlcSearch(q, parent) {
   const r = await igdb("games", `${q ? `search "${q}"; ` : ""}fields name,first_release_date,cover.image_id,parent_game.name; where ${w.join(" & ")}; limit 30;`);
   return { items: r.map(g => ({ id: g.id, name: g.name, kind: /expansi/i.test(g.name) ? "Expansión" : "DLC", released: g.first_release_date ? new Date(g.first_release_date * 1000).toISOString().slice(0, 10) : "", parent: g.parent_game?.name || "" })) };
 }
+// Juegos populares para que el usuario elija sus gustos (máx. 5 por género para que haya variedad)
+const GENRES = ["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
+let popC = { t: 0, b: "" }; const recC = new Map();
+async function popular() {
+  const r = await igdb("games", "fields name,cover.image_id,genres.name; where total_rating_count > 400 & version_parent = null & parent_game = null & cover != null & genres != null; sort total_rating_count desc; limit 150;");
+  const per = {}, out_ = [];
+  for (const g of r) { const k = g.genres?.[0]?.name || "?"; per[k] = (per[k] || 0) + 1; if (per[k] > 5) continue; out_.push({ id: g.id, title: g.name, cover: cov(g), genres: (g.genres || []).map(x => x.name) }); if (out_.length >= 36) break; }
+  return { items: out_ };
+}
+// Recomendaciones: juegos similares a los que le gustan + juegos bien valorados de sus géneros favoritos
+async function recommend(like, gn, ex) {
+  const items = [], seen = new Set(ex);
+  const add = (g, why) => { if (!g || seen.has(g.id) || !g.cover?.image_id) return; seen.add(g.id); items.push({ id: g.id, title: g.name, cover: cov(g), released: iso(g), genres: (g.genres || []).map(x => x.name).slice(0, 2), why }); };
+  if (like.length) {
+    try { const r = await igdb("games", `fields similar_games.name,similar_games.cover.image_id,similar_games.first_release_date,similar_games.genres.name; where id = (${like.join(",")}); limit 20;`); r.forEach(g => (g.similar_games || []).forEach(x => add(x, "sim"))); } catch (e) { /* opcional */ }
+  }
+  if (gn.length && items.length < 16) {
+    try { const w = [`genres.name = (${gn.map(x => `"${x}"`).join(",")})`, "total_rating_count > 250", "version_parent = null", "parent_game = null", "cover != null"]; if (seen.size) w.push(`id != (${[...seen].slice(0, 80).join(",")})`);
+      const r = await igdb("games", `fields name,cover.image_id,first_release_date,genres.name; where ${w.join(" & ")}; sort total_rating desc; limit 40;`); r.forEach(g => add(g, "gen")); } catch (e) { /* opcional */ }
+  }
+  return { items: items.slice(0, 18) };
+}
 const dcache = new Map(), dhits = new Map();
 async function detail(id) {
   const [g] = await igdb("games", `fields screenshots.image_id,similar_games.name,similar_games.cover.image_id,genres,themes,dlcs.name,dlcs.first_release_date,dlcs.cover.image_id,expansions.name,expansions.first_release_date,expansions.cover.image_id,standalone_expansions.name,standalone_expansions.first_release_date,standalone_expansions.cover.image_id; where id = ${id};`);
@@ -107,17 +129,38 @@ exports.handler = async (event) => {
     if (upc.b && un - upc.t < 6 * 36e5) return out(200, upc.b);
     try {
       const now = Math.floor(un / 1000);
-      const r = await igdb("games", `fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name,hypes; where first_release_date > ${now} & first_release_date < ${now + 150 * 864e2} & cover != null & hypes > 2 & version_parent = null; sort hypes desc; limit 14;`);
+      const r = await igdb("games", `fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name,hypes,genres.name; where first_release_date > ${now} & first_release_date < ${now + 150 * 864e2} & cover != null & hypes > 2 & version_parent = null; sort hypes desc; limit 14;`);
       const body = JSON.stringify({ items: r.sort((a, b) => a.first_release_date - b.first_release_date).map(g => ({
         id: g.id, title: g.name, released: new Date(g.first_release_date * 1000).toISOString().slice(0, 10),
         cover: `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg`,
-        platforms: (g.platforms || []).slice(0, 3).map(p => p.abbreviation || p.name)
+        platforms: (g.platforms || []).slice(0, 3).map(p => p.abbreviation || p.name),
+        genres: (g.genres || []).map(x => x.name)
       })) });
       upc = { t: un, b: body };
       return out(200, body);
     } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
   }
   const qp = event.queryStringParameters || {};
+  if (qp.popular !== undefined || qp.rec !== undefined) {
+    const pip = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", pn = Date.now();
+    const pr = (mh.get("p" + pip) || []).filter(t => pn - t < 60000);
+    if (pr.length >= 20) return out(429, { error: "Demasiadas peticiones, espera un momento" });
+    pr.push(pn); mh.set("p" + pip, pr);
+    try {
+      if (qp.popular !== undefined) {
+        if (!popC.b || pn - popC.t > 864e5) popC = { t: pn, b: JSON.stringify(await popular()) };
+        return out(200, popC.b);
+      }
+      const ids = v => String(v || "").split(",").filter(x => /^\d{1,9}$/.test(x)).slice(0, 12), like = ids(qp.like), ex = ids(qp.ex).concat(like);
+      const gn = String(qp.gn || "").split("|").map(x => x.trim()).filter(x => GENRES.includes(x)).slice(0, 4);
+      if (!like.length && !gn.length) return out(200, { items: [] });
+      const rk = [like.sort().join(","), gn.sort().join("|"), ex.slice(0, 40).sort().join(",")].join("#"), rc = recC.get(rk);
+      if (rc && pn - rc.t < 432e5) return out(200, rc.b);
+      const body = JSON.stringify(await recommend(like, gn, ex.slice(0, 60)));
+      recC.set(rk, { t: pn, b: body }); if (recC.size > 500) recC.delete(recC.keys().next().value);
+      return out(200, body);
+    } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
+  }
   if (qp.findid !== undefined || qp.dlcq !== undefined) {
     const mip = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", mn = Date.now();
     const mr = (mh.get(mip) || []).filter(t => mn - t < 60000);
