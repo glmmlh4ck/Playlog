@@ -77,7 +77,7 @@ async function dlcSearch(q, parent) {
 }
 // Juegos populares para que el usuario elija sus gustos (máx. 5 por género para que haya variedad)
 const GENRES = ["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
-let rcC = { t: 0, b: "" }; let popC = { t: 0, b: "" }; const recC = new Map();
+let upc = { t: 0, b: "" }; let rcC = { t: 0, b: "" }; let popC = { t: 0, b: "" }; const recC = new Map();
 async function popular() {
   const r = await igdb("games", "fields name,cover.image_id,genres.name; where total_rating_count > 400 & version_parent = null & parent_game = null & cover != null & genres != null; sort total_rating_count desc; limit 150;");
   const per = {}, out_ = [];
@@ -151,7 +151,15 @@ exports.handler = async (event) => {
     if (upc.b && un - upc.t < 6 * 36e5) return out(200, upc.b);
     try {
       const now = Math.floor(un / 1000);
-      const r = await igdb("games", `fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name,hypes,genres.name; where first_release_date > ${now} & first_release_date < ${now + 150 * 864e2} & cover != null & hypes > 2 & version_parent = null; sort hypes desc; limit 14;`);
+      const F = "fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name,hypes,genres.name;";
+      let r = await igdb("games", `${F} where first_release_date > ${now} & first_release_date < ${now + 150 * 864e2} & cover != null & hypes > 2 & version_parent = null; sort hypes desc; limit 14;`);
+      if (r.length < 6) {
+        // Si hay pocos con tanto "hype", se amplía la ventana y se baja el listón
+        const more = await igdb("games", `${F} where first_release_date > ${now} & first_release_date < ${now + 400 * 864e2} & cover != null & hypes > 0 & version_parent = null; sort hypes desc; limit 14;`);
+        const have = new Set(r.map(g => g.id));
+        r = r.concat(more.filter(g => !have.has(g.id))).slice(0, 14);
+      }
+      if (!r.length) return out(200, { items: [] });
       const body = JSON.stringify({ items: r.sort((a, b) => a.first_release_date - b.first_release_date).map(g => ({
         id: g.id, title: g.name, released: new Date(g.first_release_date * 1000).toISOString().slice(0, 10),
         cover: `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg`,

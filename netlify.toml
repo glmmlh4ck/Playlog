@@ -1,3 +1,7 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+
+# Optimización de imágenes de portadas y capturas (Netlify Image CDN): tamaño justo y WebP
+[images]
+  remote_images = ["https://images\\.igdb\\.com/.*", "https://media\\.rawg\\.io/.*"]

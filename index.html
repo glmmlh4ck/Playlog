@@ -395,9 +395,16 @@ function selNewList(){const n=$("#nl3").value.trim().slice(0,40);if(!n)return;S.
 function selDel(){const ids=lib.sel;if(!ids||!ids.size)return;if(!confirm("¿Eliminar "+ids.size+" juego"+(ids.size===1?"":"s")+" y sus sesiones?"))return;
  S.games=S.games.filter(g=>!ids.has(g.id));S.sessions=S.sessions.filter(x=>!ids.has(x.gameId));(S.lists||[]).forEach(l=>l.ids=l.ids.filter(i=>!ids.has(i)));save();lib.sel=null;R()}
 // Imágenes de IGDB a través de Netlify Image CDN (tamaño justo + WebP). Si falla, se usa la original.
-const opt=(u,w)=>u&&u.startsWith("https://images.igdb.com/")?"/.netlify/images?url="+encodeURIComponent(u)+"&w="+w+"&fm=webp&q=72":u;
+const opt=(u,w)=>u&&(u.startsWith("https://images.igdb.com/")||u.startsWith("https://media.rawg.io/"))?"/.netlify/images?url="+encodeURIComponent(u)+"&w="+w+"&fm=webp&q=72":u;
 const oi=(u,w)=>`src="${e(opt(u,w))}" data-o="${e(u)}" decoding="async"`;
-document.addEventListener("error",ev=>{const t=ev.target;if(t&&t.tagName==="IMG"&&t.dataset&&t.dataset.o&&!t.dataset.f){t.dataset.f="1";t.src=t.dataset.o}},true);
+// Portadas fiables: 1) si falla la versión optimizada se prueba la original, 2) se reintenta con espera, 3) si todo falla queda un 🎮 (y se reintenta al reconectar)
+document.addEventListener("error",ev=>{const t=ev.target;if(!t||t.tagName!=="IMG"||!t.dataset||!t.dataset.o)return;const n=+t.dataset.f||0;t.dataset.f=n+1;
+ if(n===0){t.src=t.dataset.o;return}
+ if(n<3){setTimeout(()=>{if(t.isConnected)t.src=t.dataset.o+(t.dataset.o.includes("?")?"&":"?")+"r="+n},1500*n);return}
+ const d=document.createElement("div");d.className="imgph";d.style.cssText=t.style.cssText+";display:grid;place-items:center;background:var(--s2);font-size:22px;flex:none";if(t.className)d.className+=" "+t.className;d.textContent="🎮";t.replaceWith(d)},true);
+// Safari a veces no arranca las imágenes "lazy" dentro de tarjetas o carruseles: se fuerzan las que ya están cerca de la pantalla
+setInterval(()=>{if(document.hidden)return;const H=innerHeight+900,W=innerWidth+700;document.querySelectorAll('img[loading="lazy"]').forEach(i=>{if(i.complete||i.dataset.k)return;const r=i.getBoundingClientRect();if(r.bottom>-300&&r.top<H&&r.right>-300&&r.left<W){i.dataset.k=1;i.loading="eager"}})},800);
+addEventListener("online",()=>{try{R()}catch(_){}});
 function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" style="cursor:pointer"><div class="row">${g.cover?`<img ${oi(g.cover,170)} alt="" loading="lazy" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:cover;border-radius:8px">`:`<div style="width:56px;height:56px;border-radius:8px;background:var(--s2);display:grid;place-items:center">🎮</div>`}<div><b>${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${H(gm(g.id))}</div></div></div><span>›</span></div>`}
 function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><div class="row"><button onclick="selOn()">☑️ Elegir</button><button onclick="listsSheet()">📋 Listas</button></div></div>
  <div class="row" style="margin-top:8px"><input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()"><button onclick="filt()" style="white-space:nowrap">⚙️ Filtros${Object.values(lib.f).filter((v,i)=>i<3&&v).length?" ("+Object.values(lib.f).filter((v,i)=>i<3&&v).length+")":""}</button></div>
