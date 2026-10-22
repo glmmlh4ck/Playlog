@@ -61,6 +61,7 @@ summary{cursor:pointer;color:var(--ac2);padding:10px 0}
 .rc-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}.rc-hint{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom,0px));opacity:.8;font-size:13px}
 @media (prefers-reduced-motion:no-preference){.rc-body{animation:pop .35s ease-out}@keyframes pop{from{transform:scale(.9);opacity:0}}}
 .cal button.sel{background:linear-gradient(135deg,var(--acd),var(--acl));border:0}
+details.dt{background:var(--s1);border:1px solid var(--bd);border-radius:14px;margin:8px 0}details.dt>summary{list-style:none;cursor:pointer;padding:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center}details.dt>summary::-webkit-details-marker{display:none}details.dt>summary::after{content:"›";color:var(--mu);font-size:20px;transition:transform .15s}details.dt[open]>summary::after{transform:rotate(90deg)}details.dt>.dtb{padding:0 14px 14px}details.dt details.dt{background:var(--s2);margin:8px 0}details.dt details.dt>summary{padding:11px 12px;font-size:14px}.emb{display:inline-grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--s2);border:2px solid var(--ac);font-size:24px;margin:0 4px}.bd.sel{outline:2px solid var(--ac);outline-offset:1px}.bd[data-e]{cursor:pointer}
 .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bd{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:10px 6px;text-align:center;opacity:.55}
 .bd.on{opacity:1;border-color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent)}.bd b{display:block;font-size:12px;line-height:1.2;margin-top:2px}.bd span{display:block;font-size:10px;color:var(--mu)}
 .cv .fan{position:absolute;top:6px;left:6px;z-index:1;background:#000b;border-radius:8px;padding:2px 7px;font-size:10px;font-style:normal;font-weight:700}
@@ -580,22 +581,25 @@ function delS(id){if(confirm("¿Eliminar esta sesión? XP y horas se recalcular�
 function vProf(){const s=stats(),yr=String(new Date().getFullYear()),tot=S.sessions.reduce((a,x)=>a+x.min,0),gen={},plt={},fmtc={};
  S.sessions.forEach(x=>{const g=G(x.gameId);if(g?.status==="wish")return;(g?.genre||"").split(",").map(z=>z.trim()).filter(Boolean).forEach(z=>gen[z]=(gen[z]||0)+x.min);if(x.platform)plt[x.platform]=(plt[x.platform]||0)+x.min});
  S.games.filter(g=>g.status!=="wish").forEach(g=>{const k=g.format||"Digital";fmtc[k]=(fmtc[k]||0)+1});
- const tt=[["week","Semana"],["month","Mes"],["year","Año"]].map(([p,l])=>{const r=range(p);return`<div class="card" style="margin:0;text-align:center;padding:10px 4px"><div class="mu" style="font-size:12px">${l}</div><b style="font-size:17px">${H(r.reduce((a,x)=>a+x.min,0))}</b><div class="mu" style="font-size:11px">${r.length} sesiones</div></div>`}).join("");
+ const tt=[["week","Tiempo semana"],["month","Tiempo mes"],["year","Tiempo año"]].map(([p,l])=>{const r=range(p);return`<div class="card" style="margin:0;text-align:center;padding:10px 4px"><div class="mu" style="font-size:12px">${l}</div><b style="font-size:17px">${H(r.reduce((a,x)=>a+x.min,0))}</b><div class="mu" style="font-size:11px">${r.length} sesiones</div></div>`}).join("");
  const gs=S.games.filter(g=>g.status!=="wish"&&g.goals?.length),nAll=gs.reduce((n,g)=>n+g.goals.length,0),nDone=gs.reduce((n,g)=>n+g.goals.filter(x=>x.done).length,0),pls=S.games.filter(g=>g.platinum&&g.status!=="wish").length;
  const yrs=[...new Set([yr,...S.sessions.map(x=>x.date.slice(0,4))])].sort().reverse();
- return`<div class="row"><label style="margin:0;cursor:pointer;flex:none">${S.user.avatar?`<img src="${S.user.avatar}" alt="Avatar" style="width:76px;height:76px;border-radius:50%;object-fit:cover">`:`<div style="font-size:38px;width:76px;height:76px;display:grid;place-items:center;border-radius:50%;background:var(--s2)">🎮</div>`}<input type="file" accept="image/*" hidden onchange="setAvatar(this)"></label>
- <div style="flex:1;min-width:0"><input value="${e(S.user.name)}" onchange="S.user.name=this.value.slice(0,30)||'Jugador';save()"><div class="mu" style="margin-top:6px">Nivel ${s.lv} · ${s.xp}/${s.hi} XP</div>${bar(s.xp-s.lo,s.hi-s.lo)}</div></div>
- <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:8px;margin-top:14px"><div class="card" style="margin:0;text-align:center"><div class="mu">Racha</div><b style="font-size:28px">🔥 ${s.cur}</b><div class="mu">récord ${s.rec} d</div></div>
+ const nm=ACCT?ACCT.username:S.user.name,EM=(S.emb||[]).slice(0,EMB_MAX),A=RKA(),xp=Math.min(100,(s.xp-s.lo)/Math.max(1,s.hi-s.lo)*100);
+ return`<div style="display:grid;grid-template-columns:84px 1fr 54px;grid-template-rows:54px 54px;gap:8px;align-items:stretch">
+ <label style="grid-row:1/3;align-self:center;cursor:pointer;margin:0">${S.user.avatar?`<img src="${S.user.avatar}" alt="Avatar" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--ac)">`:`<div style="font-size:40px;width:84px;height:84px;display:grid;place-items:center;border-radius:50%;background:var(--s2);border:2px solid var(--ac)">🎮</div>`}<input type="file" accept="image/*" hidden onchange="setAvatar(this)"></label>
+ <div class="card" style="margin:0;padding:0 14px;display:flex;align-items:center;min-width:0"><b style="font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(nm)}</b></div>
+ <button class="card" style="margin:0;padding:0;font-size:22px" onclick="usersSheet()" aria-label="Buscar jugadores">🔎</button>
+ <div class="card" style="margin:0;padding:6px 12px;min-width:0;display:flex;flex-direction:column;justify-content:center"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nivel ${s.lv} - ${s.xp}/${s.hi} XP</div><div class="bar" style="margin-top:5px"><i style="width:${xp}%;background:#22c55e"></i></div></div>
+ <button class="card" style="margin:0;padding:0;font-size:22px" onclick="settingsSheet()" aria-label="Ajustes">⚙️</button></div>
+ <div class="card" style="cursor:pointer;margin-top:12px;text-align:center;padding:16px 10px" onclick="logrosSheet()"><b style="font-size:20px">🎖️ Logros</b>${EM.length?`<div style="margin-top:10px">${EM.map(x=>`<span class="emb" title="${e(x.n)}">${e(x.ic)}</span>`).join("")}</div>`:`<div class="mu" style="margin-top:4px;font-size:12px">${nAll?nDone+"/"+nAll+" · ":""}🏆 ${pls} platinos · elige tus emblemas ›</div>`}</div>
+ <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:8px;margin-top:12px"><div class="card" style="margin:0;text-align:center"><div class="mu">Racha</div><b style="font-size:28px">🔥 ${s.cur}</b><div class="mu">récord ${s.rec} d</div></div>
  <div class="card" style="margin:0"><div class="row sp"><span class="mu">⏱ Horas</span><b>${H(tot)}</b></div><div class="row sp"><span class="mu">🎮 Sesiones</span><b>${S.sessions.length}</b></div><div class="row sp"><span class="mu">🏁 Completados</span><b>${S.games.filter(g=>g.status==="done").length}</b></div></div></div>
  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px">${tt}</div>
- <div class="card" style="cursor:pointer;margin-top:12px" onclick="logrosSheet()"><div class="row sp"><b>🎖️ Logros</b><span class="mu">${nAll?nDone+"/"+nAll+" · ":""}🏆 ${pls} platinos ›</span></div>${nAll?bar(nDone,nAll):""}</div>
- ${levelsCard()}${usersCard()}
- <div class="card"><b>🎞️ Recaps</b><div class="row" style="flex-wrap:wrap;margin-top:8px">${yrs.map(y=>`<button class="pri" onclick="recap('${y}')">${y}</button>`).join("")}</div></div>
- <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${miniPie(gen,"gen","Géneros")}${miniPie(plt,"plt","Plataformas")}${miniPie(fmtc,"fmt","Físico / Digital")}</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">${rankTile("best","Mejor valorados"+(A?"":" "+yr))}${rankTile("most","Más jugados"+(A?"":" "+yr))}</div>
+ <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">${miniPie(gen,"gen","Géneros")}${miniPie(plt,"plt","Plataformas")}${miniPie(fmtc,"fmt","Físico / Digital")}</div>
  ${evo()}
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">${rankTile("best","Mejor valorados "+yr)}${rankTile("most","Más jugados "+yr)}</div>
- <div class="card" style="cursor:pointer;text-align:center;margin-top:12px" onclick="settingsSheet()"><b>⚙️ Ajustes</b></div>
- ${bdg()}<div class="mu" style="margin-top:8px">${APP_NAME} · v${APP_VER}</div>`}
+ <div class="card" style="margin-top:12px"><b>🎞️ Recaps</b><div class="row" style="flex-wrap:wrap;margin-top:8px">${yrs.map(y=>`<button class="pri" onclick="recap('${y}')">${y}</button>`).join("")}</div></div>
+ <div class="mu" style="margin-top:8px">${APP_NAME} · v${APP_VER}</div>`}
 const PC=["#8b5cf6","#34d399","#f59e0b","#f87171","#38bdf8","#f472b6","#a3e635"];
 function pie(o,t,kind){const a=Object.entries(o).sort((x,y)=>y[1]-x[1]).slice(0,7),sum=a.reduce((n,x)=>n+x[1],0);if(!sum)return`<h2>${t}</h2><div class="empty">Aún no hay datos.</div>`;let acc=0;const fr=[];
  const g=a.map(([k,v],i)=>{const st=acc/sum*100;acc+=v;fr.push(acc/sum);return`${PC[i]} ${st}% ${acc/sum*100}%`}).join(",");
@@ -740,21 +744,37 @@ function miniPie(o,kind,t){const a=Object.entries(o).sort((x,y)=>y[1]-x[1]).slic
 function pieSheet(kind){const p=window._pie&&window._pie[kind];if(!p)return;const sum=p.e.reduce((n,x)=>n+x[1],0);
  sheet(`<div class="row sp"><h1>${p.t}</h1><button onclick="closeSheet()">✕</button></div><div style="display:flex;justify-content:center;margin:16px 0"><div class="pie" style="width:190px;height:190px;background:conic-gradient(${p.g});cursor:pointer" onclick="pieClick(event,'${kind}')"></div></div>${p.e.map(([k,v],i)=>`<div class="card row sp" style="cursor:pointer" onclick="pieShow('${kind}',${i})"><span class="row"><i style="width:10px;height:10px;border-radius:50%;background:${PC[i]};flex:none"></i>${e(k)}</span><span class="mu">${Math.round(v/sum*100)}% · ${kind==="fmt"?v+" juegos":H(v)}</span></div>`).join("")}<div class="mu">Toca el gráfico o una fila para ver los juegos.</div>`)}
 let RK={kind:"best",gen:"",all:0};
+const RKA=()=>S.prefs&&S.prefs.rkAll?1:0;
 function rkMin(g,all){if(all)return gm(g.id);const yr=String(new Date().getFullYear());return S.sessions.filter(x=>x.gameId===g.id&&x.date.startsWith(yr)).reduce((n,x)=>n+x.min,0)}
 function mYr(id,all){const yr=String(new Date().getFullYear());return S.sessions.filter(x=>x.gameId===id&&(all||x.date.startsWith(yr))).reduce((a,x)=>a+x.min,0)+(all?unkMin(id):0)}
 function rankList(kind,gen,all){const yr=String(new Date().getFullYear()),inYr=g=>{const c=comps(g);return c.length?c.some(d=>d.startsWith(yr)):(g.doneDate||g.rating?.date||"").startsWith(yr)};
  let a=S.games.filter(g=>g.status!=="wish");a=kind==="best"?a.filter(g=>g.rating?.score&&(all||inYr(g))):a.filter(g=>mYr(g.id,all)>0);
  if(gen)a=a.filter(g=>(g.genre||"").split(",").map(z=>z.trim()).includes(gen));
  return kind==="best"?a.sort((x,y)=>y.rating.score-x.rating.score||gm(y.id)-gm(x.id)):a.sort((x,y)=>mYr(y.id,all)-mYr(x.id,all))}
-function rankSheet(kind,keep){if(!keep)RK={kind,gen:"",all:0};const base=rankList(RK.kind,"",RK.all),gens=[...new Set(base.flatMap(g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean)))].sort(),l=rankList(RK.kind,RK.gen,RK.all).slice(0,30),b=RK.kind==="best";
+function rankSheet(kind,keep){if(!keep)RK={kind,gen:"",all:RKA()};const base=rankList(RK.kind,"",RK.all),gens=[...new Set(base.flatMap(g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean)))].sort(),l=rankList(RK.kind,RK.gen,RK.all).slice(0,30),b=RK.kind==="best";
  sheet(`<div class="row sp"><h1>${b?"Mejor valorados":"Más jugados"}</h1><button onclick="closeSheet()">✕</button></div>
  <label>Género</label><select onchange="rkSet('gen',this.value)"><option value="">Todos los géneros</option>${gens.map(x=>`<option ${x===RK.gen?"selected":""}>${e(x)}</option>`).join("")}</select>
  <div class="row" style="margin-top:10px"><button class="${RK.all?"":"pri"}" style="flex:1" onclick="rkSet('all',0)">Este año</button><button class="${RK.all?"pri":""}" style="flex:1" onclick="rkSet('all',1)">Siempre</button></div>
  <div class="mu" style="margin:10px 0">${b?"Ordenados por nota, de más alta a más baja":"Ordenados por horas jugadas "+(RK.all?"en total":"este año")}</div>
  ${l.map((g,i)=>`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<b style="flex:1;min-width:0">${i+1}. ${e(g.title)}<div class="mu" style="font-weight:400">${e(g.genre||"—")}</div></b><span>${b?"⭐ "+g.rating.score:"⏱ "+H(mYr(g.id,RK.all))}</span></div>`).join("")||`<div class="empty">Sin juegos con estos filtros.</div>`}`)}
 function rkSet(k,v){RK[k]=v;rankSheet(RK.kind,1)}
-function rankTile(kind,t){const l=rankList(kind,"",0).slice(0,3);return`<div class="card" style="margin:0;cursor:pointer;overflow:hidden;min-width:0" onclick="rankSheet('${kind}')"><div class="mu" style="font-size:12px;margin-bottom:8px;text-align:center">${t}</div>${l.length?`<div style="display:flex;gap:6px;justify-content:center">${l.map((g,i)=>`<div style="text-align:center;min-width:0"><div style="font-size:12px">${["🥇","🥈","🥉"][i]}</div>${th(g,46,62)}<div style="font-size:11px;margin-top:3px">${kind==="best"?"⭐ "+g.rating.score:Math.round(mYr(g.id,0)/60)+"h"}</div></div>`).join("")}</div>`:`<div class="mu" style="margin:14px 0;text-align:center">Sin datos</div>`}<div class="mu" style="margin-top:8px;font-size:11px;text-align:center">Ver más ›</div></div>`}
-function logrosSheet(){sheet(`<div class="row sp"><h1>Logros</h1><button onclick="closeSheet()">✕</button></div>${logros().replace("<h2>Logros</h2>","")}`)}
+function rankTile(kind,t){const A=RKA(),l=rankList(kind,"",A).slice(0,3);return`<div class="card" style="margin:0;cursor:pointer;overflow:hidden;min-width:0" onclick="rankSheet('${kind}')"><div class="mu" style="font-size:12px;margin-bottom:8px;text-align:center">${t}</div>${l.length?`<div style="display:flex;gap:6px;justify-content:center">${l.map((g,i)=>`<div style="text-align:center;min-width:0"><div style="font-size:12px">${["🥇","🥈","🥉"][i]}</div>${th(g,46,62)}<div style="font-size:11px;margin-top:3px">${kind==="best"?"⭐ "+g.rating.score:Math.round(mYr(g.id,A)/60)+"h"}</div></div>`).join("")}</div>`:`<div class="mu" style="margin:14px 0;text-align:center">Sin datos</div>`}<div class="mu" style="margin-top:8px;font-size:11px;text-align:center">Ver más ›</div></div>`}
+const EMB_MAX=3,BCOL={"común":"#9ca3af","rara":"#38bdf8","épica":"#a78bfa","legendaria":"#f59e0b"};
+function embList(){const L=[];badges().forEach(b=>{if(b[3]>=b[4])L.push({k:"b:"+b[1],ic:b[0],n:b[1],r:b[2],t:"b"})});
+ S.games.filter(g=>g.platinum&&g.status!=="wish").forEach(g=>L.push({k:"p:"+g.id,ic:"🏆",n:"Platino · "+g.title,t:"p"}));
+ S.games.filter(g=>g.status!=="wish").forEach(g=>(g.goals||[]).filter(x=>x.done).forEach(x=>L.push({k:"g:"+g.id+":"+x.name,ic:"🎖️",n:x.name+" · "+g.title,t:"g"})));return L}
+function embTog(i){const it=window._emb[i];if(!it)return;let E=(S.emb||[]).filter(x=>S.emb.length);const at=E.findIndex(x=>x.k===it.k);
+ if(at>=0)E.splice(at,1);else{if(E.length>=EMB_MAX)return alert("Puedes elegir hasta "+EMB_MAX+" emblemas. Quita uno antes de poner otro.");E.push({k:it.k,ic:it.ic,n:it.n})}
+ S.emb=E;save();logrosSheet(true);R()}
+function logrosSheet(keep){const L=embList(),sel=new Set((S.emb||[]).map(x=>x.k)),B=badges(),lock=B.filter(b=>b[3]<b[4]);window._emb=L;
+ const idx=k=>L.findIndex(x=>x.k===k),bd=it=>`<div class="bd on ${sel.has(it.k)?"sel":""}" data-e="1" style="--c:${BCOL[it.r]||"var(--ac)"}" onclick="embTog(${idx(it.k)})"><div style="font-size:26px">${e(it.ic)}</div><b>${e(it.n)}</b>${it.r?`<span>${it.r}</span>`:""}</div>`,
+ bs=L.filter(x=>x.t==="b"),other=L.filter(x=>x.t!=="b"),y=window.scrollY;
+ sheet(`<div class="row sp"><h1>🎖️ Logros</h1><button onclick="closeSheet()">✕</button></div>
+ <div class="card" style="text-align:center"><div class="mu">Emblemas de tu perfil (${sel.size}/${EMB_MAX})</div><div style="margin-top:8px;min-height:50px">${(S.emb||[]).map(x=>`<span class="emb" title="${e(x.n)}">${e(x.ic)}</span>`).join("")||`<span class="mu">Ninguno todavía</span>`}</div><div class="mu" style="margin-top:8px;font-size:12px">Toca un logro o una insignia conseguidos para ponerlo o quitarlo de tu perfil.</div></div>
+ <h2>Insignias conseguidas (${bs.length}/${B.length})</h2>${bs.length?`<div class="bgrid">${bs.map(bd).join("")}</div>`:`<div class="empty">Aún no has conseguido ninguna insignia.</div>`}
+ <h2>Logros y platinos conseguidos (${other.length})</h2>${other.length?other.map(it=>`<div class="card row sp" style="cursor:pointer;${sel.has(it.k)?"border-color:var(--ac)":""}" onclick="embTog(${idx(it.k)})"><span class="row"><span style="font-size:22px">${e(it.ic)}</span><b style="font-size:14px">${e(it.n)}</b></span><span class="mu">${sel.has(it.k)?"✓ en tu perfil":""}</span></div>`).join(""):`<div class="empty">Añade logros a tus juegos desde su ficha (y el 🏆 Platino en juegos de PlayStation).</div>`}
+ ${lock.length?`<h2>Por conseguir</h2><div class="bgrid">${lock.map(([ic,n,r,c,t])=>`<div class="bd" style="--c:${BCOL[r]}"><div style="font-size:26px">${ic}</div><b>${n}</b><span>${r}</span><div class="bar" style="margin-top:6px"><i style="width:${Math.min(100,c/t*100)}%"></i></div><span>${+Math.min(c,t).toFixed(1)}/${t}</span></div>`).join("")}</div>`:""}
+ <h2>Progreso por juego</h2>${logros().replace("<h2>Logros</h2>","")}${levelsCard()}`);if(keep)window.scrollTo(0,y)}
 // ===== Temas de color (Ajustes > Apariencia) =====
 const TDEF={bg:"#0b0b10",s1:"#15151d",s2:"#1e1e29",bd:"rgba(255,255,255,.07)",tx:"#f4f4f8",mu:"#9494a8",ac:"#8b5cf6",ac2:"#b69dff",acd:"#7c3aed",acl:"#9d6bff",acr:"124,58,237",glow:"#2d1b5e",hero1:"#2e1a69",hero2:"#171727",ring:"#1b1536",navbg:"rgba(21,21,29,.85)",sheet:"#121219",strip:"#13131b",onac:"#fff"};
 const THEMES={
@@ -792,12 +812,12 @@ async function userProfile(name){sheet(`<div class="row sp"><button onclick="use
  catch(er){sheet(`<div class="row sp"><button onclick="usersSheet()">‹ Volver</button><button onclick="closeSheet()">✕</button></div><div class="empty" style="margin-top:20px">${e(er.message)}</div>`)}}
 function upShow(){const d=window._up,st=window._upSt,lo=50*(d.lv-1)**2,hi=50*d.lv**2,L=(d.list||[]).filter(g=>g.s===st).sort((a,b)=>(b.r||0)-(a.r||0)||b.h-a.h),cnt=k=>(d.list||[]).filter(g=>g.s===k).length;
  sheet(`<div class="row sp"><button onclick="usersSheet()">‹ Volver</button><button onclick="closeSheet()">✕</button></div>
- <div class="hero" style="margin-top:12px"><div class="ring" style="--p:${Math.round((d.xp-lo)/(hi-lo)*100)}"><b>${d.lv}</b><small>NIVEL</small></div><div style="flex:1;min-width:0"><b style="font-size:20px">${e(d.username)}</b>${d.name&&d.name!==d.username?`<div class="mu">${e(d.name)}</div>`:""}<div class="mu">${d.xp} XP</div></div></div>
- <div class="stats"><div><b>${d.hours}h</b><span>jugadas</span></div><div><b>${d.sessions}</b><span>sesiones</span></div><div><b>${d.done}</b><span>completados</span></div><div><b>${d.rec}</b><span>racha récord</span></div></div>
+ <div class="hero" style="margin-top:12px"><div class="ring" style="--p:${Math.round((d.xp-lo)/(hi-lo)*100)}"><b>${d.lv}</b><small>NIVEL</small></div><div style="flex:1;min-width:0"><b style="font-size:20px">${e(d.username)}</b>${d.name&&d.name!==d.username?`<div class="mu">${e(d.name)}</div>`:""}<div class="mu">${d.xp} XP</div>${(d.emb||[]).length?`<div style="margin-top:6px">${d.emb.map(x=>`<span class="emb" style="width:34px;height:34px;font-size:18px;margin:0 3px 0 0" title="${e(x.n)}">${e(x.ic)}</span>`).join("")}</div>`:""}</div></div>
+ ${d.hours==null?`<div class="mu" style="margin:10px 0">Este usuario no comparte sus estadísticas.</div>`:`<div class="stats"><div><b>${d.hours}h</b><span>jugadas</span></div><div><b>${d.sessions}</b><span>sesiones</span></div><div><b>${d.done}</b><span>completados</span></div><div><b>${d.rec}</b><span>racha récord</span></div></div>`}
  ${d.genres.length?`<h2>Géneros favoritos</h2><div>${d.genres.map(x=>`<span class="chip">${e(x.k)} · ${H(x.h*60)}</span>`).join("")}</div>`:""}
  ${d.platforms.length?`<h2>Plataformas</h2><div>${d.platforms.map(x=>`<span class="chip">${e(x.k)} · ${H(x.h*60)}</span>`).join("")}</div>`:""}
- <h2>Juegos (${d.games})</h2><div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${st===k?"on":""}" onclick="window._upSt='${k}';upShow()">${v} (${cnt(k)})</button>`).join("")}</div>
- ${L.length?`<div class="grid">${L.map(g=>`<div class="poster"><div class="cv">${g.c?`<img ${oi(g.c,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.t)}</b><span>${g.h?"⏱ "+H(g.h*60):""}${g.r?(g.h?" · ":"")+"⭐ "+g.r:""}</span></div>`).join("")}</div>`:`<div class="empty">Ningún juego aquí.</div>`}`)}
+ ${d.sec&&d.sec.lib===false?`<div class="mu" style="margin:10px 0">Este usuario no comparte su biblioteca.</div><div style="display:none">`:"<div>"}<h2>Juegos (${d.games})</h2><div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${st===k?"on":""}" onclick="window._upSt='${k}';upShow()">${v} (${cnt(k)})</button>`).join("")}</div>
+ ${L.length?`<div class="grid">${L.map(g=>`<div class="poster"><div class="cv">${g.c?`<img ${oi(g.c,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><b>${e(g.t)}</b><span>${g.h?"⏱ "+H(g.h*60):""}${g.r?(g.h?" · ":"")+"⭐ "+g.r:""}</span></div>`).join("")}</div>`:`<div class="empty">Ningún juego aquí.</div>`}</div>`)}
 // ===== Cuenta y sincronización en la nube (Supabase, a través de /.netlify/functions/account) =====
 try{ACCT=JSON.parse(localStorage.getItem("playlog_acct")||"null")}catch(_){}
 const accSave=()=>{try{if(ACCT)localStorage.setItem("playlog_acct",JSON.stringify(ACCT));else localStorage.removeItem("playlog_acct")}catch(_){}};
@@ -843,13 +863,10 @@ async function syncMerge(){if(!confirm("Se combinarán los datos de este disposi
   ACCT.hold=false;accSave();await doPush();R();accUi();alert("Datos combinados ✅")}catch(er){alert("No se pudo combinar: "+er.message)}}
 function accUi(){const el=$("#acct");if(el)el.innerHTML=accCard(true)}
 function accCard(inner){const c=ACCT;
- const h=c?`<div class="row sp"><b>☁️ Cuenta</b><span class="chip" style="margin:0">${e(c.username)}</span></div>
- ${c.hold?`<div class="card" style="margin:10px 0 0;border-color:var(--er)"><b>⏸ Sincronización en pausa</b><div class="mu" style="margin-top:4px">Este dispositivo y la nube tienen datos distintos. No se ha cambiado nada. Elige qué hacer:</div></div>`:`<div class="mu" style="margin-top:6px">Tus datos se sincronizan con la nube.${c.at?" Última vez: "+new Date(c.at).toLocaleString():""}</div>`}
+ const h=c?`${c.hold?`<div class="card" style="margin:0 0 10px;border-color:var(--er)"><b>⏸ Sincronización en pausa</b><div class="mu" style="margin-top:4px">Este dispositivo y la nube tienen datos distintos. No se ha cambiado nada. Elige qué hacer:</div></div>`:`<div class="mu">Tus datos se sincronizan con la nube.<br>Última sincronización: ${c.at?new Date(c.at).toLocaleString():"todavía ninguna"}</div>`}
  <div class="row" style="margin-top:10px;flex-wrap:wrap">${c.hold?"":`<button onclick="accSync(true)">🔄 Sincronizar ahora</button>`}<button class="${c.hold?"pri":""}" onclick="syncMerge()">🔀 Combinar ambos</button></div>
- <div class="row" style="margin-top:8px;flex-wrap:wrap"><button onclick="syncUseCloud()">⬇️ Usar los datos de la nube</button><button onclick="syncUseLocal()">⬆️ Subir los de este dispositivo</button></div>
- <label class="row" style="margin-top:12px;color:var(--tx);font-size:14px"><input type="checkbox" style="width:22px;min-height:22px" ${c.pub!==false?"checked":""} onchange="setPublic(this.checked)"><span>Perfil público: otros usuarios pueden buscarme y ver mi nivel, estadísticas y juegos (no mis notas ni reseñas)</span></label>
- <div class="row" style="margin-top:10px"><button onclick="accLogout()">Cerrar sesión</button></div>`
- :`<div class="row sp"><b>☁️ Cuenta</b></div><div class="mu" style="margin-top:6px">Crea una cuenta para guardar tu biblioteca en la nube y usarla en varios dispositivos.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="pri" onclick="authSheet('login')">Iniciar sesión</button><button onclick="authSheet('signup')">Crear cuenta</button></div>`;
+ <div class="row" style="margin-top:8px;flex-wrap:wrap"><button onclick="syncUseCloud()">⬇️ Usar los datos de la nube</button><button onclick="syncUseLocal()">⬆️ Subir los de este dispositivo</button></div>`
+ :`<div class="mu">Crea una cuenta para guardar tu biblioteca en la nube y usarla en varios dispositivos.</div>`;
  return inner?h:`<div class="card" id="acct">${h}</div>`}
 async function setPublic(v){const t=await accTok();if(!t)return;try{await accCall("setpublic",{public:v},t);ACCT.pub=v;accSave()}catch(er){alert("No se pudo cambiar: "+er.message);accUi()}}
 async function accLogout(){if(!ACCT)return;
@@ -879,7 +896,36 @@ function resetSheet(tok){sheet(`<h1>Nueva contraseña</h1><form onsubmit="resetG
 async function resetGo(ev){ev.preventDefault();const b=$("#abtn");b.disabled=true;try{await accCall("reset",{token:window._rt,password:$("#rp").value});closeSheet();alert("Contraseña cambiada ✅ Ya puedes iniciar sesión.");authSheet("login")}catch(x){$("#aerr").textContent=x.message;b.disabled=false}}
 (function(){const h=location.hash||"";if(/type=recovery/.test(h)){const t=(h.match(/access_token=([^&]+)/)||[])[1];history.replaceState(null,"",location.pathname);if(t)setTimeout(()=>resetSheet(t),300)}
  if(ACCT)setTimeout(()=>accSync(false),800)})();
-function settingsSheet(){sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div>${langCard()}${themeCard()}${prefsCard()}${accCard()}<div class="card"><div class="mu">Tus datos se guardan en este dispositivo (y en la nube si inicias sesión). Exporta de vez en cuando una copia.</div><div class="row" style="margin-top:10px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div></div><button class="dng" style="width:100%" onclick="if(confirm('¿Borrar todos los datos?')){localStorage.removeItem('playlog_v1');location.reload()}">Borrar todos los datos</button><div class="mu" style="margin-top:14px">${APP_NAME} MVP · v${APP_VER} · Premium: estructura futura, sin cobros.</div>`)}
+window._det=window._det||{};
+const dt=(k,t,b,inner)=>`<details class="dt" data-k="${k}" ${window._det[k]?"open":""} ontoggle="window._det[this.dataset.k]=this.open"><summary>${t}</summary><div class="dtb">${b}</div></details>`;
+function pubSec(){return Object.assign({lib:true,ach:true,stats:true},S.pubSec)}
+function setPubSec(k,v){S.pubSec=Object.assign(pubSec(),{[k]:v});save()}
+function setRk(v){S.prefs=Object.assign({},S.prefs,{rkAll:v});save();R();settingsSheet()}
+async function accMe(){if(!ACCT)return;const t=await accTok();if(!t)return;try{const d=await accCall("me",{},t);if(d.email&&d.email!==ACCT.email){ACCT.email=d.email}if(d.username&&d.username!==ACCT.username){ACCT.username=d.username;S._owner=d.username}accSave();const m=$("#mailv");if(m)m.textContent=ACCT.email||""}catch(_){}}
+async function renameUser(){const n=($("#nu").value||"").trim().toLowerCase();if(!/^[a-z0-9_]{3,20}$/.test(n))return alert("El usuario debe tener 3-20 letras, números o _");if(n===ACCT.username)return alert("Ese ya es tu nombre de usuario");
+ const t=await accTok();if(!t)return;try{const d=await accCall("rename",{username:n},t);ACCT.username=d.username;S._owner=d.username;S.user.name=d.username;accSave();save();R();settingsSheet();alert("Nombre de usuario cambiado a "+d.username)}catch(er){alert(er.message)}}
+async function changePw(){const a=$("#pw0").value,b=$("#pw1").value;if(!a||!b)return alert("Escribe tu contraseña actual y la nueva");if(b.length<8)return alert("La contraseña nueva debe tener al menos 8 caracteres");
+ const t=await accTok();if(!t)return;try{await accCall("password",{current:a,password:b},t);$("#pw0").value=$("#pw1").value="";alert("Contraseña cambiada")}catch(er){alert(er.message)}}
+async function wipeAll(){if(!confirm(ACCT?"¿Borrar todos tus datos? Se borrarán de este dispositivo y de la nube. Tu cuenta se mantiene. No se puede deshacer.":"¿Borrar todos los datos?"))return;
+ if(ACCT){const t=await accTok();if(!t)return;try{await accCall("wipe",{},t)}catch(er){return alert("No se pudieron borrar los datos de la nube: "+er.message)}}
+ window._noPush=true;clearTimeout(_pt);try{["playlog_v1","playlog_news","playlog_upc"].forEach(k=>localStorage.removeItem(k))}catch(_){}location.reload()}
+function themeGrid(){const t=S.theme||{},cur=t.id||"playlog",acc=(t.accent||"").toLowerCase();return`<div class="themes">${Object.entries(THEMES).map(([k,x])=>{const v=Object.assign({},TDEF,x.v);return`<button class="thm ${cur===k&&!acc?"on":""}" onclick="setTheme('${k}')"><span class="sw"><i style="background:${v.bg}"></i><i style="background:${v.ac}"></i><i style="background:${v.ac2}"></i></span>${x.n}</button>`}).join("")}</div>`}
+function accentRow(){const acc=((S.theme||{}).accent||"").toLowerCase();return`<div class="accs">${ACC.map(([n,c])=>`<button class="acc ${acc===c?"on":""}" style="background:${c}" aria-label="${n}" onclick="setAccent('${c}')"></button>`).join("")}<input type="color" aria-label="Color personalizado" value="${/^#[0-9a-f]{6}$/i.test(acc)?acc:"#8b5cf6"}" onchange="setAccent(this.value)">${acc?`<button onclick="setAccent('')">Quitar</button>`:""}</div>`}
+function settingsSheet(){const ps=pubSec(),g=!ACCT,need=`<div class="mu">Necesitas una cuenta para esto.</div><button class="pri" style="margin-top:8px" onclick="authSheet('login')">Iniciar sesión</button>`,
+ ck=(k,l)=>`<label class="row" style="color:var(--tx);font-size:14px;margin:8px 0"><input type="checkbox" style="width:22px;min-height:22px" ${ps[k]?"checked":""} onchange="setPubSec('${k}',this.checked)"><span>${l}</span></label>`;
+ const cuenta=
+  dt("c_u","👤 Nombre de usuario",g?need:`<div class="mu">Es el nombre que ven los demás. Debe ser único.</div><div class="row" style="margin-top:8px"><input id="nu" value="${e(ACCT.username)}" maxlength="20" autocapitalize="none" autocomplete="off"><button class="pri" onclick="renameUser()">Cambiar</button></div>`)+
+  dt("c_m","✉️ Correo",g?need:`<div id="mailv" style="word-break:break-all">${e(ACCT.email||"…")}</div>`)+
+  dt("c_p","🔑 Contraseña",g?need:`<input id="pw0" type="password" placeholder="Contraseña actual" autocomplete="current-password"><input id="pw1" type="password" placeholder="Contraseña nueva (mín. 8)" autocomplete="new-password" style="margin-top:8px"><button class="pri" style="margin-top:8px" onclick="changePw()">Cambiar contraseña</button>`)+
+  dt("c_r","🏆 Mejor valorados y más jugados",`<div class="mu">Qué juegos se muestran en esos dos cuadros del perfil.</div><div class="row" style="margin-top:8px"><button class="${RKA()?"":"pri"}" style="flex:1" onclick="setRk(0)">Solo este año</button><button class="${RKA()?"pri":""}" style="flex:1" onclick="setRk(1)">En general</button></div>`)+
+  dt("c_s","🔄 Sincronización y copias",`<div id="acct">${accCard(true)}</div><div class="mu" style="margin-top:12px">Copias de seguridad</div><div class="row" style="margin-top:8px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div>`)+
+  dt("c_v","🌍 Perfil público",g?need:`<label class="row" style="color:var(--tx);font-size:14px"><input type="checkbox" style="width:22px;min-height:22px" ${ACCT.pub!==false?"checked":""} onchange="setPublic(this.checked)"><span>Otros usuarios pueden buscarme y ver mi perfil (nunca mis notas ni reseñas)</span></label><div class="mu" style="margin-top:10px">Lo que se enseña:</div>${ck("lib","📚 Biblioteca")}${ck("ach","🎖️ Logros y emblemas")}${ck("stats","📊 Estadísticas")}`)+
+  dt("c_d","🗑️ Borrar datos",`<div class="mu">Borra tu biblioteca, sesiones y ajustes${ACCT?" de este dispositivo y de la nube. Tu cuenta se mantiene":""}.</div><button class="dng" style="margin-top:10px;width:100%" onclick="wipeAll()">Borrar todos los datos</button>`)+
+  (ACCT?`<button style="width:100%;margin-top:8px" onclick="accLogout()">Cerrar sesión</button>`:`<div class="row" style="margin-top:8px"><button class="pri" onclick="authSheet('login')">Iniciar sesión</button><button onclick="authSheet('signup')">Crear cuenta</button></div>`);
+ const apar=dt("a_i","🌐 Idioma",`<select onchange="setLang(this.value)"><option value="es" ${LANG==="es"?"selected":""}>Español</option><option value="en" ${LANG==="en"?"selected":""}>English</option></select>`)+dt("a_t","🎨 Tema",themeGrid())+dt("a_a","🌈 Color de acento",accentRow());
+ const sel=newsSel(),all=!sel.length,tn=S.taste?.games?.length||0;
+ const guia=dt("g_n","📰 Noticias",`<div class="mu" style="margin-bottom:6px">Editoriales de las noticias</div>${NEWS_SRC.map(x=>srcRow(x,all||sel.includes(x)).replace("SRCFN","prefSrc")).join("")}`)+dt("g_g","🎮 Mis gustos",`<div class="mu" style="margin-bottom:8px">${tn?`Has elegido ${tn} juego${tn===1?"":"s"} favorito${tn===1?"":"s"}.`:"Todavía no has elegido tus juegos favoritos."}</div><div class="row" style="flex-wrap:wrap"><button onclick="window._onb=null;onbShow(2,true)">🎮 Elegir mis juegos favoritos</button>${tn?`<button onclick="if(confirm('¿Borrar tus gustos? Las recomendaciones usarán solo tu biblioteca.')){S.taste=null;save();settingsSheet()}">Borrar gustos</button>`:""}</div>`);
+ sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div>${dt("s_c","☁️ Cuenta",cuenta)}${dt("s_a","🎨 Apariencia",apar)}${dt("s_g","🧭 Guía de inicio",guia)}<div class="mu" style="margin-top:14px">${APP_NAME} · v${APP_VER}</div>`);accMe()}
 function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];
@@ -1618,6 +1664,35 @@ const EN_DICT={/*EN-START*/
 "No la recuerdo":"I don't remember",
 "Elige el mes y el año":"Pick the month and year",
 "Escribe un año válido":"Enter a valid year",
+"🧭 Guía de inicio":"🧭 Getting started",
+"Guía de inicio":"Getting started",
+"🎮 Mis gustos":"🎮 My tastes",
+"🗑️ Borrar datos":"🗑️ Delete data",
+"Borrar datos":"Delete data",
+"🏆 Mejor valorados y más jugados":"🏆 Top rated & most played",
+"🔄 Sincronización y copias":"🔄 Sync & backups",
+"📊 Estadísticas":"📊 Statistics",
+"🎖️ Logros y emblemas":"🎖️ Achievements & emblems",
+"Solo este año":"This year only",
+"En general":"All time",
+"Cambiar contraseña":"Change password",
+"Copias de seguridad":"Backups",
+"Qué juegos se muestran en esos dos cuadros del perfil.":"Which games are shown in those two profile boxes.",
+"Lo que se enseña:":"What is shown:",
+"Es el nombre que ven los demás. Debe ser único.":"This is the name others see. It must be unique.",
+"Cambiar":"Change",
+"👤 Nombre de usuario":"👤 Username",
+"✉️ Correo":"✉️ Email",
+"🔑 Contraseña":"🔑 Password",
+"Necesitas una cuenta para esto.":"You need an account for this.",
+"🌍 Perfil público":"🌍 Public profile",
+"Borra tu biblioteca, sesiones y ajustes.":"Deletes your library, sessions and settings.",
+"🎨 Tema":"🎨 Theme",
+"🌈 Color de acento":"🌈 Accent color",
+"Otros usuarios pueden buscarme y ver mi perfil (nunca mis notas ni reseñas)":"Other users can find me and see my profile (never my notes or reviews)",
+"Contraseña actual":"Current password",
+"Contraseña nueva (mín. 8)":"New password (min. 8)",
+"📚 Biblioteca":"📚 Library",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
