@@ -77,7 +77,7 @@ async function dlcSearch(q, parent) {
 }
 // Juegos populares para que el usuario elija sus gustos (máx. 5 por género para que haya variedad)
 const GENRES = ["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
-let popC = { t: 0, b: "" }; const recC = new Map();
+let rcC = { t: 0, b: "" }; let popC = { t: 0, b: "" }; const recC = new Map();
 async function popular() {
   const r = await igdb("games", "fields name,cover.image_id,genres.name; where total_rating_count > 400 & version_parent = null & parent_game = null & cover != null & genres != null; sort total_rating_count desc; limit 150;");
   const per = {}, out_ = [];
@@ -124,6 +124,28 @@ exports.handler = async (event) => {
   const q = (event.queryStringParameters?.q || "").trim().slice(0, 80).replace(/["\\*]/g, "");
   if (!ID() || !SEC()) return out(500, { error: "Falta configurar IGDB" });
 
+  if (event.queryStringParameters && event.queryStringParameters.recent !== undefined) {
+    const rn = Date.now();
+    if (rcC.b && rn - rcC.t < 6 * 36e5) return out(200, rcC.b);
+    try {
+      const now = Math.floor(rn / 1000), from = now - 30 * 864e2;
+      const base = `fields name,first_release_date,cover.image_id,platforms.abbreviation,platforms.name,hypes,genres.name; where first_release_date >= ${from} & first_release_date <= ${now} & cover != null & version_parent = null`;
+      let r = await igdb("games", `${base} & hypes > 0; sort hypes desc; limit 14;`);
+      if (r.length < 8) {
+        const extra = await igdb("games", `${base}; sort first_release_date desc; limit 14;`);
+        const have = new Set(r.map(g => g.id));
+        r = r.concat(extra.filter(g => !have.has(g.id))).slice(0, 14);
+      }
+      const body = JSON.stringify({ items: r.sort((a, b) => b.first_release_date - a.first_release_date).map(g => ({
+        id: g.id, title: g.name, released: new Date(g.first_release_date * 1000).toISOString().slice(0, 10),
+        cover: `https://images.igdb.com/igdb/image/upload/t_cover_big/${g.cover.image_id}.jpg`,
+        platforms: (g.platforms || []).slice(0, 3).map(p => p.abbreviation || p.name),
+        genres: (g.genres || []).map(x => x.name)
+      })) });
+      rcC = { t: rn, b: body };
+      return out(200, body);
+    } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
+  }
   if (event.queryStringParameters && event.queryStringParameters.upcoming !== undefined) {
     const un = Date.now();
     if (upc.b && un - upc.t < 6 * 36e5) return out(200, upc.b);
