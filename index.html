@@ -592,10 +592,10 @@ function vDiary(){const{y,m,sel}=cal,dm=stats().dm,cd=new Set(S.games.flatMap(g=
  return`<div class="row sp"><button onclick="cm(-1)" aria-label="Mes anterior">‹</button><h1 style="cursor:pointer;text-align:center" onclick="pickMonth()">${new Date(y,m,1).toLocaleDateString(LANG==="en"?"en-US":"es",{month:"long",year:"numeric"})} ▾</h1><button onclick="cm(1)" aria-label="Mes siguiente">›</button></div>
  <div class="cal mu" style="margin:8px 0">${(LANG==="en"?["M","T","W","T","F","S","S"]:["L","M","X","J","V","S","D"]).map(d=>`<span>${d}</span>`).join("")}</div><div class="cal">${c}</div>
  <h2 style="margin:20px 0 10px">${sel.split("-").reverse().join("/")} · ${fm(tot)}</h2>
- ${S.games.filter(g=>comps(g).includes(sel)).map(g=>`<div class="card row" style="border-color:#f5c518">${th(g,40,54)}<b style="flex:1">🏁 Completaste ${e(g.title)}</b></div>`).join("")}${ss.map(s=>{const g=G(s.gameId);return`<div class="card row" style="cursor:pointer" onclick="editS('${s.id}')">${th(g,52,70)}<div style="min-width:0"><b>${g&&comps(g).includes(s.date)?"⭐ ":""}${e(g?.title||"?")}</b><div class="mu">${e(s.platform||"—")} · ${fm(s.min)}</div>${s.note?`<div class="mu">${e(s.note)}</div>`:""}</div></div>`}).join("")||`<div class="empty">Sin sesiones este día.</div>`}
+ ${S.games.filter(g=>comps(g).includes(sel)).map(g=>`<div class="card row" style="border-color:#f5c518">${th(g,40,54)}<b style="flex:1">🏁 Completaste ${e(g.title)}</b></div>`).join("")}${ss.map(s=>{const g=G(s.gameId);return`<div class="card row" style="cursor:pointer" onclick="editS('${s.id}')">${th(g,52,70)}<div style="min-width:0"><b>${g&&comps(g).includes(s.date)?"⭐ ":""}${e(g?.title||"?")}</b><div class="mu">${e(s.platform||"—")} · ${fm(s.min)}${runTag(s)}</div>${s.note?`<div class="mu">${e(s.note)}</div>`:""}</div></div>`}).join("")||`<div class="empty">Sin sesiones este día.</div>`}
  <button class="pri" style="width:100%" onclick="openLog(cal.sel)">+ Registrar sesión el ${sel.split("-").reverse().join("/")}</button>`}
 function cm(d){cal.m+=d;if(cal.m<0){cal.m=11;cal.y--}if(cal.m>11){cal.m=0;cal.y++}R()}
-function editS(id){const s=S.sessions.find(x=>x.id===id),g=G(s.gameId)||{};sheet(`<div class="row sp"><h1>Editar sesión</h1><button onclick="closeSheet()">✕</button></div>
+function editS(id){const s=S.sessions.find(x=>x.id===id),g=G(s.gameId)||{};sheet(`<div class="row sp"><h1>Editar sesión</h1><button onclick="closeSheet()">✕</button></div>${runTag(s)?`<div class="mu" style="margin-bottom:6px">${runTag(s).slice(3)}</div>`:""}
  <div class="card row">${th(g,56,74)}<div><b>${e(g.title||"?")}</b><div class="mu">⏱ ${fm(s.min)}${s.run>1?" · Partida "+s.run:""}</div></div></div>
  <label>Plataforma</label><select id="ep">${platOpts(pl(g),s.platform)}</select><label>Fecha</label><input type="date" id="ed" value="${s.date}">
  <label>Duración</label><div class="row"><input type="number" id="eh" min="0" max="24" inputmode="numeric" placeholder="Horas" value="${Math.floor(s.min/60)}"><input type="number" id="emn" min="0" max="59" inputmode="numeric" placeholder="Minutos" value="${s.min%60}"></div>
@@ -695,6 +695,8 @@ async function shareRecap(){const d=window._rd;if(!d)return;const load=u=>new Pr
  const f=new File([b],"playlog-"+d.y+".png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:"Mi año en Playlog"})}catch(_){}return}
  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=f.name;a.click()}
 // Partidas: cada vez que completas un juego es una partida; las sesiones se reparten por fecha (hasta cada finalización).
+// Etiqueta de partida para una sesión (solo si el juego tiene 2 o más partidas)
+function runTag(x){const g=G(x.gameId);if(!g)return"";const rn=runsOf(g);if(rn.length<2)return"";const r=rn.find(q=>q.ss.some(y=>y.id===x.id));return r?` · <span class="chip" style="margin:0">🔁 <span>Partida</span> ${r.n}${r.end?"":" · <span>en curso</span>"}</span>`:""}
 function runsOf(g){const u=(g.unk||[]).map((x,i)=>({n:i+1,end:null,unk:1,ss:[],min:x.min||0})),c=[...comps(g)].sort(),ss=S.sessions.filter(x=>x.gameId===g.id).sort((a,b)=>a.date.localeCompare(b.date)),Rn=[...u,...c.map((d,i)=>({n:u.length+i+1,end:d,ss:[],min:0}))];let cur=null;
  ss.forEach(x=>{let r=Rn.find(q=>x.date<=q.end);if(!r&&Rn.length&&!(g.rs?x.date>=g.rs:(g.run||1)>Rn.length))r=Rn[Rn.length-1];if(!r){cur=cur||{n:Rn.length+1,end:null,ss:[],min:0};r=cur}r.ss.push(x);r.min+=x.min});return cur?[...Rn,cur]:Rn}
 // ===== Demos: ficha propia (estado "Demos"), enlazada al juego completo; suma horas pero no cuenta como completado =====
@@ -1797,6 +1799,8 @@ const EN_DICT={/*EN-START*/
 "Demos":"Demos",
 "Demo":"Demo",
 "Tu nota (1-10, opcional)":"Your rating (1-10, optional)",
+"Partida":"Playthrough",
+"en curso":"in progress",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
