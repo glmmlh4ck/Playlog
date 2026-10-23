@@ -471,7 +471,7 @@ function manualSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.
  <label>Formato</label><select id="gf"><option>Digital</option><option>Físico</option></select>
  <label>Géneros</label>${gchips(b.genres||[])}
  <label>Reto o modo (opcional)</label><input id="gc" list="chl" placeholder="Nuzlocke, Randomizer…"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
- <div id="gd" style="display:${lib.st==="done"?"block":"none"}">${doneFields("gn")}</div>
+ <div id="gd" style="display:${lib.st==="done"?"block":"none"}">${doneFields("gn","",1)}</div>
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveGame(${i})">Guardar</button>`)}
 function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math.round(x*60)):"—",
  mine=S.games.filter(g=>g.title.toLowerCase()===b.title.toLowerCase()&&g.rating?.score),ps=mine.length?(mine.reduce((n,g)=>n+g.rating.score,0)/mine.length).toFixed(1).replace(/\.0$/,""):"—",
@@ -495,7 +495,7 @@ function trackPick(i,st){if(!["done","backlog","playing"].includes(st))return tr
  const pf=pl(b),def=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
  sheet(`<div class="row sp"><button onclick="addSheet(${i})">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><h1 style="text-align:center;margin-top:20px">${e(b.title)}</h1><div class="mu" style="text-align:center;margin-top:6px">Un último paso para añadirlo</div>
  <label>¿En qué consola o plataforma lo juegas?</label><select id="tp">${platOpts(pf,def)}</select>
- ${st==="done"?doneFields("tn"):""}<label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
+ ${st==="done"?doneFields("tn","",1):""}<label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
 function agClamp(){const run=()=>{const el=$("#ag-sum"),m=$("#ag-more");if(el&&m&&!el.classList.contains("open"))m.style.display=el.scrollHeight>el.clientHeight+1?"block":"none"};requestAnimationFrame(run);setTimeout(run,300)}
 function agMore(){const el=$("#ag-sum"),m=$("#ag-more");m.textContent=el.classList.toggle("open")?"Ver menos":"Ver más"}
 function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender();}
@@ -711,16 +711,16 @@ function demoSave(id){const g=G(id);if(!g)return;const t=($("#dmn").value||"").t
  if(p)S.pref=p;save();openGame(id);R()}
 function compSec(g){const c=comps(g);if(g.status!=="done"&&!c.length&&!(g.unk||[]).length)return"";return`<h2>🏁 Veces completado: ${c.length+(g.unk||[]).length}</h2>${(g.unk||[]).map((u,i)=>`<span class="tag">Fecha desconocida${u.min?" · "+fm(u.min):""} <b style="cursor:pointer;color:var(--er)" onclick="delUnk('${g.id}',${i})">✕</b></span>`).join("")}${c.map((d,i)=>`<span class="tag">${fdA(g,d)} <b style="cursor:pointer;color:var(--er)" onclick="delComp('${g.id}',${i})">✕</b></span>`).join("")}<div style="margin-top:8px"><button onclick="doneDialog('${g.id}',1)">＋ Añadir otra partida completada</button></div>`}
 // Campos para indicar cuándo y cuánto: solo aparecen al marcar un juego como completado
-function doneFields(k,d0){const t=today();return`<label>¿Cuánto recuerdas de la fecha de finalización?</label><select id="${k}p" onchange="dnPrec('${k}')"><option value="e">Fecha exacta</option><option value="m">Solo mes y año</option><option value="y">Solo el año</option><option value="u">No la recuerdo</option></select>
+function doneFields(k,d0,rate){const t=today();return`<label>¿Cuánto recuerdas de la fecha de finalización?</label><select id="${k}p" onchange="dnPrec('${k}')"><option value="e">Fecha exacta</option><option value="m">Solo mes y año</option><option value="y">Solo el año</option><option value="u">No la recuerdo</option></select>
  <input type="date" id="${k}n" value="${d0||t}" max="${t}" style="margin-top:8px"><input type="month" id="${k}m" max="${t.slice(0,7)}" style="display:none;margin-top:8px"><input type="number" id="${k}y" min="1970" max="${t.slice(0,4)}" placeholder="Año" inputmode="numeric" style="display:none;margin-top:8px">
- <label>Horas jugadas (opcional)</label><input type="number" id="${k}h" min="0" max="5000" step="0.5" inputmode="decimal" placeholder="Ej: 40">`}
+ <label>Horas jugadas (opcional)</label><input type="number" id="${k}h" min="0" max="5000" step="0.5" inputmode="decimal" placeholder="Ej: 40">${rate?`<label>Tu nota (1-10, opcional)</label><input type="number" id="${k}s" min="1" max="10" step="1" inputmode="numeric" placeholder="Ej: 8">`:""}`}
 function dnPrec(k){const v=$("#"+k+"p").value;$("#"+k+"n").style.display=v==="e"?"":"none";$("#"+k+"m").style.display=v==="m"?"":"none";$("#"+k+"y").style.display=v==="y"?"":"none"}
 function readDone(k){const pr=$("#"+k+"p").value,h=parseFloat($("#"+k+"h").value),min=h>0&&h<=5000?Math.round(h*60):0;let d="";
  if(pr==="e")d=$("#"+k+"n").value||today();
  else if(pr==="m"){const m=$("#"+k+"m").value;if(!m){alert("Elige el mes y el año");return null}d=m+"-15"}
  else if(pr==="y"){const y=parseInt($("#"+k+"y").value);if(!(y>=1970&&y<=+today().slice(0,4))){alert("Escribe un año válido");return null}d=y+"-07-01"}
- return{pr,d,min}}
-function applyDone(g,r,note){if(r.pr==="u"){g.unk=g.unk||[];g.unk.push({id:uid(),min:r.min});return}
+ const sc=parseInt($("#"+k+"s")?.value);return{pr,d,min,score:sc>=1&&sc<=10?sc:null}}
+function applyDone(g,r,note){if(r.score)g.rating={date:r.pr==="u"?"":r.d,score:r.score,review:g.rating?.review||""};if(r.pr==="u"){g.unk=g.unk||[];g.unk.push({id:uid(),min:r.min});return}
  const d=r.d;if(r.pr!=="e"){g.compA=g.compA||{};g.compA[d]=r.pr}else if(g.compA)delete g.compA[d];
  const c=comps(g);if(!c.includes(d))c.push(d);c.sort();g.doneDate=c[c.length-1];
  if(r.min>0)S.sessions.push({id:uid(),gameId:g.id,date:d,platform:g.platform||"",min:r.min,note:note||"Partida completada",run:c.indexOf(d)+1})}
@@ -1796,6 +1796,7 @@ const EN_DICT={/*EN-START*/
 "Escribe un nombre":"Enter a name",
 "Demos":"Demos",
 "Demo":"Demo",
+"Tu nota (1-10, opcional)":"Your rating (1-10, optional)",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
