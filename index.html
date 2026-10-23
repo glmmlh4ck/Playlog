@@ -41,6 +41,8 @@ input,select,textarea{font-size:16px}h1{font-size:24px}.tabs button{min-height:4
 .poster b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.25;margin-top:8px;font-weight:500}
 .poster span{font-size:11px;color:var(--mu)}
 #gate{position:fixed;inset:0;z-index:8;background:var(--bg);overflow-y:auto;display:none;padding:calc(30px + env(safe-area-inset-top,0px)) 20px 40px;-webkit-user-select:auto;user-select:auto}#gate>div{max-width:420px;margin:0 auto}
+input[type=date],input[type=month],input[type=time]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;max-width:100%;height:46px;text-align:left}input[type=date]::-webkit-date-and-time-value,input[type=month]::-webkit-date-and-time-value{text-align:left;margin:0;min-width:0}
+#sheet>div{overflow-x:hidden}#sheet .row>*{min-width:0}
 #sheet{position:fixed;inset:0;background:#000b;backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:9}
 #sheet>div{background:var(--sheet);border:1px solid var(--bd);width:100%;max-width:480px;max-height:92%;overflow-y:auto;border-radius:24px 24px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 #sheet>div:before{content:"";display:block;width:42px;height:4px;background:#ffffff33;border-radius:9px;margin:0 auto 14px}
@@ -159,7 +161,7 @@ h1{font-size:30px}
 var LANG="es";const ML=()=>LANG==="en"?"JFMAMJJASOND":"EFMAMJJASOND";const APP_NAME="Playlog",SLOGAN="Your gaming story";document.title=APP_NAME;
 const ST={playing:"Jugando",done:"Completados",backlog:"Backlog",wish:"Deseados",drop:"Abandonados"};
 // Reglas XP centralizadas (derivadas de los registros: editar/borrar recalcula, sin farmeo)
-const XP={session:10,perHour:20,maxMinPerDay:600,completed:100};
+const XP={session:10,perHour:20,maxMinPerDay:600,completed:100,mDay:5,mWeek:20,mMonth:50};
 var ACCT=null,_pt=null;
 let S={games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""};
 try{const r=localStorage.getItem("playlog_v1");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
@@ -180,6 +182,9 @@ let tab="home",lib={st:"playing",q:"",f:{pl:"",gen:"",fmt:"",sort:"name"}},cal={
 function stats(){
  const dm={};S.sessions.forEach(s=>dm[s.date]=(dm[s.date]||0)+s.min);
  let xp=0;Object.values(dm).forEach(m=>xp+=Math.min(m,XP.maxMinPerDay)/60*XP.perHour);
+ // Misiones ocultas: día con sesión, semana con 3+ días activos y mes con 10+ h dan puntos extra automáticamente
+ const wkd={},mom={};Object.entries(dm).forEach(([d,m])=>{const t=new Date(d+"T12:00");t.setDate(t.getDate()-(t.getDay()+6)%7);const k=ymd(t);wkd[k]=(wkd[k]||0)+1;mom[d.slice(0,7)]=(mom[d.slice(0,7)]||0)+m});
+ xp+=Object.keys(dm).length*XP.mDay+Object.values(wkd).filter(n=>n>=3).length*XP.mWeek+Object.values(mom).filter(m=>m>=600).length*XP.mMonth;
  xp=Math.round(xp+S.sessions.length*XP.session+S.games.filter(g=>g.status==="done").length*XP.completed);
  const lv=Math.floor(Math.sqrt(xp/50))+1,lo=50*(lv-1)**2,hi=50*lv**2;
  const days=Object.keys(dm).sort();let rec=0,run=0,prev=null;
@@ -209,11 +214,11 @@ function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing"),up=S
  return`<h1>¡Hola, ${e(S.user.name)}!</h1><div class="mu">${APP_NAME} · ${SLOGAN}</div>
  <div class="hero"><div class="ring" style="--p:${Math.round((s.xp-s.lo)/(s.hi-s.lo)*100)}"><b>${s.lv}</b><small>NIVEL</small></div><div style="flex:1"><div class="mu">${s.xp} XP</div><b style="font-size:17px">Faltan ${s.hi-s.xp} XP</b><div><span class="chip">🔥 ${s.cur} días de racha</span><span class="chip">🏆 récord ${s.rec}</span></div></div></div>
  ${ACCT?"":guestCard()}
- ${sech("🎯","Desafíos","Temporada y misiones")}${seasonCard()}${missions().map(m=>`<div class="card"><div class="row sp"><span>${m.n}</span><span class="mu">${Math.min(m.v,m.t)}/${m.t}${m.v>=m.t?" ✅":""}</span></div>${bar(m.v,m.t)}</div>`).join("")}
+ ${sech("🎯","Desafíos","Temporada")}${seasonCard()}
  ${lastPlayedCard()}
  ${sech("📰","Noticias","Según tus editoriales")}<div id="news" class="hs"><div class="mu">Cargando noticias…</div></div>
  ${hasTaste()?`<div>${sech("✨","Recomendado para ti","Según tus gustos")}<div id="rec" class="hs"><div class="mu">Buscando recomendaciones…</div></div></div>`:""}
- ${sech("💝","Próximos de tu lista de deseos",up.length?up.length+" por salir":"")}${up.length?up.map(g=>{const d=dleft(g.released);return`<div class="card row ${d<=7?"alert":""}" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<div style="flex:1;min-width:0"><b>${d<=7?"🔔 ":""}${e(g.title)}</b><div class="mu">${d<=0?"¡Sale hoy!":"Sale en "+d+" día"+(d===1?"":"s")}</div></div><span class="mu" style="text-align:right">📅 ${fd(g.released)}</span></div>`}).join(""):`<div class="empty">Añade juegos sin salir todavía a tu lista de deseos y aquí verás cuánto falta.</div>`}
+ ${sech("💝","Próximos de tu lista de deseos",up.length?up.length+" por salir":"")}${up.length?`<div class="hs">${up.map(g=>{const d=dleft(g.released);return`<div class="up" onclick="openGame('${g.id}')">${g.cover?`<img ${oi(g.cover,220)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}<b>${e(g.title)}</b><span>📅 ${fd(g.released)}</span><span class="chip" style="margin:0">${d<=0?"🔔 ¡Sale hoy!":d<=7?"🔔 en "+d+" d":"en "+d+" d"}</span></div>`}).join("")}</div>`:`<div class="empty">Añade juegos sin salir todavía a tu lista de deseos y aquí verás cuánto falta.</div>`}
  ${sech("🆕","Lanzamientos recientes","Del último mes")}<div id="rcn" class="hs"><div class="mu">Cargando lanzamientos…</div></div>
  ${sech("🔥","Más esperados por la comunidad","Próximos meses")}<div id="upc" class="hs"><div class="mu">Cargando lanzamientos…</div></div>
  ${mem.length?`${sech("🎉","Recuerdos","")}${mem.map(m=>`<div class="card row" style="cursor:pointer" onclick="openGame('${m.g.id}')">${th(m.g,44,58)}<div>Hace ${m.y} ${m.y===1?"año":"años"} te pasaste <b>${e(m.g.title)}</b><div class="mu">${fd(m.d)}${m.df===0?" · ¡es hoy!":""}</div></div></div>`).join("")}`:""}`}
@@ -712,7 +717,10 @@ function doneSave(id,more){const g=G(id),r=readDone("dd");if(!r)return;const was
 function delUnk(id,i){const g=G(id);g.unk.splice(i,1);save();openGame(id);R()}
 function delComp(id,i){const g=G(id),c=comps(g);c.splice(i,1);g.doneDate=c.length?c[c.length-1]:"";save();openGame(id);R()}
 let CALL=[];
-function catEmpty(msg){const q=($("#cq")?.value||"").trim(),w=q.split(" ")[0],sg=[...new Set([w,"Zelda","Pokémon","Mario","Final Fantasy","Sonic"].filter(x=>x&&x.toLowerCase()!==q.toLowerCase()))].slice(0,5);
+const SAGAS=["Pokémon","Super Mario","Zelda","Grand Theft Auto","Final Fantasy","Sonic","Call of Duty","FIFA","The Witcher","Resident Evil","God of War","Assassin's Creed","Minecraft","Dark Souls","Metroid","Kirby","Fallout","The Elder Scrolls","Dragon Quest","Street Fighter","Mortal Kombat","Halo","Uncharted","The Last of Us","Red Dead Redemption","Persona","Metal Gear Solid","Crash Bandicoot","Spyro","Donkey Kong","Animal Crossing","Splatoon","Mario Kart","Smash Bros","Overwatch","Diablo","Borderlands","Bioshock","Tomb Raider","Silent Hill","Devil May Cry","Monster Hunter","Yakuza","Kingdom Hearts","Fire Emblem","Xenoblade","Cyberpunk","Hollow Knight","Celeste","Stardew Valley","Portal","Half-Life","Doom","Need for Speed","Gran Turismo","Forza","Tekken","Rayman","Lego"];
+const rndSagas=(n,not)=>{const a=SAGAS.filter(x=>!not||x.toLowerCase()!==not.toLowerCase());for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,n)};
+const sagaChips=a=>a.map(x=>`<span class="chipb" data-v="${e(x)}" onclick="$('#cq').value=this.dataset.v;catGo()">🔎 ${e(x)}</span>`).join("");
+function catEmpty(msg){const q=($("#cq")?.value||"").trim(),w=q.split(" ")[0],sg=[...new Set([w,...rndSagas(5,q)].filter(x=>x&&x.toLowerCase()!==q.toLowerCase()))].slice(0,5);
  return`<div class="empty">${msg}<div style="margin-top:12px">${sg.map(x=>`<span class="chipb" data-v="${e(x)}" onclick="$('#cq').value=this.dataset.v;catGo()">🔎 ${e(x)}</span>`).join("")}</div><div class="row" style="justify-content:center;margin-top:8px"><button onclick="catGo()">Reintentar</button><button class="pri" onclick="addGame()">Crear ficha manual</button></div></div>`}
 function catRender(){const m=S.catMode||"off",of=CALL.filter(g=>g.official!==false),un=CALL.filter(g=>g.official===false);
  const row=(g,i)=>`<div class="card row sp"><div class="row" style="flex:1;min-width:0">${th(g,48,64)}<div style="min-width:0"><b>${e(g.title)}</b>${g.alt?`<div class="mu">también: ${e(g.alt)}</div>`:""}<div class="mu">${e((g.released||"s/f").slice(0,4))} · ${e((g.platforms||[]).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="window._agBack=[];addSheet(${i})">Añadir</button></div>`;
@@ -965,7 +973,7 @@ function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.on
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];
 function catSearch(){
- sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: Pokémon" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
+ sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: ${e(rndSagas(1)[0])}" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"><div class="mu" style="margin:14px 0 8px;text-align:center">Prueba con alguna saga:</div><div style="text-align:center">${sagaChips(rndSagas(6))}</div></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
 async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
  const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("error "+r.status);return r.json()};
  try{let d;try{d=await get("/.netlify/functions/igdb?q="+encodeURIComponent(q))}catch(_){d=await get("/.netlify/functions/search?q="+encodeURIComponent(q))}
@@ -1757,6 +1765,10 @@ const EN_DICT={/*EN-START*/
 "🏁 ¡Completado!":"🏁 Completed!",
 "🏁 Otra partida completada":"🏁 Another completed playthrough",
 "Si ya registraste las sesiones de esta partida, deja las horas en blanco para no contarlas dos veces.":"If you already logged the sessions for this playthrough, leave the hours blank so they aren't counted twice.",
+"Temporada":"Season",
+"Prueba con alguna saga:":"Try a franchise:",
+"🔔 ¡Sale hoy!":"🔔 Out today!",
+"Ej: {}":"E.g. {}",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
