@@ -317,7 +317,7 @@ async function dlcFetch(id){const g=G(id);if(!g)return;
   (d.dlcs||[]).forEach(x=>{if(!have.has(x.id))g.dlcs.push({id:x.id,name:x.name,kind:x.kind,released:x.released,st:""})});save()}catch(_){}
  window._dlT[id]=2;
  if($("#dlcs")&&window._og===id)openGame(id)}
-const nrm=t=>String(t||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const nrm=t=>String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 async function dlcFind(id){const g=G(id),q=($("#dlcn")?.value||"").trim(),box=$("#dlcr");if(!g||!box)return;
  if(q.length<2&&!g.igdb)return alert("Escribe al menos 2 letras");box.innerHTML=`<div class="mu" style="margin-top:8px">Buscando en IGDB y RAWG…</div>`;
  const get=async u=>{try{const r=await fetch(u);if(!r.ok)return[];return(await r.json()).items||[]}catch(_){return[]}};
@@ -1007,8 +1007,12 @@ function catSearch(){
  sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: ${e(rndSagas(1)[0])}" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"><div class="mu" style="margin:14px 0 8px;text-align:center">Prueba con alguna saga:</div><div style="text-align:center">${sagaChips(rndSagas(6))}</div></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
 async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
  const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("error "+r.status);return r.json()};
- try{let d;try{d=await get("/.netlify/functions/igdb?q="+encodeURIComponent(q))}catch(_){d=await get("/.netlify/functions/search?q="+encodeURIComponent(q))}
- CALL=(d.results||[]).map(g=>g.title?g:{title:g.name,released:g.released,cover:g.background_image,platforms:(g.platforms||[]).map(p=>p.platform.name),genres:(g.genres||[]).map(x=>x.name),tags:[],similar:[],summary:"",ttb:null,versions:[]}).sort((a,b)=>(b.released||"").localeCompare(a.released||""));catRender()}
+ try{const mapR=g=>g.title?g:{title:g.name,released:g.released,cover:g.background_image,platforms:(g.platforms||[]).map(p=>p.platform.name),genres:(g.genres||[]).map(x=>x.name),tags:[],similar:[],summary:"",ttb:null,versions:[]};
+ // IGDB y RAWG a la vez: RAWG completa con fangames y juegos que IGDB no tiene
+ const [d,rw]=await Promise.all([get("/.netlify/functions/igdb?q="+encodeURIComponent(q)).catch(()=>null),get("/.netlify/functions/search?q="+encodeURIComponent(q)).catch(()=>null)]);
+ if(!d&&!rw)throw new Error("sin respuesta");
+ const A=(d?.results||[]).map(mapR),seen=new Set(A.map(g=>nrm(g.title))),B=(rw?.results||[]).map(mapR).filter(g=>g.title&&!seen.has(nrm(g.title))).slice(0,12);
+ CALL=[...A,...B].sort((a,b)=>(b.released||"").localeCompare(a.released||""));catRender()}
  catch(x){$("#cr").innerHTML=catEmpty("No se pudo buscar ("+e(x.message)+"). Revisa tu conexión.")}}
 // iPhone (app instalada): si iOS recorta la altura de la web por debajo (franja vacía abajo), se marca <html class="gap"> y la barra se pega al borde visible
 (function(){const fix=()=>{try{const r=document.documentElement;if(navigator.standalone!==true){r.classList.remove("gap");return}
