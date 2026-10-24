@@ -171,7 +171,9 @@ const $=s=>document.querySelector(s),e=s=>String(s??"").replace(/[&<>"]/g,c=>({"
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const ymd=d=>{d=new Date(d);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const today=()=>ymd(new Date()),H=m=>{m=Math.round(m);const h=Math.floor(m/60),r=m%60;return h?(r?h+"h "+r+"min":h+"h"):r+"min"},fm=H;
-const unkMin=id=>((S.games.find(g=>g.id===id)||{}).unk||[]).reduce((a,u)=>a+(u.min||0),0),gm=id=>S.sessions.filter(s=>s.gameId===id).reduce((a,s)=>a+s.min,0)+unkMin(id);
+const unkMin=id=>((S.games.find(g=>g.id===id)||{}).unk||[]).reduce((a,u)=>a+(u.min||0),0),dpar=()=>{const k=(S._u||0)+":"+S.games.length+":"+S.sessions.length;if(dpar.k!==k){dpar.k=k;const m={};S.games.forEach(g=>{if(g.status==="demo"&&g.parent)m[g.id]=g.parent});dpar.m=m}return dpar.m},
+ inG=(x,id)=>x.gameId===id||dpar()[x.gameId]===id,
+ gm=id=>S.sessions.filter(s=>inG(s,id)).reduce((a,s)=>a+s.min,0)+unkMin(id);
 const G=id=>S.games.find(g=>g.id===id);
 const PLAT=["PC","PlayStation 5","PlayStation 4","PlayStation 3","PlayStation 2","PlayStation","PS Vita","PSP","Xbox Series X|S","Xbox One","Xbox 360","Xbox","Nintendo Switch","Nintendo Switch 2","Wii U","Wii","GameCube","Nintendo 64","SNES","NES","Nintendo 3DS","Nintendo DS","Game Boy Advance","Game Boy","Steam Deck","Mac","Linux","iOS","Android","Consola Android","Game Boy Color","Sega Master System","Sega Mega Drive","Sega Saturn","Dreamcast","Neo Geo","PC Engine","Atari 2600","Anbernic","Retroid Pocket","Miyoo Mini","Powkiddy","Ayn Odin","Ayaneo","ROG Ally","Lenovo Legion Go","MSI Claw","Analogue Pocket","Playdate","Meta Quest","Steam Machine","Otra"];
 const GEN=["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
@@ -291,12 +293,12 @@ async function upGo(id){sheet(`<div class="row sp"><span></span><button onclick=
 
 // ===== Backlog: juegos completados que quieres volver a jugar =====
 const dnDate=g=>g.doneDate||g.rating?.date||lastS(g)||"";
-const rjList=()=>S.games.filter(g=>g.status==="done"&&g.again).sort((a,b)=>dnDate(b).localeCompare(dnDate(a)));
+const rjList=()=>S.games.filter(g=>(g.status==="done"||g.status==="drop")&&g.again).sort((a,b)=>dnDate(b).localeCompare(dnDate(a)));
 function rjSec(){const a=rjList();
- return`<div id="rjs" class="row sp" style="margin-top:18px"><h2 style="margin:0">🔁 Para rejugar${a.length?` (${a.length})`:""}</h2><button onclick="rjPick()">➕ Añadir juego</button></div>${a.length?`<div class="grid" style="margin-top:10px">${a.map(g=>`<div>${gg(g)}<button style="width:100%;margin-top:4px;font-size:12px;min-height:32px" onclick="togAgain('${g.id}')">✕ Quitar</button></div>`).join("")}</div>`:`<div class="empty" style="margin-top:10px">Aquí van los juegos que ya te pasaste y quieres volver a jugar.</div>`}`}
+ return`<div id="rjs" class="row sp" style="margin-top:18px"><h2 style="margin:0">🔁 Para rejugar${a.length?` (${a.length})`:""}</h2><button onclick="rjPick()">➕ Añadir juego</button></div>${a.length?`<div class="grid" style="margin-top:10px">${a.map(g=>`<div>${gg(g)}<button style="width:100%;margin-top:4px;font-size:12px;min-height:32px" onclick="togAgain('${g.id}')">✕ Quitar</button></div>`).join("")}</div>`:`<div class="empty" style="margin-top:10px">Aquí van los juegos que ya te pasaste (o abandonaste) y quieres volver a jugar desde el principio.</div>`}`}
 function togAgain(id){const g=G(id);if(!g)return;g.again=!g.again;save();if($("#sheet").style.display==="flex"&&window._rjOpen)rjPick();else if(window._og===id&&$("#sheet").style.display==="flex")openGame(id);R()}
-function rjPick(){window._rjOpen=1;const a=S.games.filter(g=>g.status==="done").sort((x,y)=>dnDate(y).localeCompare(dnDate(x)));
- sheet(`<div class="row sp"><h1>🔁 Añadir a rejugar</h1><button onclick="window._rjOpen=0;closeSheet()">✕</button></div><div class="mu">Tus juegos completados, del más reciente al más antiguo. Toca uno para añadirlo o quitarlo.</div>${a.length?a.map(g=>`<div class="card row" style="cursor:pointer;${g.again?"border-color:var(--ac)":""}" onclick="togAgain('${g.id}')">${th(g,44,58)}<div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(g.title)}</b><div class="mu">${dnDate(g)?"Completado el "+fd(dnDate(g)):"Sin fecha"}${comps(g).length>1?" · 🏁×"+comps(g).length:""}</div></div><b style="font-size:20px">${g.again?"✅":"➕"}</b></div>`).join(""):`<div class="empty">Aún no tienes juegos completados.</div>`}<button class="pri" style="width:100%;margin-top:8px" onclick="window._rjOpen=0;closeSheet()">Listo</button>`)}
+function rjPick(){window._rjOpen=1;const a=S.games.filter(g=>g.status==="done"||g.status==="drop").sort((x,y)=>dnDate(y).localeCompare(dnDate(x)));
+ sheet(`<div class="row sp"><h1>🔁 Añadir a rejugar</h1><button onclick="window._rjOpen=0;closeSheet()">✕</button></div><div class="mu">Tus juegos completados o abandonados, del más reciente al más antiguo. Toca uno para añadirlo o quitarlo.</div>${a.length?a.map(g=>`<div class="card row" style="cursor:pointer;${g.again?"border-color:var(--ac)":""}" onclick="togAgain('${g.id}')">${th(g,44,58)}<div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(g.title)}</b><div class="mu">${g.status==="drop"?"Abandonado"+(dnDate(g)?" · "+fd(dnDate(g)):""):dnDate(g)?"Completado el "+fd(dnDate(g)):"Sin fecha"}${comps(g).length>1?" · 🏁×"+comps(g).length:""}</div></div><b style="font-size:20px">${g.again?"✅":"➕"}</b></div>`).join(""):`<div class="empty">Aún no tienes juegos completados ni abandonados.</div>`}<button class="pri" style="width:100%;margin-top:8px" onclick="window._rjOpen=0;closeSheet()">Listo</button>`)}
 // ===== DLCs y expansiones dentro de la ficha del juego =====
 const DST=[["","Pendiente","⬜"],["playing","Jugando","🎮"],["done","Completado","✅"]];
 function dlcSec(g){const a=g.dlcs||[];window._dlT=window._dlT||{};if(!window._dlT[g.id]){window._dlT[g.id]=1;dlcFetch(g.id)}
@@ -516,14 +518,14 @@ function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().
  if(st==="done"){const r=readDone("gn");if(!r)return;applyDone(g,r,"Tiempo total al completar")}
  S.games.push(g);if(p)S.pref=p;save();closeSheet();R();getBanner(id)}
 function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);const gl=g.goals,dn=gl.filter(x=>x.done).length,t=g.ttb||{},hl=t.src==="hltb",
- ss=S.sessions.filter(s=>s.gameId===id).sort((a,b)=>b.date.localeCompare(a.date)),rd=g.doneDate||g.rating?.date,
+ ss=S.sessions.filter(s=>inG(s,id)).sort((a,b)=>b.date.localeCompare(a.date)),rd=g.doneDate||g.rating?.date,
  d3=(hl?[["main","Main story"],["extra","Main + extras"],["full","Completionist"]]:[["fast","Main story"],["main","Main + extras"],["full","Completionist"]]).map(([k,l])=>`<div><b>${t[k]?H(Math.round(t[k]*60)):"—"}</b><span>${l}</span></div>`).join("");
  sheet(`<div class="row sp"><button onclick="editGame('${id}')">✏️ Editar</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
  <div class="ag-top" style="margin-top:14px"><div class="ag-cv" style="width:96px">${g.cover?`<img ${oi(g.cover,300)} alt="" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><div class="ag-info"><h1>${e(g.title)}</h1><div class="mu">${e([g.platform,g.genre].filter(Boolean).join(" · "))}${g.platform||g.genre?" · ":""}⏱ ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>${g.challenge?`<div><span class="tag">🎯 ${e(g.challenge)}</span></div>`:""}</div></div>
  ${g.status==="demo"?demoHead(g):`<h2>Estado</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button class="${g.status===k?"on":""}" ${g.status===k?"":`onclick="setStatus('${id}','${k}')"`}>${l}</button>`).join("")}</div>`}
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fd(rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
  ${g.status==="done"?`<button class="pri" style="margin-top:8px;width:100%" onclick="storyGame('${id}')">📤 Compartir tarjeta Story</button>`:""}
- ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}${g.status==="done"?` <button style="margin-top:8px" onclick="togAgain('${id}')">${g.again?"✓ En «Para rejugar»":"➕ Para rejugar"}</button>`:""}
+ ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}${g.status==="done"||g.status==="drop"?` <button style="margin-top:8px" onclick="togAgain('${id}')">${g.again?"✓ En «Para rejugar»":"➕ Para rejugar"}</button>`:""}
  ${compSec(g)}
  ${demosSec(g)}
  <h2>Duración</h2><div class="ag-dur">${d3}</div><div class="mu" style="margin-top:6px">${t.fast||t.main||t.extra||t.full?(hl?"Duración puesta por ti. ":"Estimación de IGDB. "):"Sin duración todavía. "}<a href="https://howlongtobeat.com/?q=${encodeURIComponent(g.title)}" target="_blank" rel="noopener" style="color:var(--ac2)">Ver en HowLongToBeat</a></div>
@@ -531,9 +533,9 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${x.done?"🎖️ ":""}${e(x.name)}</span>${x.done?`<button style="min-height:32px;padding:2px 10px" onclick="storyGoal('${id}',${i})">📤</button>`:""}<button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
  <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo logro"><button onclick="addGoal('${id}')">Añadir</button></div></div>
  <h2>Notas</h2><textarea onchange="G('${id}').notes=this.value;save()">${e(g.notes)}</textarea>
- <h2>Sesiones (${ss.length})</h2><div class="card">${(()=>{const rn=runsOf(g),line=x=>`<div class="mu" style="margin:2px 0">${comps(g).includes(x.date)?"⭐ ":""}${fdA(g,x.date)} - ${fm(x.min)}${x.note?" - "+e(x.note):""}</div>`;
-  if(!ss.length&&!rn.length)return`<div class="mu">Ninguna</div>`;if(rn.length<2)return ss.map(line).join("");
-  return`<div class="row sp"><b>⏱ Total: ${H(gm(g.id))}</b><span class="mu">${rn.length} partidas</span></div>`+[...rn].reverse().map(r=>`<div style="margin:12px 0 4px"><b>Partida ${r.n}${r.unk?" · fecha desconocida":r.end?" · completada el "+fdA(g,r.end):" · en curso"}</b><span class="mu"> · ${H(r.min)}</span></div>${[...r.ss].reverse().map(line).join("")||(r.unk?"":`<div class="mu" style="margin:2px 0">Sin sesiones registradas</div>`)}`).join("")})()}</div>
+ <h2>Sesiones (${ss.length})</h2><div class="card">${(()=>{const rn=runsOf(g),dsn=ss.filter(x=>x.gameId!==id),own=ss.filter(x=>x.gameId===id),dtot=`<div class="row sp"><b>⏱ Total: ${H(gm(g.id))}</b><span class="mu">incluye ${H(dsn.reduce((a,x)=>a+x.min,0))} de demo</span></div>`,line=x=>`<div class="mu" style="margin:2px 0">${x.gameId!==id?"🧪 Demo · ":""}${comps(g).includes(x.date)?"⭐ ":""}${fdA(g,x.date)} - ${fm(x.min)}${x.note?" - "+e(x.note):""}</div>`;
+  if(!ss.length&&!rn.length)return`<div class="mu">Ninguna</div>`;if(rn.length<2)return(dsn.length?dtot:"")+ss.map(line).join("");
+  return`<div class="row sp"><b>⏱ Total: ${H(gm(g.id))}</b><span class="mu">${rn.length} partidas${dsn.length?" · incluye "+H(dsn.reduce((a,x)=>a+x.min,0))+" de demo":""}</span></div>`+[...rn].reverse().map(r=>`<div style="margin:12px 0 4px"><b>Partida ${r.n}${r.unk?" · fecha desconocida":r.end?(r.k==="drop"?" · abandonada el "+fd(r.end):" · completada el "+fdA(g,r.end)):" · en curso"}</b><span class="mu"> · ${H(r.min)}${r.ss.length?" · "+fd(r.ss[0].date)+(r.ss[r.ss.length-1].date!==r.ss[0].date?" → "+fd(r.ss[r.ss.length-1].date):""):""}</span></div>${[...r.ss].reverse().map(line).join("")||(r.unk?"":`<div class="mu" style="margin:2px 0">Sin sesiones registradas</div>`)}`).join("")+(dsn.length?`<div style="margin:12px 0 4px"><b>🧪 Demo</b><span class="mu"> · ${H(dsn.reduce((a,x)=>a+x.min,0))}</span></div>${dsn.map(line).join("")}`:"")})()}</div>
  <button class="dng" style="margin-top:16px" onclick="delGame('${id}')">Eliminar juego</button>`)}
 function editGame(id){const g=G(id);sheet(`<div class="row sp"><h1>Editar juego</h1><button onclick="openGame('${id}')" aria-label="Volver">✕</button></div>
  <div class="row" style="flex-wrap:wrap;margin-top:8px"><button onclick="addToList('${id}')">📋 Listas</button><button onclick="setCover('${id}')">🖼 Portada</button></div>
@@ -547,7 +549,7 @@ async function getBanner(id){const g=G(id);if(!g||g.banner||g.bannerTried)return
  try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>x.background_image&&nz(x.name)===nz(g.title));
  if(m){g.banner=m.background_image;save();if(window._og===id)openGame(id)}}catch(_){}}
 function imp(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.games)||!Array.isArray(d.sessions))throw 0;if(!confirm("Se reemplazarán tus datos actuales por los del archivo ("+d.games.length+" juegos, "+d.sessions.length+" sesiones). ¿Continuar?"))return;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);save();R()}catch(x){alert("El archivo no es un JSON válido de Playlog.")}};rd.readAsText(f);inp.value=""}
-function replay(id){const g=G(id);g.again=false;g.run=(g.run||1)+1;g.rs=today();g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
+function replay(id){const g=G(id);if(g.status!=="done"){const rs=runsOf(g),l=rs[rs.length-1];if(l&&!l.end&&!l.unk&&l.ss.length){g.ends=g.ends||[];g.ends.push({d:lastS(g)||today(),k:"drop"})}}g.again=false;g.run=(g.run||1)+1;g.rs=today();g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
 function setCover(id){const u=prompt("Pega el enlace (URL) de la imagen de portada:");if(u&&/^https?:\/\//.test(u.trim())){G(id).cover=u.trim();save();openGame(id);R()}}
 function setStatus(id,v){const g=G(id),was=g.status;if(v==="done"&&was!=="done")return doneDialog(id);g.status=v;if(v==="playing")g.playAt=Date.now();save();openGame(id);R()}
 function rate(id){const r=G(id).rating||{};sheet(`<h1>Valoración (opcional)</h1><label>Fecha de finalización</label><input type="date" id="rd" value="${G(id).doneDate||r.date||lastS(G(id))||today()}">
@@ -697,7 +699,7 @@ async function shareRecap(){const d=window._rd;if(!d)return;const load=u=>new Pr
 // Partidas: cada vez que completas un juego es una partida; las sesiones se reparten por fecha (hasta cada finalización).
 // Etiqueta de partida para una sesión (solo si el juego tiene 2 o más partidas)
 function runTag(x){const g=G(x.gameId);if(!g)return"";const rn=runsOf(g);if(rn.length<2)return"";const r=rn.find(q=>q.ss.some(y=>y.id===x.id));return r?` · <span class="chip" style="margin:0">🔁 <span>Partida</span> ${r.n}${r.end?"":" · <span>en curso</span>"}</span>`:""}
-function runsOf(g){const u=(g.unk||[]).map((x,i)=>({n:i+1,end:null,unk:1,ss:[],min:x.min||0})),c=[...comps(g)].sort(),ss=S.sessions.filter(x=>x.gameId===g.id).sort((a,b)=>a.date.localeCompare(b.date)),Rn=[...u,...c.map((d,i)=>({n:u.length+i+1,end:d,ss:[],min:0}))];let cur=null;
+function runsOf(g){const u=(g.unk||[]).map((x,i)=>({n:i+1,end:null,unk:1,ss:[],min:x.min||0})),c=[...comps(g)].sort(),ss=S.sessions.filter(x=>x.gameId===g.id).sort((a,b)=>a.date.localeCompare(b.date)),Rn=[...u,...[...c.map(d=>({d,k:"done"})),...(g.ends||[])].sort((a,b)=>a.d.localeCompare(b.d)).map((o,i)=>({n:u.length+i+1,end:o.d,k:o.k,ss:[],min:0}))];let cur=null;
  ss.forEach(x=>{let r=Rn.find(q=>x.date<=q.end);if(!r&&Rn.length&&!(g.rs?x.date>=g.rs:(g.run||1)>Rn.length))r=Rn[Rn.length-1];if(!r){cur=cur||{n:Rn.length+1,end:null,ss:[],min:0};r=cur}r.ss.push(x);r.min+=x.min});return cur?[...Rn,cur]:Rn}
 // ===== Demos: ficha propia (estado "Demos"), enlazada al juego completo; suma horas pero no cuenta como completado =====
 function demosSec(g){if(g.status==="demo")return"";const a=S.games.filter(x=>x.status==="demo"&&x.parent===g.id);
@@ -798,10 +800,10 @@ function pieSheet(kind){const p=window._pie&&window._pie[kind];if(!p)return;cons
  sheet(`<div class="row sp"><h1>${p.t}</h1><button onclick="closeSheet()">✕</button></div><div style="display:flex;justify-content:center;margin:16px 0"><div class="pie" style="width:190px;height:190px;background:conic-gradient(${p.g});cursor:pointer" onclick="pieClick(event,'${kind}')"></div></div>${p.e.map(([k,v],i)=>`<div class="card row sp" style="cursor:pointer" onclick="pieShow('${kind}',${i})"><span class="row"><i style="width:10px;height:10px;border-radius:50%;background:${PC[i]};flex:none"></i>${e(k)}</span><span class="mu">${Math.round(v/sum*100)}% · ${kind==="fmt"?v+" juegos":H(v)}</span></div>`).join("")}<div class="mu">Toca el gráfico o una fila para ver los juegos.</div>`)}
 let RK={kind:"best",gen:"",all:0};
 const RKA=()=>S.prefs&&S.prefs.rkAll?1:0;
-function rkMin(g,all){if(all)return gm(g.id);const yr=String(new Date().getFullYear());return S.sessions.filter(x=>x.gameId===g.id&&x.date.startsWith(yr)).reduce((n,x)=>n+x.min,0)}
-function mYr(id,all){const yr=String(new Date().getFullYear());return S.sessions.filter(x=>x.gameId===id&&(all||x.date.startsWith(yr))).reduce((a,x)=>a+x.min,0)+(all?unkMin(id):0)}
+function rkMin(g,all){if(all)return gm(g.id);const yr=String(new Date().getFullYear());return S.sessions.filter(x=>inG(x,g.id)&&x.date.startsWith(yr)).reduce((n,x)=>n+x.min,0)}
+function mYr(id,all){const yr=String(new Date().getFullYear());return S.sessions.filter(x=>inG(x,id)&&(all||x.date.startsWith(yr))).reduce((a,x)=>a+x.min,0)+(all?unkMin(id):0)}
 function rankList(kind,gen,all){const yr=String(new Date().getFullYear()),inYr=g=>{const c=comps(g);return c.length?c.some(d=>d.startsWith(yr)):(g.doneDate||g.rating?.date||"").startsWith(yr)};
- let a=S.games.filter(g=>g.status!=="wish");a=kind==="best"?a.filter(g=>g.rating?.score&&(all||inYr(g))):a.filter(g=>mYr(g.id,all)>0);
+ let a=S.games.filter(g=>g.status!=="wish"&&g.status!=="demo");a=kind==="best"?a.filter(g=>g.rating?.score&&(all||inYr(g))):a.filter(g=>mYr(g.id,all)>0);
  if(gen)a=a.filter(g=>(g.genre||"").split(",").map(z=>z.trim()).includes(gen));
  return kind==="best"?a.sort((x,y)=>y.rating.score-x.rating.score||gm(y.id)-gm(x.id)):a.sort((x,y)=>mYr(y.id,all)-mYr(x.id,all))}
 function rankSheet(kind,keep){if(!keep)RK={kind,gen:"",all:RKA()};const base=rankList(RK.kind,"",RK.all),gens=[...new Set(base.flatMap(g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean)))].sort(),l=rankList(RK.kind,RK.gen,RK.all).slice(0,30),b=RK.kind==="best";
@@ -1801,6 +1803,13 @@ const EN_DICT={/*EN-START*/
 "Tu nota (1-10, opcional)":"Your rating (1-10, optional)",
 "Partida":"Playthrough",
 "en curso":"in progress",
+"incluye {} de demo":"includes {} from the demo",
+"{} partidas · incluye {} de demo":"{} playthroughs · includes {} from the demo",
+"🧪 Demo · ":"🧪 Demo · ",
+"Partida {} · abandonada el {}":"Playthrough {} · dropped on {}",
+"Aquí van los juegos que ya te pasaste (o abandonaste) y quieres volver a jugar desde el principio.":"Games you've beaten (or dropped) and want to play again from the start go here.",
+"Tus juegos completados o abandonados, del más reciente al más antiguo. Toca uno para añadirlo o quitarlo.":"Your completed or dropped games, newest first. Tap one to add or remove it.",
+"Aún no tienes juegos completados ni abandonados.":"You don't have any completed or dropped games yet.",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
