@@ -502,7 +502,21 @@ function agDet(b){const sh=b.screens||[],sm=b.simG||[];
 async function agLoad(b){if(b._det||!b.id||b.dev===undefined)return;
  try{const r=await fetch("/.netlify/functions/igdb?id="+b.id);if(!r.ok)throw 0;const d=await r.json();b.screens=d.screens||[];b.simG=d.simG||[];b.dlcs=d.dlcs||[]}catch(_){b.screens=b.screens||[];b.simG=b.simG||[];b.dlcs=b.dlcs||[]}
  b._det=1;const el=$("#ag-det");if(el&&window._agB===b)el.innerHTML=agDet(b)}
-function trackPick(i,st){if(!["done","backlog","playing","drop"].includes(st))return trackGame(i,st,"Digital");const b=CR[i];if(!b)return;
+// Aviso si el juego ya está en la biblioteca: permite rejugarlo (nueva partida) en vez de duplicarlo
+function dupFind(b){const k=nrm(b.title);return S.games.find(g=>!g.demo&&((b.id&&g.igdb&&g.igdb===b.id)||nrm(g.title)===k))||null}
+function dupSheet(i,st,ex){const n=comps(ex).length+(ex.unk||[]).length+1,fin=ex.status==="done"||ex.status==="drop",lab=ST[ex.status]||"";
+ let opt="";
+ if(fin){
+  if(st==="done")opt=`<button class="pri" style="width:100%;padding:14px" onclick="doneDialog('${ex.id}',1)">🏁 Sí, es otra partida completada (Partida ${n})</button>`;
+  else if(st==="playing")opt=`<button class="pri" style="width:100%;padding:14px" onclick="replay('${ex.id}')">🔁 Sí, lo rejuego (empieza la Partida ${n})</button>`;
+  else if(st==="backlog"||st==="wish")opt=`<button class="pri" style="width:100%;padding:14px" onclick="dupAgain('${ex.id}')">🔁 Añadir a «Para rejugar»</button>`}
+ else opt=`<button class="pri" style="width:100%;padding:14px" onclick="openGame('${ex.id}')">Abrir su ficha</button>`;
+ sheet(`<div class="row sp"><h1>Ya lo tienes</h1><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="card row" style="margin-top:8px">${th(ex,44,58)}<div style="min-width:0"><b>${e(ex.title)}</b><div class="mu">En ${e(lab)}${gm(ex.id)?" · ⏱ "+H(gm(ex.id)):""}</div></div></div>
+ <div class="mu" style="margin:10px 0">${fin?"¿Quieres rejugarlo? Se añadirá como una nueva partida en su misma ficha, con sus propias sesiones, y las horas se sumarán.":"Ya está en tu biblioteca. Evita duplicarlo abriendo su ficha."}</div>
+ <div style="display:grid;gap:8px">${opt}<button style="width:100%;padding:14px" onclick="window._dupOK=1;trackPick(${i},'${st}')">➕ Añadir como juego aparte</button><button style="width:100%" onclick="closeSheet()">Cancelar</button></div>`)}
+function dupAgain(id){const g=G(id);if(!g)return;g.again=true;save();openGame(id);R()}
+function trackPick(i,st){const ok=window._dupOK;window._dupOK=0;if(!ok){const b0=CR[i],ex=b0&&dupFind(b0);if(ex)return dupSheet(i,st,ex)}
+ if(!["done","backlog","playing","drop"].includes(st))return trackGame(i,st,"Digital");const b=CR[i];if(!b)return;
  const pf=pl(b),def=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
  sheet(`<div class="row sp"><button onclick="addSheet(${i})">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><h1 style="text-align:center;margin-top:20px">${e(b.title)}</h1><div class="mu" style="text-align:center;margin-top:6px">Un último paso para añadirlo</div>
  <label>¿En qué consola o plataforma lo juegas?</label><select id="tp">${platOpts(pf,def)}</select>
@@ -524,6 +538,7 @@ function trackGame(i,st,fmt){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),
  if(st==="done"){const r=$("#tnp")?readDone("tn"):{pr:"e",d:today(),min:0};if(!r)return;applyDone(g,r,"Tiempo total al completar")}
  S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
+ if(i<0&&!window._dupOK){const ex=dupFind({title:t});if(ex&&!confirm("Ya tienes «"+ex.title+"» en "+(ST[ex.status]||"tu biblioteca")+". Si lo has vuelto a jugar, añade otra partida desde su ficha (Rejugar). ¿Crear igualmente una ficha nueva?"))return}window._dupOK=0;
  const st=$("#gs").value,id=uid(),p=$("#gp").value,vs=b.versions||[],k=$("#gv")?+$("#gv").value:0,v=vs[k]||{},cu=$("#gcv")&&$("#gcv").value.trim().startsWith("http")?$("#gcv").value.trim():"";
  const g={id,title:t,platform:p,platforms:b.platforms||[],genre:[...window._gs].join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:v.cover||b.cover||cu,released:v.released||b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||(i<0?readTtb():null),run:1,challenge:($("#gc").value||"").trim().slice(0,40),versions:vs,version:k,playAt:st==="playing"?Date.now():0,completions:[]};
  g.demo=!!$("#gdm")?.checked;
@@ -1879,6 +1894,15 @@ const EN_DICT={/*EN-START*/
 "Añade cada sesión con su fecha y duración para que aparezcan en el Diario.":"Add each session with its date and duration so they show up in the Diary.",
 "＋ Añadir sesión":"＋ Add session",
 "Horas jugadas en total (opcional)":"Total hours played (optional)",
+"Ya lo tienes":"You already have it",
+"¿Quieres rejugarlo? Se añadirá como una nueva partida en su misma ficha, con sus propias sesiones, y las horas se sumarán.":"Want to replay it? It will be added as a new playthrough on the same page, with its own sessions, and the hours will be added up.",
+"Ya está en tu biblioteca. Evita duplicarlo abriendo su ficha.":"It's already in your library. Avoid duplicating it by opening its page.",
+"🏁 Sí, es otra partida completada (Partida {})":"🏁 Yes, it's another completed playthrough (Playthrough {})",
+"🔁 Sí, lo rejuego (empieza la Partida {})":"🔁 Yes, I'm replaying it (starts Playthrough {})",
+"🔁 Añadir a «Para rejugar»":"🔁 Add to \"To replay\"",
+"Abrir su ficha":"Open its page",
+"➕ Añadir como juego aparte":"➕ Add as a separate game",
+"En {}":"In {}",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
