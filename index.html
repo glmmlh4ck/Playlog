@@ -16,6 +16,11 @@ h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--mu);
 .bar{height:8px;background:var(--s2);border-radius:99px;overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acd),var(--ac2));box-shadow:0 0 12px rgba(var(--acr),.6)}
 button,input,select,textarea{font:inherit;color:var(--tx);background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;min-height:46px;width:100%;outline:0}
+input[type=checkbox]{-webkit-appearance:none;appearance:none;width:24px;height:24px;min-height:0;min-width:24px;padding:0;margin:0;border-radius:7px;border:2px solid var(--mu);background:transparent;display:inline-grid;place-items:center;flex:none;cursor:pointer;transition:background .15s,border-color .15s}
+input[type=checkbox]::after{content:"";width:6px;height:11px;border:solid var(--onac,#fff);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) scale(0);margin-top:-2px;transition:transform .15s}
+input[type=checkbox]:checked{background:var(--ac);border-color:var(--ac)}
+input[type=checkbox]:checked::after{transform:rotate(45deg) scale(1)}
+input[type=checkbox]:focus-visible{box-shadow:0 0 0 3px rgba(var(--acr),.35)}
 input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(var(--acr),.24)}
 button{cursor:pointer;width:auto;font-weight:500;transition:transform .12s,background .2s}button:active{transform:scale(.97)}
 .pri{background:linear-gradient(135deg,var(--acd),var(--acl));border:0;font-weight:600;box-shadow:0 4px 14px rgba(var(--acr),.4)}.dng{color:var(--er)}
