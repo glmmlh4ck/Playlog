@@ -476,12 +476,12 @@ function manualSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.
  ${i>=0?`<div class="row">${th({cover:b.cover},56,74)}<b>${e(b.title)}</b></div>`:`<label>Título</label><input id="gt" autocapitalize="words"><label>Portada (enlace a una imagen, opcional)</label><input id="gcv" placeholder="https://…" inputmode="url">${ttbInputs(null)}`}
  
  <label class="row" style="color:var(--tx);font-size:15px;margin:6px 0 10px"><input type="checkbox" id="gdm" style="width:24px;min-height:24px"><span>🧪 Es una demo</span></label>
- <label>¿Dónde lo añadimos?</label><select id="gs" onchange="$('#gd').style.display=this.value==='done'?'block':'none'">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
+ <label>¿Dónde lo añadimos?</label><select id="gs" onchange="$('#gd').style.display=this.value==='done'?'block':'none';$('#gdr').style.display=this.value==='drop'?'block':'none'">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===lib.st?"selected":""}>${v}</option>`).join("")}</select>
  <label>Plataforma</label><select id="gp">${platOpts(pl(b),"")}</select>
  <label>Formato</label><select id="gf"><option>Digital</option><option>Físico</option></select>
  <label>Géneros</label>${gchips(b.genres||[])}
  <label>Reto o modo (opcional)</label><input id="gc" list="chl" placeholder="Nuzlocke, Randomizer…"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
- <div id="gd" style="display:${lib.st==="done"?"block":"none"}">${doneFields("gn","",1)}</div>
+ <div id="gd" style="display:${lib.st==="done"?"block":"none"}">${doneFields("gn","",1)}</div><div id="gdr" style="display:${lib.st==="drop"?"block":"none"}">${doneFields("gr","",0,1)}${dropFields("gr")}</div>
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveGame(${i})">Guardar</button>`)}
 function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math.round(x*60)):"—",
  mine=S.games.filter(g=>g.title.toLowerCase()===b.title.toLowerCase()&&g.rating?.score),ps=mine.length?(mine.reduce((n,g)=>n+g.rating.score,0)/mine.length).toFixed(1).replace(/\.0$/,""):"—",
@@ -501,11 +501,11 @@ function agDet(b){const sh=b.screens||[],sm=b.simG||[];
 async function agLoad(b){if(b._det||!b.id||b.dev===undefined)return;
  try{const r=await fetch("/.netlify/functions/igdb?id="+b.id);if(!r.ok)throw 0;const d=await r.json();b.screens=d.screens||[];b.simG=d.simG||[];b.dlcs=d.dlcs||[]}catch(_){b.screens=b.screens||[];b.simG=b.simG||[];b.dlcs=b.dlcs||[]}
  b._det=1;const el=$("#ag-det");if(el&&window._agB===b)el.innerHTML=agDet(b)}
-function trackPick(i,st){if(!["done","backlog","playing"].includes(st))return trackGame(i,st,"Digital");const b=CR[i];if(!b)return;
+function trackPick(i,st){if(!["done","backlog","playing","drop"].includes(st))return trackGame(i,st,"Digital");const b=CR[i];if(!b)return;
  const pf=pl(b),def=pf.includes(S.pref)?S.pref:(pf[0]||S.pref||"");
  sheet(`<div class="row sp"><button onclick="addSheet(${i})">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><h1 style="text-align:center;margin-top:20px">${e(b.title)}</h1><div class="mu" style="text-align:center;margin-top:6px">Un último paso para añadirlo</div>
  <label>¿En qué consola o plataforma lo juegas?</label><select id="tp">${platOpts(pf,def)}</select>
- ${st==="done"||st==="playing"?`<label class="row" style="color:var(--tx);font-size:15px;margin:14px 0 4px"><input type="checkbox" id="tdm" style="width:24px;min-height:24px" onchange="$('#tdmh').style.display=this.checked?'block':'none'"><span>🧪 Es una demo</span></label><div class="mu" id="tdmh" style="display:none;margin-bottom:6px">Contará horas, pero no como juego completado.</div>`:""}${st==="done"?doneFields("tn","",1):""}<label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
+ ${st==="done"||st==="playing"?`<label class="row" style="color:var(--tx);font-size:15px;margin:14px 0 4px"><input type="checkbox" id="tdm" style="width:24px;min-height:24px" onchange="$('#tdmh').style.display=this.checked?'block':'none'"><span>🧪 Es una demo</span></label><div class="mu" id="tdmh" style="display:none;margin-bottom:6px">Contará horas, pero no como juego completado.</div>`:""}${st==="done"?doneFields("tn","",1):""}${st==="drop"?doneFields("td","",0,1)+dropFields("td"):""}<label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`)}
 function agClamp(){const run=()=>{const el=$("#ag-sum"),m=$("#ag-more");if(el&&m&&!el.classList.contains("open"))m.style.display=el.scrollHeight>el.clientHeight+1?"block":"none"};requestAnimationFrame(run);setTimeout(run,300)}
 function agMore(){const el=$("#ag-sum"),m=$("#ag-more");m.textContent=el.classList.toggle("open")?"Ver menos":"Ver más"}
 function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender();}
@@ -519,12 +519,14 @@ async function simGo(k){const cur=window._agB,x=(cur?.simG||[])[k];if(!x)return;
 function trackGame(i,st,fmt){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),p=$("#tp")?$("#tp").value:(pf.includes(S.pref)?S.pref:(pf[0]||S.pref||""));
  const g={id,igdb:b.id||0,dlcs:(b.dlcs||[]).map(x=>({id:x.id,name:x.name,kind:x.kind,released:x.released,st:""})),title:b.title,platform:p,platforms:pf,genre:(b.genres||[]).join(", "),format:fmt||"Digital",status:st,notes:"",goals:[],rating:null,cover:b.cover||"",released:b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||null,dev:b.dev||"",critic:b.critic??null,run:1,challenge:"",versions:[],version:0,playAt:st==="playing"?Date.now():0,completions:[]};
  g.demo=!!$("#tdm")?.checked;
+ if(st==="drop"&&$("#tdp")){const r=readDone("td");if(!r)return;applyDrop(g,r,"td")}
  if(st==="done"){const r=$("#tnp")?readDone("tn"):{pr:"e",d:today(),min:0};if(!r)return;applyDone(g,r,"Tiempo total al completar")}
  S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
  const st=$("#gs").value,id=uid(),p=$("#gp").value,vs=b.versions||[],k=$("#gv")?+$("#gv").value:0,v=vs[k]||{},cu=$("#gcv")&&$("#gcv").value.trim().startsWith("http")?$("#gcv").value.trim():"";
  const g={id,title:t,platform:p,platforms:b.platforms||[],genre:[...window._gs].join(", "),format:$("#gf").value,status:st,notes:"",goals:[],rating:null,cover:v.cover||b.cover||cu,released:v.released||b.released||"",summary:b.summary||"",tags:b.tags||[],similar:b.similar||[],ttb:b.ttb||(i<0?readTtb():null),run:1,challenge:($("#gc").value||"").trim().slice(0,40),versions:vs,version:k,playAt:st==="playing"?Date.now():0,completions:[]};
  g.demo=!!$("#gdm")?.checked;
+ if(st==="drop"){const r=readDone("gr");if(!r)return;applyDrop(g,r,"gr")}
  if(st==="done"){const r=readDone("gn");if(!r)return;applyDone(g,r,"Tiempo total al completar")}
  S.games.push(g);if(p)S.pref=p;save();closeSheet();R();getBanner(id)}
 function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);const gl=g.goals,dn=gl.filter(x=>x.done).length,t=g.ttb||{},hl=t.src==="hltb",
@@ -532,6 +534,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  d3=(hl?[["main","Main story"],["extra","Main + extras"],["full","Completionist"]]:[["fast","Main story"],["main","Main + extras"],["full","Completionist"]]).map(([k,l])=>`<div><b>${t[k]?H(Math.round(t[k]*60)):"—"}</b><span>${l}</span></div>`).join("");
  sheet(`<div class="row sp"><button onclick="editGame('${id}')">✏️ Editar</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
  <div class="ag-top" style="margin-top:14px"><div class="ag-cv" style="width:96px">${g.cover?`<img ${oi(g.cover,300)} alt="" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}</div><div class="ag-info"><h1>${e(g.title)}</h1><div class="mu">${e([g.platform,g.genre].filter(Boolean).join(" · "))}${g.platform||g.genre?" · ":""}⏱ ${H(gm(id))}${g.run>1?" · Partida "+g.run:""}</div>${g.challenge?`<div><span class="tag">🎯 ${e(g.challenge)}</span></div>`:""}</div></div>
+ ${g.status==="drop"&&(g.dropAt||g.dropWhy)?`<div class="card" style="margin-top:10px">🛑 <b>Abandonado${g.dropAt?" el "+fdP(g.dropAt,g.dropA):""}</b>${g.dropWhy?`<div class="mu" style="margin-top:4px">Motivo: ${e(g.dropWhy)}</div>`:""}</div>`:""}
  <h2>Estado</h2><div class="ag-trk">${[["done","Completed"],["playing","Playing"],["backlog","To-Play"],["wish","Wishlist"],["drop","Dropped"]].map(([k,l])=>`<button class="${g.status===k?"on":""}" ${g.status===k?"":`onclick="setStatus('${id}','${k}')"`}>${l}</button>`).join("")}</div>
  ${g.demo?demoHead(g):""}
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fd(rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
@@ -561,7 +564,7 @@ async function getBanner(id){const g=G(id);if(!g||g.banner||g.bannerTried)return
  try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>x.background_image&&nz(x.name)===nz(g.title));
  if(m){g.banner=m.background_image;save();if(window._og===id)openGame(id)}}catch(_){}}
 function imp(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.games)||!Array.isArray(d.sessions))throw 0;if(!confirm("Se reemplazarán tus datos actuales por los del archivo ("+d.games.length+" juegos, "+d.sessions.length+" sesiones). ¿Continuar?"))return;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);save();R()}catch(x){alert("El archivo no es un JSON válido de Playlog.")}};rd.readAsText(f);inp.value=""}
-function replay(id){const g=G(id);if(g.status!=="done"){const rs=runsOf(g),l=rs[rs.length-1];if(l&&!l.end&&!l.unk&&l.ss.length){g.ends=g.ends||[];g.ends.push({d:lastS(g)||today(),k:"drop"})}}g.again=false;g.run=(g.run||1)+1;g.rs=today();g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
+function replay(id){const g=G(id);g.dropAt="";g.dropWhy="";if(g.status!=="done"){const rs=runsOf(g),l=rs[rs.length-1];if(l&&!l.end&&!l.unk&&l.ss.length){g.ends=g.ends||[];g.ends.push({d:lastS(g)||today(),k:"drop"})}}g.again=false;g.run=(g.run||1)+1;g.rs=today();g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
 function setCover(id){const u=prompt("Pega el enlace (URL) de la imagen de portada:");if(u&&/^https?:\/\//.test(u.trim())){G(id).cover=u.trim();save();openGame(id);R()}}
 function setStatus(id,v){const g=G(id),was=g.status;if(v==="done"&&was!=="done"&&!g.demo)return doneDialog(id);g.status=v;if(v==="done"&&g.demo&&!g.doneDate)g.doneDate=lastS(g)||today();if(v==="playing")g.playAt=Date.now();save();openGame(id);R()}
 function rate(id){const r=G(id).rating||{};sheet(`<h1>Valoración (opcional)</h1><label>Fecha de finalización</label><input type="date" id="rd" value="${G(id).doneDate||r.date||lastS(G(id))||today()}">
@@ -731,9 +734,14 @@ function demoSave(id){const g=G(id);if(!g)return;const t=($("#dmn").value||"").t
  if(p)S.pref=p;save();openGame(id);R()}
 function compSec(g){if(g.demo)return"";const c=comps(g);if(g.status!=="done"&&!c.length&&!(g.unk||[]).length)return"";return`<h2>🏁 Veces completado: ${c.length+(g.unk||[]).length}</h2>${(g.unk||[]).map((u,i)=>`<span class="tag">Fecha desconocida${u.min?" · "+fm(u.min):""} <b style="cursor:pointer;color:var(--er)" onclick="delUnk('${g.id}',${i})">✕</b></span>`).join("")}${c.map((d,i)=>`<span class="tag">${fdA(g,d)} <b style="cursor:pointer;color:var(--er)" onclick="delComp('${g.id}',${i})">✕</b></span>`).join("")}<div style="margin-top:8px"><button onclick="doneDialog('${g.id}',1)">＋ Añadir otra partida completada</button></div>`}
 // Campos para indicar cuándo y cuánto: solo aparecen al marcar un juego como completado
-function doneFields(k,d0,rate){const t=today();return`<label>¿Cuánto recuerdas de la fecha de finalización?</label><select id="${k}p" onchange="dnPrec('${k}')"><option value="e">Fecha exacta</option><option value="m">Solo mes y año</option><option value="y">Solo el año</option><option value="u">No la recuerdo</option></select>
+function doneFields(k,d0,rate,drop){const t=today();return`<label>${drop?"¿Cuánto recuerdas de la fecha en que lo dejaste?":"¿Cuánto recuerdas de la fecha de finalización?"}</label><select id="${k}p" onchange="dnPrec('${k}')"><option value="e">Fecha exacta</option><option value="m">Solo mes y año</option><option value="y">Solo el año</option><option value="u">No la recuerdo</option></select>
  <input type="date" id="${k}n" value="${d0||t}" max="${t}" style="margin-top:8px"><input type="month" id="${k}m" max="${t.slice(0,7)}" style="display:none;margin-top:8px"><input type="number" id="${k}y" min="1970" max="${t.slice(0,4)}" placeholder="Año" inputmode="numeric" style="display:none;margin-top:8px">
  <label>Horas jugadas (opcional)</label><input type="number" id="${k}h" min="0" max="5000" step="0.5" inputmode="decimal" placeholder="Ej: 40">${rate?`<label>Tu nota (1-10, opcional)</label><input type="number" id="${k}s" min="1" max="10" step="1" inputmode="numeric" placeholder="Ej: 8">`:""}`}
+const DROPW=["Me aburrió","Muy difícil","Falta de tiempo","Fallos o mal rendimiento","No me gustó la historia","Se me hizo repetitivo","No me enganchó","Otro motivo"];
+function dropFields(k){return`<label>Motivo del abandono (opcional)</label><select id="${k}w"><option value="">— Sin indicar —</option>${DROPW.map(x=>`<option>${x}</option>`).join("")}</select><input id="${k}x" maxlength="120" placeholder="Detalles (opcional)" style="margin-top:8px">`}
+function applyDrop(g,r,k,note){g.dropAt=r.pr==="u"?"":r.d;if(r.pr==="m"||r.pr==="y")g.dropA=r.pr;const w=($("#"+k+"w")?.value||"").trim(),x=($("#"+k+"x")?.value||"").trim().slice(0,120);g.dropWhy=w&&x?w+": "+x:w||x;
+ if(r.min>0)S.sessions.push({id:uid(),gameId:g.id,date:r.d||today(),platform:g.platform||"",min:r.min,note:note||"Tiempo total al abandonar",run:1})}
+const fdP=(d,a)=>!d?"":a==="y"?d.slice(0,4):a==="m"?d.slice(5,7)+"/"+d.slice(0,4):fd(d);
 function dnPrec(k){const v=$("#"+k+"p").value;$("#"+k+"n").style.display=v==="e"?"":"none";$("#"+k+"m").style.display=v==="m"?"":"none";$("#"+k+"y").style.display=v==="y"?"":"none"}
 function readDone(k){const pr=$("#"+k+"p").value,h=parseFloat($("#"+k+"h").value),min=h>0&&h<=5000?Math.round(h*60):0;let d="";
  if(pr==="e")d=$("#"+k+"n").value||today();
@@ -1834,6 +1842,20 @@ const EN_DICT={/*EN-START*/
 "🧪 Es una demo":"🧪 It's a demo",
 "Contará horas, pero no como juego completado.":"It will count hours, but not as a completed game.",
 "Una demo no cuenta como completada: se quitarán las fechas de finalización de esta ficha. ¿Seguir?":"A demo doesn't count as completed: this entry's completion dates will be removed. Continue?",
+"¿Cuánto recuerdas de la fecha en que lo dejaste?":"How much of the date you dropped it do you remember?",
+"Motivo del abandono (opcional)":"Reason for dropping (optional)",
+"— Sin indicar —":"— Not specified —",
+"Detalles (opcional)":"Details (optional)",
+"Me aburrió":"It bored me",
+"Muy difícil":"Too difficult",
+"Falta de tiempo":"Lack of time",
+"Fallos o mal rendimiento":"Bugs or poor performance",
+"No me gustó la historia":"I didn't like the story",
+"Se me hizo repetitivo":"It got repetitive",
+"No me enganchó":"It didn't hook me",
+"Otro motivo":"Other reason",
+"Abandonado el {}":"Dropped on {}",
+"Motivo: {}":"Reason: {}",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
