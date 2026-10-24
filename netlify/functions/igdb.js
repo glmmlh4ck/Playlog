@@ -233,14 +233,18 @@ exports.handler = async (event) => {
   recent.push(now); hits.set(ip, recent);
   if (hits.size > 2000) hits.clear();
 
-  const ck = "v8:" + q.toLowerCase(), c = cache.get(ck);
+  const ck = "v9:" + q.toLowerCase(), c = cache.get(ck);
   if (c && now - c.t < 864e5) return out(200, c.b);
 
   try {
     const pool = new Map();
-    const page = off => igdb("games", `search "${q}"; fields ${FIELDS}; limit 100; offset ${off};`);
+    const page2 = (t, off) => igdb("games", `search "${t}"; fields ${FIELDS}; limit 100; offset ${off};`), page = off => page2(q, off);
     (await page(0)).forEach(g => pool.set(g.id, g));
     (await Promise.all([100, 200].map(o => page(o).catch(() => [])))).flat().forEach(g => pool.set(g.id, g));
+    // Búsqueda por nombre exacto (con y sin acentos): rescata fangames y juegos poco conocidos que la búsqueda difusa deja fuera del top
+    const nd = v => v.normalize("NFD").replace(/[\u0300-\u036f]/g, ""), qv = [...new Set([q, nd(q)])];
+    if (qv.length > 1) { try { (await page2(qv[1], 0)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ } }
+    for (const v of qv) { try { (await igdb("games", `fields ${FIELDS}; where name ~ *"${v}"*; limit 50;`)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ } }
     // Nombres alternativos (títulos en español u otros idiomas), si IGDB los tiene registrados
     try { (await igdb("games", `fields ${FIELDS}; where alternative_names.name ~ *"${q}"*; limit 50;`)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ }
     // Descarta solo las "ediciones" de otro juego (p. ej. "X Deluxe Edition"); versiones con nombre propio (Let's Go Pikachu / Eevee) se mantienen
