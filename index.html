@@ -580,7 +580,7 @@ function moveComp(g,old,r){const AUTO=/^(Partida completada|Tiempo total al comp
  g.completions=[...new Set(c)].sort();g.doneDate=g.completions[g.completions.length-1]||""}
 function saveRate(id,skip){const g=G(id),r=readDone("rt");if(!r)return;const d=r.pr==="u"?"":r.d;
  if(skip){if(g.rating)g.rating={...g.rating,date:d}}else{let n=parseInt($("#rs").value);n=n>=1&&n<=10?n:null;g.rating={date:d,score:n,review:$("#rr").value.slice(0,2000)}}
- if(g.demo){g.doneDate=d}else moveComp(g,g.doneDate,r);
+ if(g.demo){const old=g.doneDate,sm=old?S.sessions.filter(x=>x.gameId===g.id&&x.date===old&&/^(Demo|Tiempo total al completar)$/.test(x.note||"")):[];if(old&&g.compA)delete g.compA[old];g.doneDate=d;if(d&&(r.pr==="m"||r.pr==="y")){g.compA=g.compA||{};g.compA[d]=r.pr}sm.forEach(x=>{if(d){x.date=d;if(r.pr==="e")delete x.ap;else x.ap=1}})}else moveComp(g,g.doneDate,r);
  save();openGame(id);R()}
 function goal(id,i){const x=G(id).goals[i];x.done=!x.done;x.at=x.done?today():"";save();openGame(id)}
 function delGoal(id,i){G(id).goals.splice(i,1);save();openGame(id)}
@@ -768,7 +768,7 @@ function readDone(k){const pr=$("#"+k+"p").value,h=parseFloat($("#"+k+"h")?.valu
  const sc=parseInt($("#"+k+"s")?.value);return{pr,d,min,score:sc>=1&&sc<=10?sc:null,ss:readSess(k)}}
 function applyDone(g,r,note){if(r.score)g.rating={date:r.pr==="u"?"":r.d,score:r.score,review:g.rating?.review||""};
  (r.ss||[]).forEach(x=>S.sessions.push({id:uid(),gameId:g.id,date:x.date,platform:g.platform||"",min:x.min,note:"",run:g.run||1}));
- if(g.demo){g.doneDate=r.pr==="u"?"":r.d;if(r.min>0)S.sessions.push({id:uid(),gameId:g.id,date:r.d||today(),platform:g.platform||"",min:r.min,...(r.pr==="m"||r.pr==="y"?{ap:1}:{}),note:"Demo",run:1});return}if(r.pr==="u"){g.unk=g.unk||[];g.unk.push({id:uid(),min:r.min});return}
+ if(g.demo){g.doneDate=r.pr==="u"?"":r.d;if(g.compA&&g.compA[g.doneDate])delete g.compA[g.doneDate];if(g.doneDate&&(r.pr==="m"||r.pr==="y")){g.compA=g.compA||{};g.compA[g.doneDate]=r.pr}if(r.min>0)S.sessions.push({id:uid(),gameId:g.id,date:r.d||today(),platform:g.platform||"",min:r.min,...(r.pr==="m"||r.pr==="y"?{ap:1}:{}),note:"Demo",run:1});return}if(r.pr==="u"){g.unk=g.unk||[];g.unk.push({id:uid(),min:r.min});return}
  const d=r.d;if(r.pr!=="e"){g.compA=g.compA||{};g.compA[d]=r.pr}else if(g.compA)delete g.compA[d];
  const c=comps(g);if(!c.includes(d))c.push(d);c.sort();g.doneDate=c[c.length-1];
  if(r.min>0)S.sessions.push({id:uid(),gameId:g.id,date:d,platform:g.platform||"",min:r.min,...(r.pr==="m"||r.pr==="y"?{ap:1}:{}),note:note||"Partida completada",run:c.indexOf(d)+1})}
