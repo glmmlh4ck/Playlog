@@ -537,7 +537,7 @@ function trackGame(i,st,fmt){const b=CR[i];if(!b)return;const id=uid(),pf=pl(b),
  g.demo=!!$("#tdm")?.checked;
  if(st==="drop"&&$("#tdp")){const r=readDone("td");if(!r)return;applyDrop(g,r,"td")}
  if(st==="done"){const r=$("#tnp")?readDone("tn"):{pr:"e",d:today(),min:0};if(!r)return;applyDone(g,r,"Tiempo total al completar")}
- S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id)}
+ S.games.push(g);if(p)S.pref=p;lib.st=st;save();closeSheet();R();getBanner(id);if(!g.demo)famSuggest(id)}
 function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().slice(0,120);if(!t)return alert("Escribe un título");
  if(i<0&&!window._dupOK){const ex=dupFind({title:t});if(ex&&!confirm("Ya tienes «"+ex.title+"» en "+(ST[ex.status]||"tu biblioteca")+". Si lo has vuelto a jugar, añade otra partida desde su ficha (Rejugar). ¿Crear igualmente una ficha nueva?"))return}window._dupOK=0;
  const st=$("#gs").value,id=uid(),p=$("#gp").value,vs=b.versions||[],k=$("#gv")?+$("#gv").value:0,v=vs[k]||{},cu=$("#gcv")&&$("#gcv").value.trim().startsWith("http")?$("#gcv").value.trim():"";
@@ -545,7 +545,7 @@ function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().
  g.demo=!!$("#gdm")?.checked;
  if(st==="drop"){const r=readDone("gr");if(!r)return;applyDrop(g,r,"gr")}
  if(st==="done"){const r=readDone("gn");if(!r)return;applyDone(g,r,"Tiempo total al completar")}
- S.games.push(g);if(p)S.pref=p;save();closeSheet();R();getBanner(id)}
+ S.games.push(g);if(p)S.pref=p;save();closeSheet();R();getBanner(id);if(!g.demo)famSuggest(id)}
 function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);const gl=g.goals,dn=gl.filter(x=>x.done).length,t=g.ttb||{},hl=t.src==="hltb",
  ss=S.sessions.filter(s=>inG(s,id)).sort((a,b)=>b.date.localeCompare(a.date)),rd=g.doneDate||g.rating?.date,
  d3=(hl?[["main","Main story"],["extra","Main + extras"],["full","Completionist"]]:[["fast","Main story"],["main","Main + extras"],["full","Completionist"]]).map(([k,l])=>`<div><b>${t[k]?H(Math.round(t[k]*60)):"—"}</b><span>${l}</span></div>`).join("");
@@ -558,6 +558,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ${g.status==="done"?`<button class="pri" style="margin-top:8px;width:100%" onclick="storyGame('${id}')">📤 Compartir tarjeta Story</button>`:""}
  ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}${g.status==="done"||g.status==="drop"?` <button style="margin-top:8px" onclick="togAgain('${id}')">${g.again?"✓ En «Para rejugar»":"➕ Para rejugar"}</button>`:""}
  ${compSec(g)}
+ ${famSec(g)}
  ${demosSec(g)}
  <h2>Duración</h2><div class="ag-dur">${d3}</div><div class="mu" style="margin-top:6px">${t.fast||t.main||t.extra||t.full?(hl?"Duración puesta por ti. ":"Estimación de IGDB. "):"Sin duración todavía. "}<a href="https://howlongtobeat.com/?q=${encodeURIComponent(g.title)}" target="_blank" rel="noopener" style="color:var(--ac2)">Ver en HowLongToBeat</a></div>
  <h2>Logros</h2><div class="card">${isPS(g)?`<label class="row" style="color:var(--tx);font-size:15px;margin:0 0 10px"><input type="checkbox" style="width:24px;min-height:24px" ${g.platinum?"checked":""} onchange="togPlat('${id}')">🏆 Platino conseguido${g.platinum&&g.platAt?" · "+fd(g.platAt):""}${g.platinum?` <button style="margin-left:auto;min-height:32px;padding:2px 10px" onclick="event.preventDefault();storyPlat('${id}')">📤</button>`:""}</label>`:""}${gl.length?`<div class="mu">🎖️ ${dn} de ${gl.length} logros conseguidos · Logros personalizados: no se verifican automáticamente.</div>`:`<div class="mu">Sin logros todavía.</div>`}
@@ -601,7 +602,7 @@ function saveRate(id,skip){const g=G(id),r=readDone("rt");if(!r)return;const d=r
 function goal(id,i){const x=G(id).goals[i];x.done=!x.done;x.at=x.done?today():"";save();openGame(id)}
 function delGoal(id,i){G(id).goals.splice(i,1);save();openGame(id)}
 function addGoal(id){const n=$("#ng").value.trim();if(n){G(id).goals.push({name:n.slice(0,100),done:false});save();openGame(id)}}
-function delGame(id){if(!confirm("¿Eliminar el juego y sus sesiones?"))return;S.games=S.games.filter(g=>g.id!==id);S.sessions=S.sessions.filter(s=>s.gameId!==id);save();closeSheet();R()}
+function delGame(id){if(!confirm("¿Eliminar el juego y sus sesiones?"))return;S.games.filter(g=>g.fam===id).forEach(g=>{delete g.fam});S.games=S.games.filter(g=>g.id!==id);S.sessions=S.sessions.filter(s=>s.gameId!==id);save();closeSheet();R()}
 // Cronómetro con marcas temporales persistidas
 const el=()=>{const t=S.timer;return t?t.acc+(t.run?Date.now()-t.start:0):0};
 function openPlus(){sheet(`<h1 style="text-align:center">¿Qué quieres hacer?</h1><div style="display:grid;gap:10px;margin-top:14px"><button class="pri" style="width:100%;padding:16px" onclick="closeSheet();go('lib');catSearch()">🎮 Añadir un juego a mi biblioteca</button><button style="width:100%;padding:16px" onclick="openLog()">📖 Registrar una sesión en el diario</button></div>`)}
@@ -863,19 +864,36 @@ function pieSheet(kind){const p=window._pie&&window._pie[kind];if(!p)return;cons
 let RK={kind:"best",gen:"",all:0};
 const RKA=()=>S.prefs&&S.prefs.rkAll?1:0;
 function rkMin(g,all){if(all)return gm(g.id);const yr=String(new Date().getFullYear());return S.sessions.filter(x=>inG(x,g.id)&&x.date.startsWith(yr)).reduce((n,x)=>n+x.min,0)}
+// Versiones: juegos enlazados (g.fam = id del juego principal). La Biblioteca los muestra separados; estadísticas y ficha los juntan.
+const famRoot=g=>{const r=g&&g.fam&&G(g.fam);return r&&!r.fam?r:g},famOf=g=>{const r=famRoot(g);return[r,...S.games.filter(x=>x.fam===r.id&&x.id!==r.id&&!x.demo)]},
+ mYrF=(g,all)=>famOf(g).reduce((a,x)=>a+mYr(x.id,all),0);
+const FAMW=/^(3d|hd|remaster(ed)?|definitive edition|edition|remake|collection|deluxe( edition)?|enhanced( edition)?|anniversary( edition)?|goty|game of the year( edition)?|complete( edition)?|classic|redux|reloaded|special edition|directors cut|future connected|switch|wii|wii u|nintendo switch|ultimate edition|legendary edition|trilogy)$/;
+function famCand(g){const a=nrm(g.title);if(!a||a.length<4)return[];return S.games.filter(x=>{if(x.id===g.id||x.demo||famRoot(x)===famRoot(g))return false;const b=nrm(x.title);if(!b)return false;if(a===b)return true;const[sh,lo]=a.length<b.length?[a,b]:[b,a];return sh.length>=6&&lo.startsWith(sh+" ")&&FAMW.test(lo.slice(sh.length+1))})}
+function famSuggest(id){const g=G(id);if(!g)return;const c=famCand(g);if(!c.length)return;const x=famRoot(c[0]);
+ sheet(`<div class="row sp"><h1>¿Otra versión del mismo juego?</h1><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="card row" style="margin-top:8px">${th(x,44,58)}<div style="min-width:0"><b>${e(x.title)}</b><div class="mu">${e(x.platform||"")}${gm(x.id)?" · ⏱ "+H(gm(x.id)):""}</div></div></div><div class="mu" style="margin:10px 0">Si «${e(g.title)}» es otra versión de este juego (otra consola, remaster…), puedes enlazarlas: en la Biblioteca siguen separadas, pero en las estadísticas se suman las horas y verás todas las partidas juntas.</div>
+ <div style="display:grid;gap:8px"><button class="pri" style="width:100%;padding:14px" onclick="famLink('${id}','${x.id}')">🔗 Sí, enlazar como versiones</button><button style="width:100%" onclick="closeSheet()">No, es un juego distinto</button></div>`)}
+function famLink(id,to){const g=G(id),t=G(to);if(!g||!t)return;const r=famRoot(t);if(r.id===g.id)return;S.games.forEach(x=>{if(x.fam===g.id)x.fam=r.id});g.fam=r.id;save();openGame(id);R()}
+function famUnlink(id){const g=G(id);if(!g)return;if(!g.fam){const m=S.games.filter(x=>x.fam===id);if(m.length){const h=m[0];m.slice(1).forEach(x=>x.fam=h.id);delete h.fam}}else delete g.fam;save();openGame(id);R()}
+function famPick(id,q){const g=G(id),ex=new Set(famOf(g).map(x=>x.id)),k=nrm(q||""),l=S.games.filter(x=>!x.demo&&!ex.has(x.id)&&!x.fam&&(!k||nrm(x.title).includes(k))).sort((a,b)=>a.title.localeCompare(b.title)).slice(0,40);
+ $("#famL").innerHTML=l.map(x=>`<div class="card row" style="cursor:pointer;margin:6px 0" onclick="famLink('${id}','${x.id}')">${th(x,36,48)}<div style="min-width:0"><b>${e(x.title)}</b><div class="mu">${e(x.platform||"")}</div></div></div>`).join("")||`<div class="mu">No hay juegos para enlazar.</div>`}
+function famSheet(id){sheet(`<div class="row sp"><h1>🔗 Vincular otra versión</h1><button onclick="openGame('${id}')" aria-label="Volver">✕</button></div><div class="mu" style="margin:6px 0">Elige el juego que es otra versión de «${e(G(id).title)}». Seguirán separados en la Biblioteca, pero las estadísticas los sumarán.</div><input id="famQ" placeholder="Buscar en tu biblioteca" oninput="famPick('${id}',this.value)"><div id="famL"></div>`);famPick(id,"")}
+function famSec(g){if(g.demo)return"";const m=famOf(g);
+ if(m.length<2)return`<h2>🔗 Versiones</h2><div class="card"><div class="mu">¿Jugaste este juego en otra consola o en una edición distinta? Enlázalos: en la Biblioteca siguen separados, pero en las estadísticas se suman sus horas.</div><button style="margin-top:8px" onclick="famSheet('${g.id}')">🔗 Vincular otra versión</button></div>`;
+ const first=x=>{const a=S.sessions.filter(y=>y.gameId===x.id&&!y.ap).map(y=>y.date).sort()[0];return a||comps(x)[0]||"9999"},L=[...m].sort((a,b)=>first(a).localeCompare(first(b))),tot=m.reduce((a,x)=>a+gm(x.id),0);
+ return`<h2>🔗 Versiones (${m.length})</h2><div class="card"><div class="row sp"><b>⏱ Total: ${H(tot)}</b><span class="mu">${e(famRoot(g).title)}</span></div>${L.map((x,i)=>{const rn=runsOf(x),cs=comps(x);return`<div class="lvr" style="cursor:${x.id===g.id?"default":"pointer"}" ${x.id===g.id?"":`onclick="openGame('${x.id}')"`}><div style="flex:1;min-width:0"><b>${i+1}. ${e(x.platform||x.title)}${x.id===g.id?" · esta":""}</b><div class="mu">${e(x.title)} · ${e(ST[x.status]||"")}${rn.length>1?" · "+rn.length+" partidas":""}${cs.length?" · completado "+fdA(x,cs[cs.length-1]):""}</div></div><b>${H(gm(x.id))}</b></div>`}).join("")}<button style="margin-top:8px" onclick="famSheet('${g.id}')">🔗 Vincular otra versión</button> <button style="margin-top:8px" onclick="famUnlink('${g.id}')">Desvincular este juego</button></div>`}
 function mYr(id,all){const yr=String(new Date().getFullYear());return S.sessions.filter(x=>inG(x,id)&&(all||x.date.startsWith(yr))).reduce((a,x)=>a+x.min,0)+(all?unkMin(id):0)}
 function rankList(kind,gen,all){const yr=String(new Date().getFullYear()),inYr=g=>{const c=comps(g);return c.length?c.some(d=>d.startsWith(yr)):(g.doneDate||g.rating?.date||"").startsWith(yr)};
- let a=S.games.filter(g=>g.status!=="wish"&&!g.demo);a=kind==="best"?a.filter(g=>g.rating?.score&&(all||inYr(g))):a.filter(g=>mYr(g.id,all)>0);
+ let a=S.games.filter(g=>g.status!=="wish"&&!g.demo);a=kind==="best"?a.filter(g=>g.rating?.score&&(all||inYr(g))):a.filter(g=>famRoot(g)===g&&mYrF(g,all)>0);
  if(gen)a=a.filter(g=>(g.genre||"").split(",").map(z=>z.trim()).includes(gen));
- return kind==="best"?a.sort((x,y)=>y.rating.score-x.rating.score||gm(y.id)-gm(x.id)):a.sort((x,y)=>mYr(y.id,all)-mYr(x.id,all))}
+ return kind==="best"?a.sort((x,y)=>y.rating.score-x.rating.score||gm(y.id)-gm(x.id)):a.sort((x,y)=>mYrF(y,all)-mYrF(x,all))}
 function rankSheet(kind,keep){if(!keep)RK={kind,gen:"",all:RKA()};const base=rankList(RK.kind,"",RK.all),gens=[...new Set(base.flatMap(g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean)))].sort(),l=rankList(RK.kind,RK.gen,RK.all).slice(0,30),b=RK.kind==="best";
  sheet(`<div class="row sp"><h1>${b?"Mejor valorados":"Más jugados"}</h1><button onclick="closeSheet()">✕</button></div>
  <label>Género</label><select onchange="rkSet('gen',this.value)"><option value="">Todos los géneros</option>${gens.map(x=>`<option ${x===RK.gen?"selected":""}>${e(x)}</option>`).join("")}</select>
  <div class="row" style="margin-top:10px"><button class="${RK.all?"":"pri"}" style="flex:1" onclick="rkSet('all',0)">Este año</button><button class="${RK.all?"pri":""}" style="flex:1" onclick="rkSet('all',1)">Siempre</button></div>
  <div class="mu" style="margin:10px 0">${b?"Ordenados por nota, de más alta a más baja":"Ordenados por horas jugadas "+(RK.all?"en total":"este año")}</div>
- ${l.map((g,i)=>`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<b style="flex:1;min-width:0">${i+1}. ${e(g.title)}<div class="mu" style="font-weight:400">${e(g.genre||"—")}</div></b><span>${b?"⭐ "+g.rating.score:"⏱ "+H(mYr(g.id,RK.all))}</span></div>`).join("")||`<div class="empty">Sin juegos con estos filtros.</div>`}`)}
+ ${l.map((g,i)=>`<div class="card row" style="cursor:pointer" onclick="openGame('${g.id}')">${th(g,44,58)}<b style="flex:1;min-width:0">${i+1}. ${e(g.title)}<div class="mu" style="font-weight:400">${e(g.genre||"—")}${!b&&famOf(g).length>1?" · "+famOf(g).length+" versiones":""}</div></b><span>${b?"⭐ "+g.rating.score:"⏱ "+H(mYrF(g,RK.all))}</span></div>`).join("")||`<div class="empty">Sin juegos con estos filtros.</div>`}`)}
 function rkSet(k,v){RK[k]=v;rankSheet(RK.kind,1)}
-function rankTile(kind,t){const A=RKA(),l=rankList(kind,"",A).slice(0,3);return`<div class="card" style="margin:0;cursor:pointer;overflow:hidden;min-width:0" onclick="rankSheet('${kind}')"><div class="mu" style="font-size:12px;margin-bottom:8px;text-align:center">${t}</div>${l.length?`<div style="display:flex;gap:6px;justify-content:center">${l.map((g,i)=>`<div style="text-align:center;min-width:0"><div style="font-size:12px">${["🥇","🥈","🥉"][i]}</div>${th(g,46,62)}<div style="font-size:11px;margin-top:3px">${kind==="best"?"⭐ "+g.rating.score:Math.round(mYr(g.id,A)/60)+"h"}</div></div>`).join("")}</div>`:`<div class="mu" style="margin:14px 0;text-align:center">Sin datos</div>`}<div class="mu" style="margin-top:8px;font-size:11px;text-align:center">Ver más ›</div></div>`}
+function rankTile(kind,t){const A=RKA(),l=rankList(kind,"",A).slice(0,3);return`<div class="card" style="margin:0;cursor:pointer;overflow:hidden;min-width:0" onclick="rankSheet('${kind}')"><div class="mu" style="font-size:12px;margin-bottom:8px;text-align:center">${t}</div>${l.length?`<div style="display:flex;gap:6px;justify-content:center">${l.map((g,i)=>`<div style="text-align:center;min-width:0"><div style="font-size:12px">${["🥇","🥈","🥉"][i]}</div>${th(g,46,62)}<div style="font-size:11px;margin-top:3px">${kind==="best"?"⭐ "+g.rating.score:Math.round(mYrF(g,A)/60)+"h"}</div></div>`).join("")}</div>`:`<div class="mu" style="margin:14px 0;text-align:center">Sin datos</div>`}<div class="mu" style="margin-top:8px;font-size:11px;text-align:center">Ver más ›</div></div>`}
 const EMB_MAX=3,BCOL={"común":"#9ca3af","rara":"#38bdf8","épica":"#a78bfa","legendaria":"#f59e0b"};
 function embList(){const L=[];badges().forEach(b=>{if(b[3]>=b[4])L.push({k:"b:"+b[1],ic:b[0],n:b[1],r:b[2],t:"b"})});
  S.games.filter(g=>g.platinum&&g.status!=="wish").forEach(g=>L.push({k:"p:"+g.id,ic:"🏆",n:"Platino · "+g.title,t:"p"}));
@@ -1910,6 +1928,17 @@ const EN_DICT={/*EN-START*/
 "💝 Añadir a deseados":"💝 Add to wishlist",
 " Si indicas las horas totales, solo se sumarán las sesiones posteriores a la fecha de finalización, porque el total ya incluye las anteriores.":" If you enter the total hours, only sessions after the completion date will be added, since the total already includes the earlier ones.",
 "Ya tienes sesiones registradas ({}), por eso no se piden las horas.":"You already have sessions logged ({}), so hours aren't requested.",
+"¿Otra versión del mismo juego?":"Another version of the same game?",
+"🔗 Sí, enlazar como versiones":"🔗 Yes, link as versions",
+"No, es un juego distinto":"No, it's a different game",
+"🔗 Vincular otra versión":"🔗 Link another version",
+"🔗 Versiones ({})":"🔗 Versions ({})",
+"🔗 Versiones":"🔗 Versions",
+"Desvincular este juego":"Unlink this game",
+"Buscar en tu biblioteca":"Search your library",
+"No hay juegos para enlazar.":"No games to link.",
+"{} versiones":"{} versions",
+"¿Jugaste este juego en otra consola o en una edición distinta? Enlázalos: en la Biblioteca siguen separados, pero en las estadísticas se suman sus horas.":"Did you play this game on another console or in a different edition? Link them: they stay separate in the Library, but their hours are added together in the stats.",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
