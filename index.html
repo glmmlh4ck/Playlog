@@ -86,6 +86,22 @@ details.dt{background:var(--s1);border:1px solid var(--bd);border-radius:14px;ma
 .poster .ck{position:absolute;top:7px;left:7px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:#0007;display:grid;place-items:center;font-size:14px;font-weight:700;color:#fff}
 .poster.picked .cv{outline:3px solid var(--ac);outline-offset:-3px}.poster.picked .ck{background:var(--ac);border-color:var(--ac);color:var(--onac)}
 .poster.picked .cv:after{content:"";position:absolute;inset:0;background:rgba(var(--acr),.28)}
+#srch{position:fixed;inset:0;z-index:8;background:var(--bg);display:none;flex-direction:column}#srch.on{display:flex}
+.srch-top{padding:calc(env(safe-area-inset-top,0px) + 16px) 18px 4px;font-size:22px;flex:none}
+.srch-sc{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px calc(120px + env(safe-area-inset-bottom,0px))}
+.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sgh{font-weight:700;margin:10px 2px 10px}
+.sc{position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:var(--s2);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sc img{width:100%;height:100%;object-fit:cover;display:block}
+.sc-n{height:100%;display:grid;place-items:center;text-align:center;padding:10px 10px 46px;font-weight:600;font-size:13px;color:var(--mu);overflow:hidden}
+.sc-add{position:absolute;left:8px;bottom:8px;width:36px;height:36px;border-radius:12px;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;display:grid;place-items:center;font-size:28px;font-weight:300;line-height:1;padding-bottom:3px}
+.sc-add.has{background:rgba(52,211,153,.9);font-size:18px;font-weight:700;padding:0}
+.srch-bar{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:10px;align-items:center;z-index:2}
+.srch-pill,.srch-r{background:rgba(var(--acr),.30);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 28px #0007;color:var(--tx)}
+.srch-pill{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-radius:26px}
+.srch-pill input{flex:1;min-width:0;height:100%;background:none;border:0;box-shadow:none;padding:0;margin:0;font-size:17px;border-radius:0;color:var(--tx);-webkit-appearance:none}
+.srch-pill input:focus{outline:none;box-shadow:none}
+.srch-r{flex:none;width:52px;height:52px;padding:0;border-radius:50%;font-size:20px;display:grid;place-items:center}
 .selbar{position:sticky;top:6px;z-index:5;background:var(--sheet);border:1px solid rgba(var(--acr),.55);border-radius:18px;padding:10px 12px;box-shadow:0 10px 30px #000a;margin:0 0 14px}
 .selact{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.selact button{width:100%}
 
@@ -183,7 +199,7 @@ const unkMin=id=>((S.games.find(g=>g.id===id)||{}).unk||[]).reduce((a,u)=>a+(u.m
 const G=id=>S.games.find(g=>g.id===id);
 const PLAT=["PC","PlayStation 5","PlayStation 4","PlayStation 3","PlayStation 2","PlayStation","PS Vita","PSP","Xbox Series X|S","Xbox One","Xbox 360","Xbox","Nintendo Switch","Nintendo Switch 2","Wii U","Wii","GameCube","Nintendo 64","SNES","NES","Nintendo 3DS","Nintendo DS","Game Boy Advance","Game Boy","Steam Deck","Mac","Linux","iOS","Android","Consola Android","Game Boy Color","Sega Master System","Sega Mega Drive","Sega Saturn","Dreamcast","Neo Geo","PC Engine","Atari 2600","Anbernic","Retroid Pocket","Miyoo Mini","Powkiddy","Ayn Odin","Ayaneo","ROG Ally","Lenovo Legion Go","MSI Claw","Analogue Pocket","Playdate","Meta Quest","Steam Machine","Otra"];
 const GEN=["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
-const APP_VER="2026-11-12";
+const APP_VER="2026-11-13";
 const fd=d=>d?d.split("-").reverse().join("/"):"";
 const fdA=(g,d)=>{const a=g&&((g.compA&&g.compA[d])||(g.dropAt===d&&g.dropA));if(a==="y")return d.slice(0,4);if(a==="m")return d.slice(5,7)+"/"+d.slice(0,4);return fd(d)};
 let tab="home",lib={st:"playing",q:"",f:{pl:"",gen:"",fmt:"",sort:"name"}},cal={y:new Date().getFullYear(),m:new Date().getMonth(),sel:today()};
@@ -215,7 +231,7 @@ const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1
 function nav(){const t=[["home","Inicio"],["lib","Biblioteca"],["+",""],["diary","Diario"],["prof","Perfil"]];
  $("#nav").innerHTML=t.map(([k,l])=>k==="+"?`<button class="plus" aria-label="Añadir" onclick="openPlus()">+</button>`:`<button class="${tab===k?"on":""}" onclick="go('${k}')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>${l}</button>`).join("")}
 function go(t){if(t!=="lib")lib.sel=null;if(t==="diary"){const n=new Date();cal.y=n.getFullYear();cal.m=n.getMonth();cal.sel=today()}const ch=t!==tab;tab=t;R();if(ch)$("#main").scrollTop=0}
-function R(){migDemo();migAp();nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib"){list();selUi()}if(tab==="home")homeLoad()}
+function R(){migDemo();migAp();nav();$("#main").innerHTML=({home:vHome,lib:vLib,diary:vDiary,prof:vProf})[tab]();if(tab==="lib"){list();selUi()}if(tab==="home")homeLoad();if(window._srchOn&&CR&&CR.length)catRender()}
 function ago(t){const m=Math.round((Date.now()-t)/6e4);return m<60?"hace "+Math.max(1,m)+" min":m<1440?"hace "+Math.round(m/60)+" h":"hace "+Math.round(m/1440)+" d"}
 function dleft(d){return Math.ceil((new Date(d+"T12:00")-new Date())/864e5)}
 function vHome(){const s=stats(),pl=S.games.filter(g=>g.status==="playing"),up=S.games.filter(g=>g.status==="wish"&&g.released&&g.released>today()).sort((a,b)=>a.released.localeCompare(b.released)),soon=up.filter(g=>dleft(g.released)<=7);
@@ -524,9 +540,9 @@ function trackPick(i,st){const ok=window._dupOK;window._dupOK=0;if(!ok){const b0
  ${st==="done"||st==="playing"?`<label class="row" style="color:var(--tx);font-size:15px;margin:14px 0 4px"><input type="checkbox" id="tdm" style="width:24px;min-height:24px" onchange="$('#tdmh').style.display=this.checked?'block':'none'"><span>🧪 Es una demo</span></label><div class="mu" id="tdmh" style="display:none;margin-bottom:6px">Contará horas, pero no como juego completado.</div>`:""}${st==="done"?doneFields("tn","",1):""}${st==="drop"?doneFields("td","",0,1)+dropFields("td"):""}${st==="wish"?`<button class="pri" style="width:100%;margin-top:18px;padding:16px" onclick="trackGame(${i},'wish','Digital')">💝 Añadir a deseados</button>`:`<label>¿Lo tienes en físico o en digital?</label><div class="row"><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Físico')">💿 Físico</button><button class="pri" style="flex:1;padding:18px" onclick="trackGame(${i},'${st}','Digital')">☁️ Digital</button></div>`}`)}
 function agClamp(){const run=()=>{const el=$("#ag-sum"),m=$("#ag-more");if(el&&m&&!el.classList.contains("open"))m.style.display=el.scrollHeight>el.clientHeight+1?"block":"none"};requestAnimationFrame(run);setTimeout(run,300)}
 function agMore(){const el=$("#ag-sum"),m=$("#ag-more");m.textContent=el.classList.toggle("open")?"Ver menos":"Ver más"}
-function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender();}
+function backToSearch(){const st=window._agBack;if(st&&st.length)return agShow(st.pop());closeSheet();catSearch();$("#cq").value=window._lastQ||"";if(CALL.length)catRender();}
 function agShow(b){CR=[b];addSheet(0)}
-function simSearch(n){catSearch();$("#cq").value=n;catGo()}
+function simSearch(n){closeSheet();catSearch();$("#cq").value=n;catGo()}
 async function simGo(k){const cur=window._agB,x=(cur?.simG||[])[k];if(!x)return;if(!x.id)return simSearch(x.name);
  sheet(`<div class="row sp"><button id="sg-back">‹ Volver</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="empty" style="margin-top:30px">Cargando ${e(x.name)}…</div>`);
  let cancel=false;$("#sg-back").onclick=()=>{cancel=true;agShow(cur)};
@@ -803,9 +819,10 @@ const sagaChips=a=>a.map(x=>`<span class="chipb" data-v="${e(x)}" onclick="$('#c
 function catEmpty(msg){const q=($("#cq")?.value||"").trim(),w=q.split(" ")[0],sg=[...new Set([w,...rndSagas(5,q)].filter(x=>x&&x.toLowerCase()!==q.toLowerCase()))].slice(0,5);
  return`<div class="empty">${msg}<div style="margin-top:12px">${sg.map(x=>`<span class="chipb" data-v="${e(x)}" onclick="$('#cq').value=this.dataset.v;catGo()">🔎 ${e(x)}</span>`).join("")}</div><div class="row" style="justify-content:center;margin-top:8px"><button onclick="catGo()">Reintentar</button><button class="pri" onclick="addGame()">Crear ficha manual</button></div></div>`}
 function catRender(){
- const row=(g,i)=>`<div class="card row sp"><div class="row" style="flex:1;min-width:0">${th(g,48,64)}<div style="min-width:0"><b>${e(g.title)}</b>${g.alt?`<div class="mu">también: ${e(g.alt)}</div>`:""}<div class="mu">${e((g.released||"s/f").slice(0,4))} · ${e((g.platforms||[]).slice(0,3).join(", "))}</div></div></div><button class="pri" onclick="window._agBack=[];addSheet(${i})">Añadir</button></div>`;
- CR=CALL;let last="";
- $("#cr").innerHTML=CR.length?CR.map((g,i)=>{let h="";if(g.grp&&last!==g.grp){h=`<div style="font-weight:700;margin:6px 0">🏢 Juegos de ${e(g.grp)} <span class="mu" style="font-weight:400">· por fecha de lanzamiento</span></div>`;last=g.grp}else if(!g.grp&&last){h=`<div style="font-weight:700;margin:14px 0 6px">Otros resultados</div>`;last=""}return h+row(g,i)}).join(""):catEmpty("No encontramos ese juego.")}
+ const card=(g,i)=>{const has=dupFind(g);return`<div class="sc" onclick="window._agBack=[];addSheet(${i})" role="button" aria-label="${e(g.title)}" title="${e(g.title)}">${g.cover?`<img ${oi(g.cover,360)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="sc-n">${e(g.title)}</div>`}<span class="sc-add${has?" has":""}">${has?"✓":"+"}</span></div>`};
+ CR=CALL;let last="",out="",open=false;const cl=()=>{if(open){out+="</div>";open=false}},op=()=>{if(!open){out+=`<div class="sgrid">`;open=true}};
+ CR.forEach((g,i)=>{if(g.grp&&last!==g.grp){cl();out+=`<div class="sgh">🏢 Juegos de ${e(g.grp)} <span class="mu" style="font-weight:400">· por fecha de lanzamiento</span></div>`;last=g.grp}else if(!g.grp&&last){cl();out+=`<div class="sgh" style="margin-top:18px">Otros resultados</div>`;last=""}op();out+=card(g,i)});cl();
+ $("#cr").innerHTML=CR.length?out:catEmpty("No encontramos ese juego.")}
 function lastS(g){return S.sessions.filter(x=>x.gameId===g.id&&!x.ap).reduce((m,x)=>x.date>m?x.date:m,"")}
 function pickMonth(){const y0=new Date().getFullYear(),MN=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],ys=[];for(let y=y0+1;y>=2000;y--)ys.push(y);
  sheet(`<div class="row sp"><h1>Elegir mes</h1><button onclick="closeSheet()">✕</button></div><label>Año</label><select onchange="cal.y=+this.value;pickMonth()">${ys.map(y=>`<option ${y===cal.y?"selected":""}>${y}</option>`).join("")}</select><div class="grid" style="margin-top:14px">${MN.map((n,i)=>`<button class="${i===cal.m?"pri":""}" onclick="pickM(${i})">${n}</button>`).join("")}</div>`)}
@@ -1066,9 +1083,15 @@ function settingsSheet(){const ps=pubSec(),g=!ACCT,need=`<div class="mu">Necesit
 function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];
-function catSearch(){
- sheet(`<div class="row sp"><h1>Buscar juegos</h1><button onclick="closeSheet()">✕</button></div><div class="row"><input id="cq" type="search" enterkeyhint="search" autocomplete="off" placeholder="Ej: ${e(rndSagas(1)[0])}" onkeydown="if(event.key==='Enter')catGo()"><button class="pri" onclick="catGo()">Buscar</button></div><div id="cr"><div class="mu" style="margin:14px 0 8px;text-align:center">Prueba con alguna saga:</div><div style="text-align:center">${sagaChips(rndSagas(6))}</div></div><div class="card" style="margin-top:12px"><div class="mu">¿No encuentras tu juego (por ejemplo un fangame)?</div><button style="width:100%;margin-top:8px" onclick="addGame()">✍️ Crear ficha manual</button></div><div class="mu" style="margin-top:10px">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a></div>`)}
-async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
+// Buscador a pantalla completa: resultados en cuadrícula de portadas y barra de búsqueda flotante abajo (sube sobre el teclado)
+function catSearch(){let o=$("#srch");if(!o){o=document.createElement("div");o.id="srch";document.body.appendChild(o)}
+ if(!o.classList.contains("on")){o.innerHTML=`<div class="srch-top"><b>Buscar juegos</b></div><div class="srch-sc" id="srsc"><div id="cr"><div class="mu" style="margin:46px 0 10px;text-align:center">Prueba con alguna saga:</div><div style="text-align:center">${sagaChips(rndSagas(6))}</div></div><div class="mu" style="margin:22px 0 0;text-align:center">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a> · IGDB</div></div>
+  <div class="srch-bar" id="srbar"><button class="srch-r" onclick="addGame()" aria-label="Crear ficha manual" title="Crear ficha manual">✍️</button><div class="srch-pill"><svg onclick="catGo()" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input id="cq" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" placeholder="Buscar · ej: ${e(rndSagas(1)[0])}" onkeydown="if(event.key==='Enter')catGo()"></div><button class="srch-r" onclick="catClose()" aria-label="Cerrar">✕</button></div>`;
+  o.classList.add("on");window._srchOn=1;if(window.visualViewport){visualViewport.addEventListener("resize",kbFix);visualViewport.addEventListener("scroll",kbFix)}}
+ kbFix();$("#cq").focus()}
+function kbFix(){const b=$("#srbar"),v=window.visualViewport;if(!b||!v)return;const kb=Math.max(0,innerHeight-v.height-v.offsetTop);b.style.bottom=kb>80?(kb+8)+"px":""}
+function catClose(){const o=$("#srch");if(o){o.classList.remove("on");o.innerHTML=""}window._srchOn=0;if(window.visualViewport){visualViewport.removeEventListener("resize",kbFix);visualViewport.removeEventListener("scroll",kbFix)}}
+async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cq").blur();$("#srsc")&&($("#srsc").scrollTop=0);$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
  const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error("error "+r.status);return r.json()};
  try{const mapR=g=>g.title?g:{title:g.name,released:g.released,cover:g.background_image,platforms:(g.platforms||[]).map(p=>p.platform.name),genres:(g.genres||[]).map(x=>x.name),tags:[],similar:[],summary:"",ttb:null,versions:[]};
  // IGDB y RAWG a la vez: RAWG completa con fangames y juegos que IGDB no tiene
@@ -1644,7 +1667,7 @@ const EN_DICT={/*EN-START*/
 "Sin resultados con este filtro.":"No results with this filter.",
 "No se pudo buscar ({}). Revisa tu conexión.":"Couldn't search ({}). Check your connection.",
 "Reintentar":"Retry",
-"Crear ficha manual":"Create entry manually",
+"Crear ficha manual":"Create manual entry",
 "también: {}":"also: {}",
 "s/f":"n/a",
 "{} · Partida {}":"{} · Playthrough {}",
@@ -1952,6 +1975,7 @@ const EN_DICT={/*EN-START*/
 "🏢 Juegos de":"🏢 Games by",
 "· por fecha de lanzamiento":"· by release date",
 "Otros resultados":"Other results",
+"Buscar · ej: {}":"Search · e.g. {}",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
