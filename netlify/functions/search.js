@@ -26,6 +26,30 @@ exports.handler = async (event) => {
     r0.push(n0); hits.set("d" + ip0, r0);
     try { return out(200, { items: await rawgAdditions(dl, (event.queryStringParameters?.q || "").trim().slice(0, 60), key0) }); } catch (e) { return out(502, { error: "No se pudo contactar con RAWG" }); }
   }
+  // Juegos de un desarrollador según RAWG: ?dev=<nombre>  (solo si el nombre coincide exactamente)
+  const dv = (event.queryStringParameters?.dev || "").trim().slice(0, 60).replace(/["\\*]/g, "");
+  if (event.queryStringParameters?.dev !== undefined) {
+    if (dv.length < 3) return out(200, { company: "", results: [] });
+    const kd = process.env.RAWG_KEY; if (!kd) return out(500, { error: "Falta configurar RAWG_KEY" });
+    const ipd = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", nd = Date.now();
+    const rd = (hits.get("v" + ipd) || []).filter(x => nd - x < 60000); if (rd.length >= 30) return out(429, { error: "Demasiadas búsquedas, espera un minuto" });
+    rd.push(nd); hits.set("v" + ipd, rd);
+    const ckd = "dv1:" + dv.toLowerCase(), cd = cache.get(ckd); if (cd && nd - cd.t < 864e5) return out(200, cd.b);
+    try {
+      const nz = v => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      const r1 = await fetch(`https://api.rawg.io/api/developers?key=${encodeURIComponent(kd)}&search=${encodeURIComponent(dv)}&page_size=5`);
+      if (!r1.ok) return out(502, { error: "RAWG respondió " + r1.status });
+      const ds = ((await r1.json()).results || []).filter(d => nz(d.name) === nz(dv)).slice(0, 2);
+      let body = { company: "", results: [] };
+      if (ds.length) {
+        const r2 = await fetch(`https://api.rawg.io/api/games?key=${encodeURIComponent(kd)}&developers=${ds.map(d => d.id).join(",")}&ordering=released&page_size=40`);
+        if (r2.ok) body = { company: ds[0].name, results: ((await r2.json()).results || []).map(g => ({ id: g.id, name: g.name, released: g.released, background_image: g.background_image,
+          platforms: (g.platforms || []).map(p => ({ platform: { name: p.platform.name } })), genres: (g.genres || []).map(x => ({ name: x.name })) })) };
+      }
+      const sd = JSON.stringify(body); cache.set(ckd, { t: nd, b: sd }); if (cache.size > 500) cache.delete(cache.keys().next().value);
+      return out(200, sd);
+    } catch (e) { return out(502, { error: "No se pudo contactar con RAWG" }); }
+  }
   const q = (event.queryStringParameters?.q || "").trim().slice(0, 80);
   if (q.length < 2) return out(400, { error: "Escribe al menos 2 letras" });
   const key = process.env.RAWG_KEY;

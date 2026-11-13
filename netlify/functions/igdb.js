@@ -15,12 +15,14 @@ async function token() {
   tok = { v: d.access_token, exp: Date.now() + d.expires_in * 1000 };
   return tok.v;
 }
-async function igdb(ep, body) {
+async function igdb(ep, body, tries = 3) {
   const r = await fetch("https://api.igdb.com/v4/" + ep, {
     method: "POST",
     headers: { "Client-ID": ID(), Authorization: "Bearer " + (await token()), Accept: "application/json" },
     body
   });
+  // IGDB limita a 4 peticiones por segundo: si nos frena (429), esperamos un momento y reintentamos
+  if (r.status === 429 && tries > 1) { await new Promise(z => setTimeout(z, 350)); return igdb(ep, body, tries - 1); }
   if (!r.ok) throw new Error("IGDB " + r.status);
   return r.json();
 }
@@ -97,7 +99,7 @@ async function recommend(like, gn, ex) {
   }
   return { items: items.slice(0, 18) };
 }
-const dcache = new Map(), dhits = new Map();
+const dcache = new Map(), dhits = new Map(), devc = new Map(), devh = new Map();
 async function detail(id) {
   const [g] = await igdb("games", `fields screenshots.image_id,similar_games.name,similar_games.cover.image_id,genres,themes,dlcs.name,dlcs.first_release_date,dlcs.cover.image_id,expansions.name,expansions.first_release_date,expansions.cover.image_id,standalone_expansions.name,standalone_expansions.first_release_date,standalone_expansions.cover.image_id; where id = ${id};`);
   if (!g) return { screens: [], simG: [] };
@@ -191,6 +193,30 @@ exports.handler = async (event) => {
       return out(200, body);
     } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
   }
+  // Juegos de una empresa/desarrolladora: ?dev=Level-5 (solo si el nombre de la empresa coincide con lo escrito)
+  if (qp.dev !== undefined) {
+    const dq = cleanQ(qp.dev), dip = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", dn = Date.now();
+    if (dq.length < 3) return out(200, { company: "", results: [] });
+    const dr = (devh.get(dip) || []).filter(x => dn - x < 60000);
+    if (dr.length >= 40) return out(429, { error: "Demasiadas peticiones, espera un momento" });
+    dr.push(dn); devh.set(dip, dr); if (devh.size > 2000) devh.clear();
+    const dk = "dv1:" + dq.toLowerCase(), dc = devc.get(dk);
+    if (dc && dn - dc.t < 864e5) return out(200, dc.b);
+    try {
+      const nz = v => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      const strip = v => nz(v).split(" ").filter(w => !["the", "inc", "ltd", "co", "corp", "corporation", "company", "limited", "llc", "gmbh", "sa", "kk"].includes(w)).join(" ");
+      const cs = await igdb("companies", `search "${dq}"; fields name; limit 10;`);
+      const mine = cs.filter(c => strip(c.name) === strip(dq) || nz(c.name) === nz(dq)).slice(0, 3);
+      let body = { company: "", results: [] };
+      if (mine.length) {
+        const gs = await igdb("games", `fields ${FIELDS}; where involved_companies.company = (${mine.map(c => c.id).join(",")}); sort first_release_date asc; limit 100;`);
+        const keepD = g => { const pn = (g.version_parent?.name || "").toLowerCase(); return !pn || !g.name.toLowerCase().includes(pn); };
+        body = { company: mine[0].name, results: gs.filter(keepD).map(g => shape(g, {}, dq.toLowerCase())).sort((x, y) => (x.released || "9999").localeCompare(y.released || "9999")) };
+      }
+      const s = JSON.stringify(body); devc.set(dk, { t: dn, b: s }); if (devc.size > 300) devc.delete(devc.keys().next().value);
+      return out(200, s);
+    } catch (e) { return out(502, { error: "No se pudo contactar con IGDB" }); }
+  }
   if (qp.findid !== undefined || qp.dlcq !== undefined) {
     const mip = event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "?", mn = Date.now();
     const mr = (mh.get(mip) || []).filter(t => mn - t < 60000);
@@ -239,14 +265,15 @@ exports.handler = async (event) => {
   try {
     const pool = new Map();
     const page2 = (t, off) => igdb("games", `search "${t}"; fields ${FIELDS}; limit 100; offset ${off};`), page = off => page2(q, off);
-    (await page(0)).forEach(g => pool.set(g.id, g));
-    (await Promise.all([100, 200].map(o => page(o).catch(() => [])))).flat().forEach(g => pool.set(g.id, g));
-    // Búsqueda por nombre exacto (con y sin acentos): rescata fangames y juegos poco conocidos que la búsqueda difusa deja fuera del top
-    const nd = v => v.normalize("NFD").replace(/[\u0300-\u036f]/g, ""), qv = [...new Set([q, nd(q)])];
-    if (qv.length > 1) { try { (await page2(qv[1], 0)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ } }
-    for (const v of qv) { try { (await igdb("games", `fields ${FIELDS}; where name ~ *"${v}"*; limit 50;`)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ } }
-    // Nombres alternativos (títulos en español u otros idiomas), si IGDB los tiene registrados
-    try { (await igdb("games", `fields ${FIELDS}; where alternative_names.name ~ *"${q}"*; limit 50;`)).forEach(g => pool.has(g.id) || pool.set(g.id, g)); } catch (e) { /* opcional */ }
+    // Todas las consultas a la vez (antes iban una tras otra y tardaban 10 s o más)
+    const nd = v => v.normalize("NFD").replace(/[\u0300-\u036f]/g, ""), qv = [...new Set([q, nd(q)])], opt = p => p.catch(() => []);
+    const jobs = [page(0), opt(page(100)), opt(page(200)),
+      ...(qv.length > 1 ? [opt(page2(qv[1], 0))] : []),
+      ...qv.map(v => opt(igdb("games", `fields ${FIELDS}; where name ~ *"${v}"*; limit 50;`))),
+      opt(igdb("games", `fields ${FIELDS}; where alternative_names.name ~ *"${q}"*; limit 50;`))];
+    const res = await Promise.all(jobs);
+    res[0].forEach(g => pool.set(g.id, g));
+    res.slice(1).flat().forEach(g => pool.has(g.id) || pool.set(g.id, g));
     // Descarta solo las "ediciones" de otro juego (p. ej. "X Deluxe Edition"); versiones con nombre propio (Let's Go Pikachu / Eevee) se mantienen
     const keep = g => { const pn = (g.version_parent?.name || "").toLowerCase(); return !pn || !g.name.toLowerCase().includes(pn); };
     [...pool.values()].forEach(g => keep(g) || pool.delete(g.id));
