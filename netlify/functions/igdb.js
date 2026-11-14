@@ -22,6 +22,8 @@ async function igdb(ep, body, tries = 3) {
     body
   });
   // IGDB limita a 4 peticiones por segundo: si nos frena (429), esperamos un momento y reintentamos
+  // Si IGDB no reconoce "game_type" (versiones antiguas de la API), se usa el campo antiguo "category"
+  if (r.status === 400 && /game_type/.test(body)) return igdb(ep, body.replace(/game_type\.type/g, "category"), tries);
   if (r.status === 429 && tries > 1) { await new Promise(z => setTimeout(z, 350)); return igdb(ep, body, tries - 1); }
   if (!r.ok) throw new Error("IGDB " + r.status);
   return r.json();
@@ -33,7 +35,12 @@ const cov = g => (g.cover?.image_id ? `https://images.igdb.com/igdb/image/upload
 const shot = g => (g.screenshots || []).slice(0, 5).map(x => `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${x.image_id}.jpg`);
 const sim = g => (g.similar_games || []).slice(0, 8).map(x => ({ id: x.id, name: x.name, cover: x.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${x.cover.image_id}.jpg` : "" }));
 const dev = g => { const c = (g.involved_companies || []); const d = c.find(x => x.developer) || c.find(x => x.publisher) || c[0]; return d?.company?.name || ""; };
-const FIELDS = "name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name,involved_companies.publisher,involved_companies.developer,involved_companies.company.name,aggregated_rating,aggregated_rating_count,alternative_names.name,version_parent.name";
+const FIELDS = "name,first_release_date,summary,cover.image_id,platforms.name,genres.name,themes.name,game_modes.name,player_perspectives.name,similar_games.name,involved_companies.publisher,involved_companies.developer,involved_companies.company.name,aggregated_rating,aggregated_rating_count,alternative_names.name,version_parent.name,game_type.type";
+
+// Tipo de juego (para la etiqueta sobre la portada): remake, mod, remaster...
+const KN = { Mod: "Mod", Remake: "Remake", Remaster: "Remaster", Port: "Port", Fork: "Fork", Expansion: "Expansión", "Standalone Expansion": "Expansión", "Expanded Game": "Ampliado" },
+  KC = { 5: "Mod", 8: "Remake", 9: "Remaster", 11: "Port", 12: "Fork", 2: "Expansión", 4: "Expansión", 10: "Ampliado" };
+const kindOf = g => (g.game_type && g.game_type.type ? KN[g.game_type.type] : KC[g.category]) || "";
 
 // Convierte un juego de IGDB en el formato que usa la app
 const shape = (g, ttb, ql) => {
@@ -47,6 +54,7 @@ const shape = (g, ttb, ql) => {
         summary: g.summary || "", similar: names(g.similar_games).slice(0, 8), ttb: ttb[g.id] || null,
         dev: dev(g), critic: g.aggregated_rating ? Math.round(g.aggregated_rating) : null, criticN: g.aggregated_rating_count || 0,
         // Oficial: tiene editora registrada; los anunciados o sin fecha con empresa implicada también cuentan
+        kind: kindOf(g),
         official: comps.some(c => c.publisher) || (upcoming && comps.length > 0),
         versions: []
       };
@@ -200,7 +208,7 @@ exports.handler = async (event) => {
     const dr = (devh.get(dip) || []).filter(x => dn - x < 60000);
     if (dr.length >= 40) return out(429, { error: "Demasiadas peticiones, espera un momento" });
     dr.push(dn); devh.set(dip, dr); if (devh.size > 2000) devh.clear();
-    const dk = "dv1:" + dq.toLowerCase(), dc = devc.get(dk);
+    const dk = "dv2:" + dq.toLowerCase(), dc = devc.get(dk);
     if (dc && dn - dc.t < 864e5) return out(200, dc.b);
     try {
       const nz = v => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
@@ -259,7 +267,7 @@ exports.handler = async (event) => {
   recent.push(now); hits.set(ip, recent);
   if (hits.size > 2000) hits.clear();
 
-  const ck = "v9:" + q.toLowerCase(), c = cache.get(ck);
+  const ck = "v10:" + q.toLowerCase(), c = cache.get(ck);
   if (c && now - c.t < 864e5) return out(200, c.b);
 
   try {

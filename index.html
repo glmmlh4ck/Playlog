@@ -94,6 +94,7 @@ details.dt{background:var(--s1);border:1px solid var(--bd);border-radius:14px;ma
 .sc{position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:var(--s2);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .sc img{width:100%;height:100%;object-fit:cover;display:block}
 .sc-n{height:100%;display:grid;place-items:center;text-align:center;padding:10px 10px 46px;font-weight:600;font-size:13px;color:var(--mu);overflow:hidden}
+.sc-k{position:absolute;left:8px;top:8px;max-width:calc(100% - 16px);padding:5px 11px;border-radius:13px;background:rgba(28,28,30,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#e9e9ee;font-weight:700;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sc-add{position:absolute;left:8px;bottom:8px;width:36px;height:36px;border-radius:12px;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;display:grid;place-items:center;font-size:28px;font-weight:300;line-height:1;padding-bottom:3px}
 .sc-add.has{background:rgba(52,211,153,.9);font-size:18px;font-weight:700;padding:0}
 .srch-bar{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:10px;align-items:center;z-index:2}
@@ -819,7 +820,7 @@ const sagaChips=a=>a.map(x=>`<span class="chipb" data-v="${e(x)}" onclick="$('#c
 function catEmpty(msg){const q=($("#cq")?.value||"").trim(),w=q.split(" ")[0],sg=[...new Set([w,...rndSagas(5,q)].filter(x=>x&&x.toLowerCase()!==q.toLowerCase()))].slice(0,5);
  return`<div class="empty">${msg}<div style="margin-top:12px">${sg.map(x=>`<span class="chipb" data-v="${e(x)}" onclick="$('#cq').value=this.dataset.v;catGo()">🔎 ${e(x)}</span>`).join("")}</div><div class="row" style="justify-content:center;margin-top:8px"><button onclick="catGo()">Reintentar</button><button class="pri" onclick="addGame()">Crear ficha manual</button></div></div>`}
 function catRender(){
- const card=(g,i)=>{const has=dupFind(g);return`<div class="sc" onclick="window._agBack=[];addSheet(${i})" role="button" aria-label="${e(g.title)}" title="${e(g.title)}">${g.cover?`<img ${oi(g.cover,360)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="sc-n">${e(g.title)}</div>`}<span class="sc-add${has?" has":""}">${has?"✓":"+"}</span></div>`};
+ const card=(g,i)=>{const has=dupFind(g);return`<div class="sc" onclick="window._agBack=[];addSheet(${i})" role="button" aria-label="${e(g.title)}" title="${e(g.title)}">${g.cover?`<img ${oi(g.cover,360)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="sc-n">${e(g.title)}</div>`}${g.kind?`<span class="sc-k">${e(g.kind)}</span>`:""}<span class="sc-add${has?" has":""}">${has?"✓":"+"}</span></div>`};
  CR=CALL;let last="",out="",open=false;const cl=()=>{if(open){out+="</div>";open=false}},op=()=>{if(!open){out+=`<div class="sgrid">`;open=true}};
  CR.forEach((g,i)=>{if(g.grp&&last!==g.grp){cl();out+=`<div class="sgh">🏢 Juegos de ${e(g.grp)} <span class="mu" style="font-weight:400">· por fecha de lanzamiento</span></div>`;last=g.grp}else if(!g.grp&&last){cl();out+=`<div class="sgh" style="margin-top:18px">Otros resultados</div>`;last=""}op();out+=card(g,i)});cl();
  $("#cr").innerHTML=CR.length?out:catEmpty("No encontramos ese juego.")}
@@ -1976,6 +1977,7 @@ const EN_DICT={/*EN-START*/
 "· por fecha de lanzamiento":"· by release date",
 "Otros resultados":"Other results",
 "Buscar · ej: {}":"Search · e.g. {}",
+"Ampliado":"Expanded",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
