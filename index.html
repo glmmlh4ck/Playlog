@@ -462,7 +462,7 @@ function rbAsk(){const B=S.games.filter(g=>g.status==="backlog"),gs=[...new Set(
  const grp=(k,t,o)=>o.length?`<label>${t}</label><div>${[["","Cualquiera"],...o].map(([v,l])=>`<span class="chipb ${v===""?"on":""}" data-v="${e(v)}" onclick="rbSet('${k}',this)">${e(l)}</span>`).join("")}</div>`:"";
  sheet(`<div class="row sp"><h1>🧭 Ayúdame a elegir</h1><button onclick="closeSheet()">✕</button></div>
  ${grp("gen","¿Qué género te apetece?",gs.map(x=>[x,x]))}
- ${grp("dur","¿Cuánto tiempo quieres dedicarle?",B.some(g=>g.ttb)?[["s","Corto (menos de 10 h)"],["m","Medio (10–30 h)"],["l","Largo (más de 30 h)"]]:[])}
+ ${grp("dur","¿Cuánto tiempo quieres dedicarle?",B.some(g=>ttbG(g))?[["s","Corto (menos de 10 h)"],["m","Medio (10–30 h)"],["l","Largo (más de 30 h)"]]:[])}
  ${grp("plt","¿En qué plataforma?",ps.map(x=>[x,x]))}
  ${grp("mode","¿Solo o acompañado?",B.some(g=>g.tags?.length)?[["1","Un jugador"],["2","Multijugador"]]:[])}
  <button class="pri" style="width:100%;margin-top:16px" onclick="window._rbLast='';rbGo()">Buscar juego</button>`)}
@@ -471,11 +471,11 @@ function rbMatch(){const q=window._rb;return S.games.filter(g=>{if(g.status!=="b
  if(q.gen&&!(g.genre||"").split(",").map(z=>z.trim()).includes(q.gen))return false;
  if(q.plt&&g.platform!==q.plt)return false;
  if(q.mode){const t=g.tags||[];if(q.mode==="1"&&!t.includes("Single player"))return false;if(q.mode==="2"&&!t.some(x=>x==="Multiplayer"||x==="Co-operative"||x==="Split screen"))return false}
- if(q.dur){const h=g.ttb?(g.ttb.main||g.ttb.fast||g.ttb.full):null;if(h==null)return false;if(q.dur==="s"&&!(h<10))return false;if(q.dur==="m"&&!(h>=10&&h<=30))return false;if(q.dur==="l"&&!(h>30))return false}
+ if(q.dur){const tt=ttbG(g),h=tt?(tt.main||tt.fast||tt.full):null;if(h==null)return false;if(q.dur==="s"&&!(h<10))return false;if(q.dur==="m"&&!(h>=10&&h<=30))return false;if(q.dur==="l"&&!(h>30))return false}
  return true})}
 function rbGo(){let m=rbMatch();const n=m.length;if(n>1)m=m.filter(g=>g.id!==window._rbLast);
  if(!m.length)return sheet(`<div class="row sp"><h1>Sin resultados</h1><button onclick="closeSheet()">✕</button></div><div class="empty">Ningún juego de tu backlog cumple esas respuestas.<br>Los juegos sin duración, género o etiquetas conocidas no cuentan al filtrar por ellos.</div><button class="pri" style="width:100%" onclick="rbAsk()">Cambiar respuestas</button>`);
- const g=m[Math.floor(Math.random()*m.length)],t=g.ttb,h=t?(t.main||t.fast||t.full):0;window._rbLast=g.id;
+ const g=m[Math.floor(Math.random()*m.length)],t=ttbG(g),h=t?(t.main||t.fast||t.full):0;window._rbLast=g.id;
  sheet(`<div class="row sp"><h1>Te toca jugar…</h1><button onclick="closeSheet()">✕</button></div>
  <div class="card row" style="margin-top:8px">${th(g,80,106)}<div style="min-width:0"><b style="font-size:18px">${e(g.title)}</b><div class="mu">${e(g.platform||"—")} · ${e(g.genre||"—")}</div>${h?`<div class="mu">⏱ Unas ${H(Math.round(h*60))} para completarlo</div>`:""}<div class="mu">Coincide con ${n} ${n===1?"juego":"juegos"} de tu backlog</div></div></div>
  <div class="row" style="flex-wrap:wrap;margin-top:10px">${n>1?`<button onclick="rbGo()">🎲 Otro</button>`:""}<button onclick="openGame('${g.id}')">Ver ficha</button><button class="pri" onclick="setStatus('${g.id}','playing')">▶ Empezar a jugar</button></div>
@@ -502,7 +502,12 @@ function manualSheet(i){const b=i>=0?CR[i]:{title:""},vs=b.versions||[],si=Math.
  <label>Reto o modo (opcional)</label><input id="gc" list="chl" placeholder="Nuzlocke, Randomizer…"><datalist id="chl"><option>Nuzlocke</option><option>Randomizer</option><option>Hardcore</option><option>Solo run</option></datalist>
  <div id="gd" style="display:${lib.st==="done"?"block":"none"}">${doneFields("gn","",1)}</div><div id="gdr" style="display:${lib.st==="drop"?"block":"none"}">${doneFields("gr","",0,1)}${dropFields("gr")}</div>
  <button class="pri" style="width:100%;margin-top:16px" onclick="saveGame(${i})">Guardar</button>`)}
-function addSheet(i){const b=CR[i];if(!b)return;const t=b.ttb||{},hh=x=>x?H(Math.round(x*60)):"—",
+// Duraciones desde el archivo durations.json del proyecto (prioridad: lo que pones tú > archivo > IGDB)
+var DUR={ids:{},t:{},raw:[],leeme:""};
+async function durLoad(){try{const r=await fetch("durations.json",{cache:"no-cache"});if(!r.ok)return;const d=await r.json();DUR={ids:{},t:{},raw:Array.isArray(d.games)?d.games:[],leeme:d._leeme||""};(d.games||[]).forEach(x=>{const v={main:+x.main||0,extra:+x.extra||0,full:+x.full||0,src:"file"};if(!(v.main||v.extra||v.full))return;if(x.igdb)DUR.ids[x.igdb]=v;if(x.title)DUR.t[nrm(x.title)]=v});R()}catch(_){}}
+const durFile=x=>(x.igdb||x.id)&&DUR.ids[x.igdb||x.id]||(x.title&&DUR.t[nrm(x.title)])||null,ttbG=x=>{const t=x.ttb;return t&&t.src==="hltb"?t:durFile(x)||t||null};
+setTimeout(durLoad,0);
+function addSheet(i){const b=CR[i];if(!b)return;const t0=ttbG(b)||{},t=t0.src==="file"?{fast:t0.main,main:t0.extra,full:t0.full}:t0,hh=x=>x?H(Math.round(x*60)):"—",
  mine=S.games.filter(g=>g.title.toLowerCase()===b.title.toLowerCase()&&g.rating?.score),ps=mine.length?(mine.reduce((n,g)=>n+g.rating.score,0)/mine.length).toFixed(1).replace(/\.0$/,""):"—",
  cs=b.critic,cc=cs==null?"var(--mu)":cs>=75?"#22c55e":cs>=50?"#eab308":"#ef4444",
  big=(src,ph)=>src?`<img ${oi(src,360)} alt="" referrerpolicy="no-referrer">`:`<div class="ph">${ph}</div>`;
@@ -567,7 +572,7 @@ function saveGame(i){const b=i>=0?CR[i]:{},t=i>=0?b.title:$("#gt").value.trim().
  if(st==="drop"){const r=readDone("gr");if(!r)return;applyDrop(g,r,"gr")}
  if(st==="done"){const r=readDone("gn");if(!r)return;applyDone(g,r,"Tiempo total al completar")}
  S.games.push(g);if(p)S.pref=p;save();closeSheet();R();getBanner(id);if(!g.demo)famSuggest(id)}
-function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);const gl=g.goals,dn=gl.filter(x=>x.done).length,t=g.ttb||{},hl=t.src==="hltb",
+function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);const gl=g.goals,dn=gl.filter(x=>x.done).length,t=ttbG(g)||{},hl=t.src==="hltb"||t.src==="file",
  ss=S.sessions.filter(s=>inG(s,id)).sort((a,b)=>b.date.localeCompare(a.date)),rd=g.doneDate||g.rating?.date,
  d3=(hl?[["main","Main story"],["extra","Main + extras"],["full","Completionist"]]:[["fast","Main story"],["main","Main + extras"],["full","Completionist"]]).map(([k,l])=>`<div><b>${t[k]?H(Math.round(t[k]*60)):"—"}</b><span>${l}</span></div>`).join("");
  sheet(`<div class="row sp"><button onclick="editGame('${id}')">✏️ Editar</button><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
@@ -581,7 +586,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ${compSec(g)}
  ${famSec(g)}
  ${demosSec(g)}
- <h2>Duración</h2><div class="ag-dur">${d3}</div><div class="mu" style="margin-top:6px">${t.fast||t.main||t.extra||t.full?(hl?"Duración puesta por ti. ":"Estimación de IGDB. "):"Sin duración todavía. "}<a href="https://howlongtobeat.com/?q=${encodeURIComponent(g.title)}" target="_blank" rel="noopener" style="color:var(--ac2)">Ver en HowLongToBeat</a></div>
+ <h2>Duración</h2><div class="ag-dur">${d3}</div><div class="mu" style="margin-top:6px">${t.fast||t.main||t.extra||t.full?(hl?(t.src==="file"?"Duración del archivo de tiempos. ":"Duración puesta por ti. "):"Estimación de IGDB. "):"Sin duración todavía. "}<a href="https://howlongtobeat.com/?q=${encodeURIComponent(g.title)}" target="_blank" rel="noopener" style="color:var(--ac2)">Ver en HowLongToBeat</a></div>
  <h2>Logros</h2><div class="card">${isPS(g)?`<label class="row" style="color:var(--tx);font-size:15px;margin:0 0 10px"><input type="checkbox" style="width:24px;min-height:24px" ${g.platinum?"checked":""} onchange="togPlat('${id}')">🏆 Platino conseguido${g.platinum&&g.platAt?" · "+fd(g.platAt):""}${g.platinum?` <button style="margin-left:auto;min-height:32px;padding:2px 10px" onclick="event.preventDefault();storyPlat('${id}')">📤</button>`:""}</label>`:""}${gl.length?`<div class="mu">🎖️ ${dn} de ${gl.length} logros conseguidos · Logros personalizados: no se verifican automáticamente.</div>`:`<div class="mu">Sin logros todavía.</div>`}
  ${gl.map((x,i)=>`<div class="row" style="margin-top:6px"><input type="checkbox" style="width:24px;min-height:24px" ${x.done?"checked":""} onchange="goal('${id}',${i})"><span style="flex:1">${x.done?"🎖️ ":""}${e(x.name)}</span>${x.done?`<button style="min-height:32px;padding:2px 10px" onclick="storyGoal('${id}',${i})">📤</button>`:""}<button class="dng" onclick="delGoal('${id}',${i})">✕</button></div>`).join("")}
  <div class="row" style="margin-top:8px"><input id="ng" placeholder="Nuevo logro"><button onclick="addGoal('${id}')">Añadir</button></div></div>
@@ -1077,7 +1082,7 @@ function settingsSheet(){const ps=pubSec(),g=!ACCT,need=`<div class="mu">Necesit
   dt("c_m","✉️ Correo",g?need:`<div id="mailv" style="word-break:break-all">${e(ACCT.email||"…")}</div>`)+
   dt("c_p","🔑 Contraseña",g?need:`<input id="pw0" type="password" placeholder="Contraseña actual" autocomplete="current-password"><input id="pw1" type="password" placeholder="Contraseña nueva (mín. 8)" autocomplete="new-password" style="margin-top:8px"><button class="pri" style="margin-top:8px" onclick="changePw()">Cambiar contraseña</button>`)+
   dt("c_r","🏆 Mejor valorados y más jugados",`<div class="mu">Qué juegos se muestran en esos dos cuadros del perfil.</div><div class="row" style="margin-top:8px"><button class="${RKA()?"":"pri"}" style="flex:1" onclick="setRk(0)">Solo este año</button><button class="${RKA()?"pri":""}" style="flex:1" onclick="setRk(1)">En general</button></div>`)+
-  dt("c_s","🔄 Sincronización y copias",`<div id="acct">${accCard(true)}</div><div class="mu" style="margin-top:12px">Copias de seguridad</div><div class="row" style="margin-top:8px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div>`)+
+  dt("c_s","🔄 Sincronización y copias",`<div id="acct">${accCard(true)}</div><div class="mu" style="margin-top:12px">Copias de seguridad</div><div class="row" style="margin-top:8px;flex-wrap:wrap"><button onclick="exp()">Exportar JSON</button><button onclick="$('#imp').click()">Importar JSON</button><input id="imp" type="file" accept="application/json,.json" hidden onchange="imp(this)"><button onclick="expCsv()">CSV de juegos</button><button onclick="expSess()">CSV de sesiones</button><button onclick="$('#impc').click()">Importar CSV</button><input id="impc" type="file" accept=".csv,text/csv" hidden onchange="impCsv(this)"></div><div class="mu" style="margin-top:12px">Duraciones (archivo durations.json)</div><div class="mu" style="margin:4px 0 8px">Genera el archivo con las duraciones que has puesto en Editar. Súbelo a GitHub para que la app lo use.</div><div class="row" style="flex-wrap:wrap"><button onclick="durDown()">Descargar durations.json</button><button onclick="durCopy()">Copiar</button></div>`)+
   dt("c_v","🌍 Perfil público",g?need:`<label class="row" style="color:var(--tx);font-size:14px"><input type="checkbox" style="width:22px;min-height:22px" ${ACCT.pub!==false?"checked":""} onchange="setPublic(this.checked)"><span>Otros usuarios pueden buscarme y ver mi perfil (nunca mis notas ni reseñas)</span></label><div class="mu" style="margin-top:10px">Lo que se enseña:</div>${ck("lib","📚 Biblioteca")}${ck("ach","🎖️ Logros y emblemas")}${ck("stats","📊 Estadísticas")}`)+
   dt("c_d","🗑️ Borrar datos",`<div class="mu">Borra tu biblioteca, sesiones y ajustes${ACCT?" de este dispositivo y de la nube. Tu cuenta se mantiene":""}.</div><button class="dng" style="margin-top:10px;width:100%" onclick="wipeAll()">Borrar todos los datos</button>`)+
   (ACCT?`<button style="width:100%;margin-top:8px" onclick="accLogout()">Cerrar sesión</button>`:`<div class="row" style="margin-top:8px"><button class="pri" onclick="authSheet('login')">Iniciar sesión</button><button onclick="authSheet('signup')">Crear cuenta</button></div>`);
@@ -1086,6 +1091,14 @@ function settingsSheet(){const ps=pubSec(),g=!ACCT,need=`<div class="mu">Necesit
  const guia=dt("g_n","📰 Noticias",`<div class="mu" style="margin-bottom:6px">Editoriales de las noticias</div>${NEWS_SRC.map(x=>srcRow(x,all||sel.includes(x)).replace("SRCFN","prefSrc")).join("")}`)+dt("g_g","🎮 Mis gustos",`<div class="mu" style="margin-bottom:8px">${tn?`Has elegido ${tn} juego${tn===1?"":"s"} favorito${tn===1?"":"s"}.`:"Todavía no has elegido tus juegos favoritos."}</div><div class="row" style="flex-wrap:wrap"><button onclick="window._onb=null;onbShow(2,true)">🎮 Elegir mis juegos favoritos</button>${tn?`<button onclick="if(confirm('¿Borrar tus gustos? Las recomendaciones usarán solo tu biblioteca.')){S.taste=null;save();settingsSheet()}">Borrar gustos</button>`:""}</div>`);
  sheet(`<div class="row sp"><h1>⚙️ Ajustes</h1><button onclick="closeSheet()">✕</button></div>${dt("s_c","☁️ Cuenta",cuenta)}${dt("s_a","🎨 Apariencia",apar)}${dt("s_g","🧭 Guía de inicio",guia)}<div class="mu" style="margin-top:14px">${APP_NAME} · v${APP_VER}</div>`);accMe()}
 function setAvatar(i){const f=i.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const m=Math.min(im.width,im.height);c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.user.avatar=c.toDataURL("image/jpeg",.8);save();R()};im.src=URL.createObjectURL(f)}
+// Genera durations.json: lo que ya había en el archivo + las duraciones que has escrito tú en Editar (las tuyas mandan)
+function durBuild(){const m=new Map(),key=x=>x.igdb>0?"i"+x.igdb:"t"+nrm(x.title||"");
+ (DUR.raw||[]).forEach(x=>m.set(key(x),{...x}));
+ S.games.forEach(g=>{const t=g.ttb;if(!t||t.src!=="hltb"||g.demo)return;const o={title:g.title};if(g.igdb)o.igdb=g.igdb;o.main=+t.main||0;o.extra=+t.extra||0;o.full=+t.full||0;if(o.main||o.extra||o.full)m.set(key(o),o)});
+ const L=[...m.values()].sort((a,b)=>(a.title||"").localeCompare(b.title||""));
+ return{n:L.length,txt:'{\n  "_leeme": '+JSON.stringify(DUR.leeme||"Duraciones de HowLongToBeat, en horas: main (historia), extra (+ extras) y full (completista). 'igdb' es opcional; si no está se busca por título. Si un juego no aparece aquí, la app usa IGDB.")+',\n  "games": ['+(L.length?"\n"+L.map(x=>"    "+JSON.stringify(x)).join(",\n")+"\n  ":"")+']\n}\n'}}
+function durDown(){const r=durBuild(),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([r.txt],{type:"application/json"}));a.download="durations.json";a.click()}
+async function durCopy(){const r=durBuild();try{await navigator.clipboard.writeText(r.txt);alert("Copiado: "+r.n+" juegos. Pégalo en durations.json de GitHub.")}catch(_){alert("No se pudo copiar. Usa «Descargar durations.json».")}}
 function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="playlog.json";a.click()}
 let CR=[];
 // Buscador a pantalla completa: resultados en cuadrícula de portadas y barra de búsqueda flotante abajo (sube sobre el teclado)
@@ -1984,6 +1997,11 @@ const EN_DICT={/*EN-START*/
 "Ampliado":"Expanded",
 "Añadir a tu biblioteca":"Add to your library",
 "Ver más información":"More info",
+"Duración del archivo de tiempos.":"Duration from the times file.",
+"Duraciones (archivo durations.json)":"Durations (durations.json file)",
+"Genera el archivo con las duraciones que has puesto en Editar. Súbelo a GitHub para que la app lo use.":"Generates the file with the durations you set in Edit. Upload it to GitHub so the app uses it.",
+"Descargar durations.json":"Download durations.json",
+"Copiar":"Copy",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",

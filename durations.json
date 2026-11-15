@@ -1,0 +1,5 @@
+{
+  "_leeme": "Duraciones de HowLongToBeat que apuntas tú. Una entrada por juego, en horas. 'igdb' es opcional (id del juego en IGDB); si no lo pones se busca por título. Si un juego no está aquí, la app usa IGDB.",
+  "_ejemplo": { "title": "The Legend of Zelda: Ocarina of Time", "igdb": 0, "main": 18.5, "extra": 23, "full": 26.5 },
+  "games": []
+}
