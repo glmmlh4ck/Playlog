@@ -200,7 +200,7 @@ const unkMin=id=>((S.games.find(g=>g.id===id)||{}).unk||[]).reduce((a,u)=>a+(u.m
 const G=id=>S.games.find(g=>g.id===id);
 const PLAT=["PC","PlayStation 5","PlayStation 4","PlayStation 3","PlayStation 2","PlayStation","PS Vita","PSP","Xbox Series X|S","Xbox One","Xbox 360","Xbox","Nintendo Switch","Nintendo Switch 2","Wii U","Wii","GameCube","Nintendo 64","SNES","NES","Nintendo 3DS","Nintendo DS","Game Boy Advance","Game Boy","Steam Deck","Mac","Linux","iOS","Android","Consola Android","Game Boy Color","Sega Master System","Sega Mega Drive","Sega Saturn","Dreamcast","Neo Geo","PC Engine","Atari 2600","Anbernic","Retroid Pocket","Miyoo Mini","Powkiddy","Ayn Odin","Ayaneo","ROG Ally","Lenovo Legion Go","MSI Claw","Analogue Pocket","Playdate","Meta Quest","Steam Machine","Otra"];
 const GEN=["Adventure","Arcade","Card & Board Game","Fighting","Hack and slash/Beat 'em up","Indie","MOBA","Music","Pinball","Platform","Point-and-click","Puzzle","Quiz/Trivia","Racing","Real Time Strategy (RTS)","Role-playing (RPG)","Shooter","Simulator","Sport","Strategy","Tactical","Turn-based strategy (TBS)","Visual Novel"];
-const APP_VER="2026-11-14";
+const APP_VER="2026-11-15";
 const fd=d=>d?d.split("-").reverse().join("/"):"";
 const fdA=(g,d)=>{const a=g&&((g.compA&&g.compA[d])||(g.dropAt===d&&g.dropA));if(a==="y")return d.slice(0,4);if(a==="m")return d.slice(5,7)+"/"+d.slice(0,4);return fd(d)};
 let tab="home",lib={st:"playing",q:"",f:{pl:"",gen:"",fmt:"",sort:"name"}},cal={y:new Date().getFullYear(),m:new Date().getMonth(),sel:today()};
@@ -441,7 +441,7 @@ function gc(g){return`<div class="card row sp" onclick="openGame('${g.id}')" sty
 function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><div class="row"><button onclick="selOn()">☑️ Elegir</button><button onclick="listsSheet()">📋 Listas</button></div></div>
  <div class="row" style="margin-top:8px"><input type="search" enterkeyhint="search" placeholder="Buscar en mi biblioteca" value="${e(lib.q)}" oninput="lib.q=this.value;list()"><button onclick="filt()" style="white-space:nowrap">⚙️ Filtros${Object.values(lib.f).filter((v,i)=>i<3&&v).length?" ("+Object.values(lib.f).filter((v,i)=>i<3&&v).length+")":""}</button></div>
  <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.sel=null;lib.st='${k}';R()">${v}</button>`).join("")}
- </div><div id="selbar"></div>${lib.st==="backlog"?`<div class="row" style="margin-bottom:12px"><button style="flex:1" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button><button style="flex:1" onclick="$('#rjs').scrollIntoView({behavior:'smooth',block:'start'})">🔁 Para rejugar${rjList().length?" ("+rjList().length+")":""}</button></div>`:""}<div id="list"></div>${lib.st==="backlog"?rjSec():""}`}
+ </div><div id="selbar"></div>${lib.st==="backlog"?`<div class="row" style="margin-bottom:12px"><button style="flex:1" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button></div>`:""}<div id="list"></div>`}
 function comps(g){if(!g.completions)g.completions=g.doneDate?[g.doneDate]:[];return g.completions}
 function gg(g){const rt=g.rating?.score,n=comps(g).length,on=lib.sel&&lib.sel.has(g.id);return`<div class="poster${on?" picked":""}" onclick="pTap('${g.id}')" onpointerdown="pDown(event,'${g.id}')" oncontextmenu="return false"><div class="cv">${g.cover?`<img ${oi(g.cover,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}${lib.sel?`<span class="ck">${on?"✓":""}</span>`:""}</div><b>${e(g.title)}</b><span>${g.demo?"🧪 Demo · ":""}⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}${n>1?" · 🏁×"+n:""}</span></div>`}
 function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q)&&(!F.pl||g.platform===F.pl)&&(!F.gen||(g.genre||"").split(",").map(z=>z.trim()).includes(F.gen))&&(!F.fmt||g.format===F.fmt));lib._vis=a.map(g=>g.id);
@@ -531,7 +531,7 @@ function dupSheet(i,st,ex){const n=comps(ex).length+(ex.unk||[]).length+1,fin=ex
  if(fin){
   if(st==="done")opt=`<button class="pri" style="width:100%;padding:14px" onclick="doneDialog('${ex.id}',1)">🏁 Sí, es otra partida completada (Partida ${n})</button>`;
   else if(st==="playing")opt=`<button class="pri" style="width:100%;padding:14px" onclick="replay('${ex.id}')">🔁 Sí, lo rejuego (empieza la Partida ${n})</button>`;
-  else if(st==="backlog"||st==="wish")opt=`<button class="pri" style="width:100%;padding:14px" onclick="dupAgain('${ex.id}')">🔁 Añadir a «Para rejugar»</button>`}
+}
  else opt=`<button class="pri" style="width:100%;padding:14px" onclick="openGame('${ex.id}')">Abrir su ficha</button>`;
  sheet(`<div class="row sp"><h1>Ya lo tienes</h1><button onclick="closeSheet()" aria-label="Cerrar">✕</button></div><div class="card row" style="margin-top:8px">${th(ex,44,58)}<div style="min-width:0"><b>${e(ex.title)}</b><div class="mu">En ${e(lab)}${gm(ex.id)?" · ⏱ "+H(gm(ex.id)):""}</div></div></div>
  <div class="mu" style="margin:10px 0">${fin?"¿Quieres rejugarlo? Se añadirá como una nueva partida en su misma ficha, con sus propias sesiones, y las horas se sumarán.":"Ya está en tu biblioteca. Evita duplicarlo abriendo su ficha."}</div>
@@ -577,7 +577,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ${g.demo?demoHead(g):""}
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fdA(g,rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
  ${g.status==="done"?`<button class="pri" style="margin-top:8px;width:100%" onclick="storyGame('${id}')">📤 Compartir tarjeta Story</button>`:""}
- ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}${g.status==="done"||g.status==="drop"?` <button style="margin-top:8px" onclick="togAgain('${id}')">${g.again?"✓ En «Para rejugar»":"➕ Para rejugar"}</button>`:""}
+ ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}
  ${compSec(g)}
  ${famSec(g)}
  ${demosSec(g)}
@@ -1093,7 +1093,7 @@ function catSearch(){let o=$("#srch");if(!o){o=document.createElement("div");o.i
  if(!o.classList.contains("on")){o.innerHTML=`<div class="srch-top"><b>Buscar juegos</b></div><div class="srch-sc" id="srsc"><div id="cr"><div class="mu" style="margin:46px 0 10px;text-align:center">Prueba con alguna saga:</div><div style="text-align:center">${sagaChips(rndSagas(6))}</div></div><div class="mu" style="margin:22px 0 0;text-align:center">Datos: <a href="https://rawg.io" style="color:var(--ac2)">RAWG</a> · IGDB</div></div>
   <div class="srch-bar" id="srbar"><button class="srch-r" onclick="addGame()" aria-label="Crear ficha manual" title="Crear ficha manual">✍️</button><div class="srch-pill"><svg onclick="catGo()" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input id="cq" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" placeholder="Buscar · ej: ${e(rndSagas(1)[0])}" onkeydown="if(event.key==='Enter')catGo()"></div><button class="srch-r" onclick="catClose()" aria-label="Cerrar">✕</button></div>`;
   o.classList.add("on");window._srchOn=1;if(window.visualViewport){visualViewport.addEventListener("resize",kbFix);visualViewport.addEventListener("scroll",kbFix)}}
- kbFix();$("#cq").focus()}
+ kbFix()}
 function kbFix(){const b=$("#srbar"),v=window.visualViewport;if(!b||!v)return;const kb=Math.max(0,innerHeight-v.height-v.offsetTop);b.style.bottom=kb>80?(kb+8)+"px":""}
 function catClose(){const o=$("#srch");if(o){o.classList.remove("on");o.innerHTML=""}window._srchOn=0;if(window.visualViewport){visualViewport.removeEventListener("resize",kbFix);visualViewport.removeEventListener("scroll",kbFix)}}
 async function catGo(){const q=$("#cq").value.trim();if(q.length<2)return;window._lastQ=q;$("#cq").blur();$("#srsc")&&($("#srsc").scrollTop=0);$("#cr").innerHTML=`<div class="empty">Buscando…</div>`;
