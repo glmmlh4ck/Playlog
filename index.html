@@ -443,14 +443,19 @@ function vLib(){return`<div class="row sp"><h1>Biblioteca</h1><div class="row"><
  <div class="tabs">${Object.entries(ST).map(([k,v])=>`<button class="${lib.st===k?"on":""}" onclick="lib.sel=null;lib.st='${k}';R()">${v}</button>`).join("")}
  </div><div id="selbar"></div>${lib.st==="backlog"?`<div class="row" style="margin-bottom:12px"><button style="flex:1" onclick="randomBacklog()">🎲 Aleatorizar Backlog</button></div>`:""}<div id="list"></div>`}
 function comps(g){if(!g.completions)g.completions=g.doneDate?[g.doneDate]:[];return g.completions}
-function gg(g){const rt=g.rating?.score,n=comps(g).length,on=lib.sel&&lib.sel.has(g.id);return`<div class="poster${on?" picked":""}" onclick="pTap('${g.id}')" onpointerdown="pDown(event,'${g.id}')" oncontextmenu="return false"><div class="cv">${g.cover?`<img ${oi(g.cover,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}${lib.sel?`<span class="ck">${on?"✓":""}</span>`:""}</div><b>${e(g.title)}</b><span>${g.demo?"🧪 Demo · ":""}⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}${n>1?" · 🏁×"+n:""}</span></div>`}
+function gg(g,en){const rt=g.rating?.score,n=comps(g).length,on=lib.sel&&lib.sel.has(g.id);return`<div class="poster${on?" picked":""}" onclick="pTap('${g.id}')" onpointerdown="pDown(event,'${g.id}')" oncontextmenu="return false"><div class="cv">${g.cover?`<img ${oi(g.cover,260)} alt="" loading="lazy" referrerpolicy="no-referrer">`:`<div class="ph">🎮</div>`}${lib.sel?`<span class="ck">${on?"✓":""}</span>`:""}</div><b>${e(g.title)}</b><span>${en?`🔁 Partida ${en.n}/${en.tot} · ${en.unk||!en.d?"sin fecha":fdA(g,en.d)}${en.min?" · ⏱ "+H(en.min):""}${rt?" · ⭐ "+rt:""}`:`${g.demo?"🧪 Demo · ":""}⏱ ${H(gm(g.id))}${rt?" · ⭐ "+rt:""}${n>1?" · 🏁×"+n:""}`}</span></div>`}
 function list(){const q=lib.q.toLowerCase(),F=lib.f;let a=S.games.filter(g=>g.status===lib.st&&g.title.toLowerCase().includes(q)&&(!F.pl||g.platform===F.pl)&&(!F.gen||(g.genre||"").split(",").map(z=>z.trim()).includes(F.gen))&&(!F.fmt||g.format===F.fmt));lib._vis=a.map(g=>g.id);
  if(!a.length)return $("#list").innerHTML=`<div class="empty">No hay juegos aquí todavía.</div>`;
  if(lib.st!=="done"){const last=g=>S.sessions.filter(x=>x.gameId===g.id).reduce((m,x)=>x.date>m?x.date:m,""),so={name:(x,y)=>x.title.localeCompare(y.title),date:(x,y)=>(y.released||"").localeCompare(x.released||""),hours:(x,y)=>gm(y.id)-gm(x.id),rating:(x,y)=>(y.rating?.score||0)-(x.rating?.score||0)};
   so.rel=(x,y)=>!x.released?(y.released?1:x.title.localeCompare(y.title)):!y.released?-1:x.released.localeCompare(y.released)||x.title.localeCompare(y.title);
   a=[...a].sort(lib.st==="wish"&&(F.sort==="name"||F.sort==="date")?so.rel:lib.st==="drop"&&F.sort==="name"?(x,y)=>last(y).localeCompare(last(x)):so[F.sort]||so.name);return $("#list").innerHTML=`<div class="grid">${a.map(gg).join("")}</div>`}
- const dd=g=>g.doneDate||g.rating?.date||"",dkey=g=>{const d=dd(g),a=g.compA&&g.compA[d];return a==="y"?d.slice(0,4)+"-99-99":a==="m"?d.slice(0,7)+"-99":d},yr=g=>dd(g).slice(0,4)||"Sin fecha",by={};a.forEach(g=>(by[yr(g)]=by[yr(g)]||[]).push(g));
- $("#list").innerHTML=Object.keys(by).sort((x,y)=>x==="Sin fecha"?1:y==="Sin fecha"?-1:y.localeCompare(x)).map(k=>`<h2>${k}</h2><div class="grid">${by[k].sort((x,y)=>dkey(x).localeCompare(dkey(y))).map(gg).join("")}</div>`).join("")}
+ // Completados: un juego terminado varias veces aparece una vez por partida (cada tarjeta con su año), aunque sea la misma ficha
+ const dd=g=>g.doneDate||g.rating?.date||"",key=(g,d)=>{const x=g.compA&&g.compA[d];return x==="y"?d.slice(0,4)+"-99-99":x==="m"?d.slice(0,7)+"-99":d},E=[];
+ a.forEach(g=>{const rs=g.demo?[]:runsOf(g).filter(r=>r.unk||r.k==="done");
+  if(rs.length<2){E.push({g,d:dd(g)});return}
+  rs.forEach(r=>E.push({g,d:r.unk?"":r.end,en:{n:r.n,tot:rs.length,d:r.unk?"":r.end,unk:r.unk,min:r.min}}))});
+ const by={};E.forEach(x=>{const k=x.d.slice(0,4)||"Sin fecha";(by[k]=by[k]||[]).push(x)});
+ $("#list").innerHTML=Object.keys(by).sort((x,y)=>x==="Sin fecha"?1:y==="Sin fecha"?-1:y.localeCompare(x)).map(k=>`<h2>${k}</h2><div class="grid">${by[k].sort((x,y)=>key(x.g,x.d).localeCompare(key(y.g,y.d))).map(x=>gg(x.g,x.en)).join("")}</div>`).join("")}
 function filt(){const F=lib.f,pls=[...new Set(S.games.map(g=>g.platform).filter(Boolean))].sort(),gs=[...new Set(S.games.flatMap(g=>(g.genre||"").split(",").map(z=>z.trim()).filter(Boolean)))].sort(),op=(a,v)=>a.map(x=>`<option ${x===v?"selected":""}>${e(x)}</option>`).join("");
  sheet(`<div class="row sp"><h1>Filtros</h1><button onclick="closeSheet()">✕</button></div><label>Plataforma</label><select id="fp"><option value="">Todas</option>${op(pls,F.pl)}</select><label>Género</label><select id="fg"><option value="">Todos</option>${op(gs,F.gen)}</select><label>Formato</label><select id="ff"><option value="">Todos</option>${op(["Digital","Físico"],F.fmt)}</select><label>Ordenar por</label><select id="fs">${[["name","Nombre"],["date","Fecha de lanzamiento"],["hours","Horas acumuladas"],["rating","Valoración"]].map(([k,v])=>`<option value="${k}" ${F.sort===k?"selected":""}>${v}</option>`).join("")}</select><div class="row" style="margin-top:16px"><button onclick="lib.f={pl:'',gen:'',fmt:'',sort:'name'};closeSheet();R()">Quitar filtros</button><button class="pri" onclick="lib.f={pl:$('#fp').value,gen:$('#fg').value,fmt:$('#ff').value,sort:$('#fs').value};closeSheet();R()">Aplicar</button></div>`)}
 function randomBacklog(){const n=S.games.filter(g=>g.status==="backlog").length;if(!n)return alert("Tu backlog está vacío.");
@@ -582,7 +587,7 @@ function openGame(id){const g=G(id);if(!g)return;window._og=id;getBanner(id);con
  ${g.demo?demoHead(g):""}
  ${g.status==="done"||g.rating?`<div class="row" style="margin-top:10px"><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Nota</div><b style="font-size:22px">⭐ ${g.rating?.score??"—"}/10</b></div><div class="card" style="flex:1;text-align:center;margin:0"><div class="mu">Completado el</div><b style="font-size:18px">${fdA(g,rd)||"—"}</b></div></div>${g.rating?.review?`<div class="card mu" style="margin-top:10px">${e(g.rating.review)}</div>`:""}<button style="margin-top:8px" onclick="rate('${id}')">Editar valoración</button>`:""}
  ${g.status==="done"?`<button class="pri" style="margin-top:8px;width:100%" onclick="storyGame('${id}')">📤 Compartir tarjeta Story</button>`:""}
- ${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}
+ ${g.undoRp&&g.status==="playing"?`<button style="margin-top:8px" onclick="undoReplay('${id}')">↩ Deshacer «Rejugar»</button>`:""}${g.status==="done"||g.status==="drop"?`<button style="margin-top:8px" onclick="replay('${id}')">🔁 Rejugar</button>`:""}
  ${compSec(g)}
  ${famSec(g)}
  ${demosSec(g)}
@@ -608,7 +613,11 @@ async function getBanner(id){const g=G(id);if(!g||g.banner||g.bannerTried)return
  try{const r=await fetch("/.netlify/functions/search?q="+encodeURIComponent(g.title));if(!r.ok)return;const d=await r.json(),m=(d.results||[]).find(x=>x.background_image&&nz(x.name)===nz(g.title));
  if(m){g.banner=m.background_image;save();if(window._og===id)openGame(id)}}catch(_){}}
 function imp(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.games)||!Array.isArray(d.sessions))throw 0;if(!confirm("Se reemplazarán tus datos actuales por los del archivo ("+d.games.length+" juegos, "+d.sessions.length+" sesiones). ¿Continuar?"))return;S=Object.assign({games:[],sessions:[],user:{name:"Jugador"},timer:null,pref:""},d);save();R()}catch(x){alert("El archivo no es un JSON válido de Playlog.")}};rd.readAsText(f);inp.value=""}
-function replay(id){const g=G(id);g.dropAt="";g.dropWhy="";if(g.status!=="done"){const rs=runsOf(g),l=rs[rs.length-1];if(l&&!l.end&&!l.unk&&l.ss.length){g.ends=g.ends||[];g.ends.push({d:lastS(g)||today(),k:"drop"})}}g.again=false;g.run=(g.run||1)+1;g.rs=today();g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
+// Guarda cómo estaba el juego antes de rejugar, para poder deshacerlo si se pulsó sin querer
+function undoReplay(id){const g=G(id),u=g&&g.undoRp;if(!u)return;const n=S.sessions.filter(x=>x.gameId===id).length-u.n;
+ if(!confirm("Se deshará «Rejugar» y el juego volverá a estar como antes ("+(ST[u.st]||u.st)+", partida "+(u.run||1)+")."+(n>0?"\n\nHas registrado "+n+" sesión(es) desde entonces: se conservarán y pasarán a la partida anterior.":"")+"\n\n¿Continuar?"))return;
+ g.status=u.st;g.dropAt=u.dropAt;g.dropWhy=u.dropWhy;g.again=u.again;g.ends=u.ends;if(u.hadRun)g.run=u.run;else delete g.run;if(u.hadRs)g.rs=u.rs;else delete g.rs;g.playAt=u.playAt;delete g.undoRp;save();openGame(id);R()}
+function replay(id){const g=G(id);g.undoRp={st:g.status,dropAt:g.dropAt,dropWhy:g.dropWhy,again:g.again,run:g.run,rs:g.rs,playAt:g.playAt,ends:JSON.parse(JSON.stringify(g.ends||[])),hadRun:"run" in g,hadRs:"rs" in g,n:S.sessions.filter(x=>x.gameId===id).length};g.dropAt="";g.dropWhy="";if(g.status!=="done"){const rs=runsOf(g),l=rs[rs.length-1];if(l&&!l.end&&!l.unk&&l.ss.length){g.ends=g.ends||[];g.ends.push({d:lastS(g)||today(),k:"drop"})}}g.again=false;g.run=(g.run||1)+1;g.rs=today();g.status="playing";g.playAt=Date.now();save();openGame(id);R()}
 function setCover(id){const u=prompt("Pega el enlace (URL) de la imagen de portada:");if(u&&/^https?:\/\//.test(u.trim())){G(id).cover=u.trim();save();openGame(id);R()}}
 function setStatus(id,v){const g=G(id),was=g.status;if(v==="done"&&was!=="done"&&!g.demo)return doneDialog(id);g.status=v;if(v==="done"&&g.demo&&!g.doneDate)g.doneDate=lastS(g)||today();if(v==="playing")g.playAt=Date.now();save();openGame(id);R()}
 function rate(id){const g=G(id),r=g.rating||{},d0=g.doneDate||r.date||"",pr=d0?((g.compA&&g.compA[d0])||(r.date===d0&&g.compA&&g.compA[d0])||"e"):(g.status==="done"?"u":"e");
@@ -2002,6 +2011,7 @@ const EN_DICT={/*EN-START*/
 "Genera el archivo con las duraciones que has puesto en Editar. Súbelo a GitHub para que la app lo use.":"Generates the file with the durations you set in Edit. Upload it to GitHub so the app uses it.",
 "Descargar durations.json":"Download durations.json",
 "Copiar":"Copy",
+"↩ Deshacer «Rejugar»":"↩ Undo \"Replay\"",
 "{} · ¡es hoy!":"{} · it's today!",
 "🏆 Mi GOTY {}: {}":"🏆 My GOTY {}: {}",
 "Más jugado de {}: {}":"Most played of {}: {}",
