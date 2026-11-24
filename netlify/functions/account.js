@@ -18,7 +18,7 @@ const XPR = { session: 10, perHour: 20, maxMin: 600, done: 100 };
 const okCover = c => (typeof c === "string" && /^https:\/\/(images\.igdb\.com|media\.rawg\.io)\//.test(c) ? c : "");
 const top = (o, n) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n).map(([k, v]) => ({ k, h: Math.round(v / 6) / 10 }));
 // Resumen público: solo cifras y juegos (sin notas, reseñas ni sesiones sueltas)
-function summarize(d) {
+function summarize(d, mask) {
   const games = Array.isArray(d.games) ? d.games : [], ses = Array.isArray(d.sessions) ? d.sessions : [];
   const gm = {}, dm = {}, gen = {}, plt = {};
   const byId = new Map(games.map(g => [g.id, g]));
@@ -30,9 +30,23 @@ function summarize(d) {
   const days = Object.keys(dm).sort(); let rec = 0, run = 0, pv = null;
   days.forEach(x => { const t = new Date(x + "T12:00:00Z"); run = pv && Math.round((t - pv) / 864e5) === 1 ? run + 1 : 1; pv = t; rec = Math.max(rec, run); });
   const tot = Object.values(gm).reduce((a, b) => a + b, 0);
-  return { xp, lv: Math.floor(Math.sqrt(xp / 50)) + 1, hours: Math.round(tot / 6) / 10, sessions: ses.length, done, games: games.length, rec,
+  const sec = Object.assign({ lib: true, ach: true, stats: true }, d.pubSec && typeof d.pubSec === "object" ? d.pubSec : {});
+  Object.keys(sec).forEach(k => sec[k] = sec[k] !== false);
+  const hrs = id => Math.round((gm[id] || 0) / 6) / 10;
+  const out = { xp, lv: Math.floor(Math.sqrt(xp / 50)) + 1, hours: Math.round(tot / 6) / 10, sessions: ses.length, done, games: games.length, rec, sec,
     genres: top(gen, 5), platforms: top(plt, 5), name: String(d.user?.name || "").slice(0, 30),
-    list: games.slice(0, 400).map(g => ({ t: String(g.title || "").slice(0, 80), c: okCover(g.cover), s: g.status, r: g.rating?.score ?? null, h: Math.round((gm[g.id] || 0) / 6) / 10, p: String(g.platform || "").slice(0, 30) })) };
+    list: games.slice(0, 400).map(g => ({ t: String(g.title || "").slice(0, 80), c: okCover(g.cover), s: g.status, r: g.rating?.score ?? null, h: hrs(g.id), p: String(g.platform || "").slice(0, 30) })) };
+  if (!mask) return out;
+  // Vista pública: se respeta lo que la persona ha decidido compartir
+  const favs = (Array.isArray(d.favs) ? d.favs : []).slice(0, 5).map(id => byId.get(id)).filter(Boolean)
+    .map(g => ({ t: String(g.title || "").slice(0, 80), c: okCover(g.cover), h: hrs(g.id) }));
+  const av = typeof d.user?.avatar === "string" && /^data:image\/(png|jpeg|webp);base64,/.test(d.user.avatar) && d.user.avatar.length < 60000 ? d.user.avatar : "";
+  const emb = sec.ach && Array.isArray(d.emb) ? d.emb.slice(0, 3).map(x => ({ ic: String(x.ic || "").slice(0, 8), n: String(x.n || "").slice(0, 40) })) : [];
+  const pick = (o, want) => { const k = typeof want === "string" && o[want] ? want : (top(o, 1)[0] || {}).k; return k ? { k, h: Math.round(o[k] / 6) / 10 } : null; };
+  const pub = { ...out, favs, av, emb, favPlat: pick(plt, d.favPlat), favGen: pick(gen, d.favGen) };
+  if (!sec.stats) { pub.hours = null; pub.sessions = null; pub.done = null; pub.rec = null; pub.genres = []; pub.platforms = []; pub.favPlat = null; pub.favGen = null; }
+  if (!sec.lib) { pub.list = []; pub.games = null; }
+  return pub;
 }
 async function userFromToken(tok) {
   if (!tok) return null;
@@ -105,14 +119,14 @@ exports.handler = async (event) => {
       if (act === "search") {
         const q = String(a.q || "").toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20); if (q.length < 2) return J(400, { error: "Escribe al menos 2 letras" });
         const r = await sb(`/rest/v1/profiles?username=ilike.${q}*&is_public=eq.true&select=username,summary&order=username.asc&limit=15`);
-        return J(200, { items: (r.b || []).map(x => ({ username: x.username, lv: x.summary?.lv || 1, hours: x.summary?.hours || 0, done: x.summary?.done || 0 })) });
+        return J(200, { items: (r.b || []).map(x => { const st = x.summary?.sec?.stats !== false; return { username: x.username, lv: x.summary?.lv || 1, hours: st ? x.summary?.hours || 0 : null, done: st ? x.summary?.done || 0 : null }; }) });
       }
       const name = String(a.username || "").toLowerCase(); if (!okUser(name)) return J(404, { error: "Usuario no encontrado" });
       const p = await sb(`/rest/v1/profiles?username=eq.${encodeURIComponent(name)}&select=id,username,is_public`);
       const row = p.b?.[0]; if (!row || (!row.is_public && row.id !== u.id)) return J(404, { error: "Este perfil no existe o es privado" });
       const sv = await sb(`/rest/v1/saves?user_id=eq.${row.id}&select=data`); const d = sv.b?.[0]?.data;
       if (!d) return J(404, { error: "Este usuario aún no tiene datos" });
-      return J(200, { username: row.username, ...summarize(d) });
+      return J(200, { username: row.username, ...summarize(d, true) });
     }
     return J(400, { error: "Acción desconocida" });
   } catch (e) { return J(502, { error: "No se pudo contactar con el servidor de cuentas" }); }

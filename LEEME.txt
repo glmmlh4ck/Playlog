@@ -1,0 +1,56 @@
+Logos de plataformas
+====================
+Sube aquí un archivo por plataforma, con EXACTAMENTE estos nombres (PNG transparente de 256x256 px, o SVG con el mismo nombre y extensión .svg).
+Si falta un logo, la app muestra un icono genérico.
+
+PC  ->  pc.png
+PlayStation 5  ->  playstation-5.png
+PlayStation 4  ->  playstation-4.png
+PlayStation 3  ->  playstation-3.png
+PlayStation 2  ->  playstation-2.png
+PlayStation  ->  playstation.png
+PS Vita  ->  ps-vita.png
+PSP  ->  psp.png
+Xbox Series X|S  ->  xbox-series-x-s.png
+Xbox One  ->  xbox-one.png
+Xbox 360  ->  xbox-360.png
+Xbox  ->  xbox.png
+Nintendo Switch  ->  nintendo-switch.png
+Nintendo Switch 2  ->  nintendo-switch-2.png
+Wii U  ->  wii-u.png
+Wii  ->  wii.png
+GameCube  ->  gamecube.png
+Nintendo 64  ->  nintendo-64.png
+SNES  ->  snes.png
+NES  ->  nes.png
+Nintendo 3DS  ->  nintendo-3ds.png
+Nintendo DS  ->  nintendo-ds.png
+Game Boy Advance  ->  game-boy-advance.png
+Game Boy  ->  game-boy.png
+Steam Deck  ->  steam-deck.png
+Mac  ->  mac.png
+Linux  ->  linux.png
+iOS  ->  ios.png
+Android  ->  android.png
+Consola Android  ->  consola-android.png
+Game Boy Color  ->  game-boy-color.png
+Sega Master System  ->  sega-master-system.png
+Sega Mega Drive  ->  sega-mega-drive.png
+Sega Saturn  ->  sega-saturn.png
+Dreamcast  ->  dreamcast.png
+Neo Geo  ->  neo-geo.png
+PC Engine  ->  pc-engine.png
+Atari 2600  ->  atari-2600.png
+Anbernic  ->  anbernic.png
+Retroid Pocket  ->  retroid-pocket.png
+Miyoo Mini  ->  miyoo-mini.png
+Powkiddy  ->  powkiddy.png
+Ayn Odin  ->  ayn-odin.png
+Ayaneo  ->  ayaneo.png
+ROG Ally  ->  rog-ally.png
+Lenovo Legion Go  ->  lenovo-legion-go.png
+MSI Claw  ->  msi-claw.png
+Analogue Pocket  ->  analogue-pocket.png
+Playdate  ->  playdate.png
+Meta Quest  ->  meta-quest.png
+Steam Machine  ->  steam-machine.png
