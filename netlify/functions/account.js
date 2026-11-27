@@ -16,6 +16,7 @@ const okUser = u => /^[a-z0-9_]{3,20}$/.test(u), okMail = m => /^[^\s@]+@[^\s@]+
 const session = (b, username) => ({ access_token: b.access_token, refresh_token: b.refresh_token, expires_at: b.expires_at || Math.floor(Date.now() / 1000) + (b.expires_in || 3600), username });
 const XPR = { session: 10, perHour: 20, maxMin: 600, done: 100 };
 const okCover = c => (typeof c === "string" && /^https:\/\/(images\.igdb\.com|media\.rawg\.io)\//.test(c) ? c : "");
+const lastDone = g => [...(Array.isArray(g.completions) ? g.completions : []), g.doneDate].filter(x => typeof x === "string" && /^\d{4}-\d\d-\d\d$/.test(x)).sort().pop() || "";
 const top = (o, n) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n).map(([k, v]) => ({ k, h: Math.round(v / 6) / 10 }));
 // Resumen público: solo cifras y juegos (sin notas, reseñas ni sesiones sueltas)
 function summarize(d, mask) {
@@ -35,7 +36,7 @@ function summarize(d, mask) {
   const hrs = id => Math.round((gm[id] || 0) / 6) / 10;
   const out = { xp, lv: Math.floor(Math.sqrt(xp / 50)) + 1, hours: Math.round(tot / 6) / 10, sessions: ses.length, done, games: games.length, rec, sec,
     genres: top(gen, 5), platforms: top(plt, 5), name: String(d.user?.name || "").slice(0, 30),
-    list: games.slice(0, 400).map(g => ({ t: String(g.title || "").slice(0, 80), c: okCover(g.cover), s: g.status, r: g.rating?.score ?? null, h: hrs(g.id), p: String(g.platform || "").slice(0, 30) })) };
+    list: games.slice(0, 400).map(g => ({ t: String(g.title || "").slice(0, 80), c: okCover(g.cover), s: g.status, r: g.rating?.score ?? null, h: hrs(g.id), p: String(g.platform || "").slice(0, 30), d: lastDone(g) })) };
   if (!mask) return out;
   // Vista pública: se respeta lo que la persona ha decidido compartir
   const favs = (Array.isArray(d.favs) ? d.favs : []).slice(0, 5).map(id => byId.get(id)).filter(Boolean)
@@ -54,6 +55,8 @@ async function userFromToken(tok) {
   const p = await sb(`/rest/v1/profiles?id=eq.${r.b.id}&select=username,is_public`);
   return { id: r.b.id, username: p.b?.[0]?.username || "", pub: !!p.b?.[0]?.is_public };
 }
+const isId = x => /^[0-9a-f-]{36}$/i.test(String(x));
+const fcount = async (col, id) => { const r = await sb(`/rest/v1/follows?${col}=eq.${id}&select=created_at&limit=5000`); return r.ok && Array.isArray(r.b) ? r.b.length : 0; };
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return J(405, { error: "Método no permitido" });
   if (!URL_() || !KEY()) return J(500, { error: "Las cuentas aún no están configuradas en el servidor (faltan variables de Supabase)." });
@@ -126,7 +129,33 @@ exports.handler = async (event) => {
       const row = p.b?.[0]; if (!row || (!row.is_public && row.id !== u.id)) return J(404, { error: "Este perfil no existe o es privado" });
       const sv = await sb(`/rest/v1/saves?user_id=eq.${row.id}&select=data`); const d = sv.b?.[0]?.data;
       if (!d) return J(404, { error: "Este usuario aún no tiene datos" });
-      return J(200, { username: row.username, ...summarize(d, true) });
+      const [fers, fing, ifl] = await Promise.all([fcount("followed", row.id), fcount("follower", row.id), row.id === u.id ? null : sb(`/rest/v1/follows?follower=eq.${u.id}&followed=eq.${row.id}&select=created_at`)]);
+      return J(200, { username: row.username, ...summarize(d, true), followers: fers, following: fing, me: row.id === u.id, iFollow: !!(ifl && ifl.ok && Array.isArray(ifl.b) && ifl.b.length) });
+    }
+    if (act === "follow" || act === "unfollow" || act === "follows") {
+      const u = await userFromToken(tok); if (!u) return J(401, { error: "Sesión caducada" });
+      const uname = String(a.username || "").toLowerCase(); let t = { id: u.id, username: u.username, is_public: true };
+      if (uname && uname !== u.username) {
+        if (!okUser(uname)) return J(404, { error: "Usuario no encontrado" });
+        const p = await sb(`/rest/v1/profiles?username=eq.${encodeURIComponent(uname)}&select=id,username,is_public`); t = p.b?.[0];
+        if (!t) return J(404, { error: "Usuario no encontrado" });
+        if (!t.is_public && act !== "unfollow") return J(403, { error: "Este perfil es privado" });
+      }
+      if (act === "follow" || act === "unfollow") {
+        if (t.id === u.id) return J(400, { error: "No puedes seguirte a ti mismo" });
+        const q = act === "follow"
+          ? await sb("/rest/v1/follows", { method: "POST", body: JSON.stringify({ follower: u.id, followed: t.id }), headers: { Prefer: "resolution=ignore-duplicates,return=minimal" } })
+          : await sb(`/rest/v1/follows?follower=eq.${u.id}&followed=eq.${t.id}`, { method: "DELETE", headers: { Prefer: "return=minimal" } });
+        if (!q.ok) return J(502, { error: "No se pudo actualizar. ¿Has ejecutado el SQL de seguidores en Supabase?" });
+        return J(200, { ok: true, iFollow: act === "follow", followers: await fcount("followed", t.id), following: await fcount("follower", t.id) });
+      }
+      const kind = a.kind === "following" ? "following" : "followers", col = kind === "followers" ? "followed" : "follower", other = kind === "followers" ? "follower" : "followed";
+      const rows = await sb(`/rest/v1/follows?${col}=eq.${t.id}&select=${other}&order=created_at.desc&limit=300`);
+      const ids = (Array.isArray(rows.b) ? rows.b : []).map(x => x[other]).filter(isId);
+      const pr = ids.length ? await sb(`/rest/v1/profiles?id=in.(${ids.join(",")})&select=id,username,is_public,summary`) : { b: [] };
+      const by = new Map((Array.isArray(pr.b) ? pr.b : []).map(x => [x.id, x]));
+      const items = ids.map(i => by.get(i)).filter(x => x && (x.is_public || x.id === u.id)).map(x => ({ username: x.username, lv: x.summary?.lv || 1 }));
+      return J(200, { items, followers: await fcount("followed", t.id), following: await fcount("follower", t.id) });
     }
     return J(400, { error: "Acción desconocida" });
   } catch (e) { return J(502, { error: "No se pudo contactar con el servidor de cuentas" }); }
